@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Technical Layer Innovation</title>
+<style>
+:root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:var(--light);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+.app-header{background:linear-gradient(135deg,var(--dark) 0%,var(--accent) 100%);padding:18px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;justify-content:space-between;align-items:center}
+.app-header h1{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:6px}
+.app-header .white{color:#fff}.app-header .blue{color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.4)}
+.sync-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--light);padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
+.sync-btn.syncing{color:var(--primary);animation:pulse 1s infinite}.sync-btn.synced{color:var(--success)}.sync-btn.error{color:var(--secondary)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.nav-tabs{display:flex;gap:8px;padding:12px 10px;overflow-x:auto;background:var(--dark);position:sticky;top:58px;z-index:99;border-bottom:1px solid var(--glass-border);scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{flex-shrink:0;padding:8px 16px;border-radius:25px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap;font-family:inherit}
+.nav-tab.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
+.section{display:none;padding:15px;animation:fadeIn .3s}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:12px}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:12px;border:none;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;width:100%;margin-top:8px}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
+.btn-secondary{background:var(--glass);border:1px solid var(--glass-border);color:var(--light)}
+.btn-danger{background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff}
+.btn-sm{padding:8px 14px;font-size:.8rem;width:auto}
+.form-group{margin-bottom:14px}
+.form-label{display:block;margin-bottom:5px;font-size:.8rem;color:#aaa}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
+.form-textarea{min-height:70px;resize:vertical}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.badge-pending{background:rgba(255,170,0,0.2);color:var(--warning)}
+.badge-printing{background:rgba(0,212,255,0.2);color:var(--primary)}
+.badge-finished{background:rgba(0,255,136,0.2);color:var(--success)}
+.badge-delivered{background:rgba(123,44,191,0.2);color:#c77dff}
+.order-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
+.order-item:hover{border-color:var(--primary)}
+.order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-item-title{font-weight:700;font-size:.95rem}
+.order-item-meta{font-size:.8rem;color:#888;display:flex;gap:12px;flex-wrap:wrap}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.stat-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;text-align:center}
+.stat-value{font-size:1.6rem;font-weight:800;color:var(--primary)}
+.stat-label{font-size:.75rem;color:#888;margin-top:4px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal-content{background:var(--dark);border:1px solid var(--glass-border);border-radius:20px;padding:22px;width:100%;max-height:90vh;overflow-y:auto;max-width:480px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:1.1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--light);font-size:1.5rem;cursor:pointer}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);border:1px solid var(--primary);color:var(--light);padding:12px 20px;border-radius:12px;font-size:.9rem;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-success{border-color:var(--success)}.toast-error{border-color:var(--secondary)}.toast-warning{border-color:var(--warning)}
+.notif-badge{position:fixed;top:70px;right:12px;background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff;padding:14px 18px;border-radius:12px;font-size:.9rem;z-index:2000;transform:translateX(150%);transition:transform .4s;max-width:300px}
+.notif-badge.show{transform:translateX(0)}
+.notif-title{font-weight:700;margin-bottom:4px}.notif-text{font-size:.8rem;opacity:.9}
+.notif-close{position:absolute;top:6px;right:10px;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer}
+.offline-banner{background:linear-gradient(90deg,var(--warning),#cc8800);color:var(--darker);padding:8px;text-align:center;font-size:.8rem;font-weight:700;position:fixed;top:0;left:0;right:0;z-index:1001;transform:translateY(-100%);transition:transform .3s}
+.offline-banner.show{transform:translateY(0)}
+.progress-bar{height:6px;background:var(--darker);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .5s}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
+.checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
+.timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
+.timer-card.finished{border-color:var(--success);background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,255,136,0.05));animation:glow 2s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 5px rgba(0,255,136,0.2)}50%{box-shadow:0 0 20px rgba(0,255,136,0.4)}}
+.timer-name{font-weight:700;margin-bottom:4px}.timer-info{font-size:.8rem;color:#888}
+.timer-remaining{font-size:1.5rem;font-weight:700;color:var(--primary);margin-top:6px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative}
+.photo-item img{width:100%;height:100%;object-fit:cover}
+.photo-delete{position:absolute;top:4px;right:4px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer}
+.empty-state{text-align:center;padding:30px 20px;color:#666}
+.empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
+.search-bar{position:relative;margin-bottom:12px}
+.search-bar input{width:100%;padding:12px 15px 12px 42px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
+.search-bar::before{content:"🔍";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem}
+.machine-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px}
+.machine-status{display:inline-flex;align-items:center;gap:6px;font-size:.8rem}
+.machine-status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--success)}
+.machine-status.busy::before{background:var(--warning)}.machine-status.offline::before{background:var(--secondary)}
+.planning-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.planning-day-header{text-align:center;font-size:.7rem;color:#888;padding:6px 2px}
+.planning-day{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:5px;min-height:55px;cursor:pointer;transition:all .2s;position:relative}
+.planning-day:hover{border-color:var(--primary)}.planning-day.today{border-color:var(--primary);background:rgba(0,212,255,0.1)}
+.planning-day-number{font-size:.75rem;font-weight:700;margin-bottom:3px}
+.planning-day.today .planning-day-number{color:var(--primary)}
+.planning-event-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
+.event-type-printing{background:var(--primary)}.event-type-modeling{background:var(--warning)}.event-type-design{background:#ff6b81}
+.event-type-maintenance{background:var(--secondary)}.event-type-rdv{background:#a855f7}.event-type-logistics{background:#22d3ee}.event-type-other{background:#888}
+.event-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--primary)}
+.event-item:hover{border-color:var(--primary)}
+.event-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.event-item-title{font-weight:700;font-size:.9rem}
+.event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
+.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.quality-overlay.active{display:flex}
+.quality-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 0 30px rgba(0,212,255,0.3)}
+.quality-header{text-align:center;margin-bottom:18px}
+.quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
+.quality-header p{color:#888;font-size:.85rem;margin-top:6px}
+@media(min-width:768px){.app-header{padding:18px 40px}.section{padding:20px 40px;max-width:800px;margin:0 auto}.nav-tabs{padding:12px 40px;justify-content:center}}
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">📴 Mode hors-ligne</div>
+<div class="notif-badge" id="notifBadge"><button class="notif-close" onclick="hideNotification()">×</button><div class="notif-title" id="notifTitle">Notification</div><div class="notif-text" id="notifText">Message</div></div>
+
+<header class="app-header"><h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1><button class="sync-btn" id="syncBtn" onclick="syncWithGoogle()"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button></header>
+
+<nav class="nav-tabs" id="navTabs">
+<div class="nav-tab active" data-section="dashboard" onclick="showSection('dashboard')">📊 Tableau</div>
+<div class="nav-tab" data-section="orders" onclick="showSection('orders')">📦 Commandes</div>
+<div class="nav-tab" data-section="catalog" onclick="showSection('catalog')">🎨 Catalogue</div>
+<div class="nav-tab" data-section="stock" onclick="showSection('stock')">📋 Stock</div>
+<div class="nav-tab" data-section="planning" onclick="showSection('planning')">📅 Planning</div>
+<div class="nav-tab" data-section="clients" onclick="showSection('clients')">👥 Clients</div>
+<div class="nav-tab" data-section="calculator" onclick="showSection('calculator')">🧮 Devis</div>
+<div class="nav-tab" data-section="timer" onclick="showSection('timer')">⏰ Timer</div>
+<div class="nav-tab" data-section="settings" onclick="showSection('settings')">⚙️ Config</div>
+</nav>
+
+<section id="dashboard" class="section active">
+<div class="stats-grid"><div class="stat-box"><div class="stat-value" id="statOrders">0</div><div class="stat-label">En cours</div></div><div class="stat-box"><div class="stat-value" id="statFinished">0</div><div class="stat-label">Terminées</div></div><div class="stat-box"><div class="stat-value" id="statRevenue">0€</div><div class="stat-label">CA estimé</div></div><div class="stat-box"><div class="stat-value" id="statMachines">4</div><div class="stat-label">Machines</div></div></div>
+<div class="card"><div class="card-title">⚡ Actions rapides</div><button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button><button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button><button class="btn btn-secondary" onclick="showSection('timer')" style="margin-top:8px">⏰ Lancer timer</button></div>
+<div class="card" id="activeTimersCard" style="display:none"><div class="card-title">🔥 Impressions en cours</div><div id="activeTimersList"></div></div>
+<div class="card"><div class="card-title">🔔 Alertes stock</div><div id="stockAlerts"></div></div>
+<div class="card"><div class="card-title">📅 Aujourd'hui</div><div id="todayEvents"></div></div>
+</section>
+
+<section id="orders" class="section"><div class="search-bar"><input type="text" id="orderSearch" placeholder="Rechercher..." oninput="renderOrders()"></div><div id="ordersList"></div></section>
+
+<section id="catalog" class="section"><button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modèle</button><div id="catalogList" style="margin-top:12px"></div></section>
+
+<section id="stock" class="section"><button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button><div id="stockList" style="margin-top:12px"></div></section>
+
+<section id="planning" class="section">
+<div class="card"><div class="card-title">📅 Calendrier</div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(-1)" style="width:auto">◀</button><div id="planningMonthLabel" style="font-weight:700"></div><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(1)" style="width:auto">▶</button></div><div class="planning-calendar" id="planningCalendar"></div></div>
+<div class="card"><div class="card-title">📋 Événements du jour</div><div id="planningEventsList"></div></div>
+<button class="btn btn-primary" onclick="openPlanningModal()">+ Ajouter événement</button>
+</section>
+
+<section id="clients" class="section"><button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button><div id="clientsList" style="margin-top:12px"></div></section>
+
+<section id="calculator" class="section">
+<div class="card"><div class="card-title">🧮 Calculateur de devis</div>
+<div class="form-group"><label class="form-label">Type de prestation</label><select class="form-select" id="calcService" onchange="calculateCost()"><option value="print">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception / Prototypage</option></select></div>
+<div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType" onchange="calculateCost()"><option value="fdm">FDM</option><option value="resin">Résine</option></select></div>
+<div class="form-group"><label class="form-label">Poids / Volume estimé (g)</label><input type="number" class="form-input" id="calcWeight" value="50" oninput="calculateCost()"></div>
+<div class="form-group"><label class="form-label">Temps estimé (h)</label><input type="number" class="form-input" id="calcTime" value="4" oninput="calculateCost()"></div>
+<div class="form-group"><label class="form-label">Complexité</label><select class="form-select" id="calcComplexity" onchange="calculateCost()"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
+<div class="form-group"><label class="form-label">Quantité</label><input type="number" class="form-input" id="calcQty" value="1" min="1" oninput="calculateCost()"></div>
+<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px"><div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estimé</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div></div>
+</div>
+</section>
+
+<section id="timer" class="section">
+<div class="card"><div class="card-title">⏰ Nouveau timer</div>
+<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="timerName" placeholder="ex: Support téléphone"></div>
+<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="timerMachine"></select></div>
+<div class="form-group"><label class="form-label">Durée (h)</label><input type="number" class="form-input" id="timerHours" value="4" min="0.5" step="0.5"></div>
+<div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="timerMinutes" value="0" min="0" max="59"></div>
+<button class="btn btn-primary" onclick="startPrintTimer()">🚀 Démarrer</button>
+<button class="btn btn-secondary" onclick="requestWakeLock()" style="margin-top:8px">🔒 Garder écran allumé</button>
+</div>
+<div class="card" id="activeTimersSection" style="display:none"><div class="card-title">🔥 En cours</div><div id="timerList"></div></div>
+<div class="card" id="finishedTimersSection" style="display:none"><div class="card-title">✅ Terminées</div><div id="finishedTimerList"></div></div>
+</section>
+
+<section id="settings" class="section">
+<div class="card"><div class="card-title">🔗 Synchronisation</div><div class="form-group"><label class="form-label">URL API Apps Script</label><input type="text" class="form-input" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"></div><button class="btn btn-primary" onclick="saveConfig()">💾 Sauvegarder</button><button class="btn btn-secondary" onclick="testConnection()" style="margin-top:8px">🧪 Tester</button></div>
+<div class="card"><div class="card-title">🔔 Notifications</div><div class="checklist-item"><input type="checkbox" id="notifSound" checked><label for="notifSound">Son timer terminé</label></div><div class="checklist-item"><input type="checkbox" id="notifVibrate" checked><label for="notifVibrate">Vibration</label></div><div class="checklist-item"><input type="checkbox" id="notifScreen" checked><label for="notifScreen">Garder écran allumé</label></div></div>
+<div class="card"><div class="card-title">📤 Export / Import</div><button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button><button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:8px">📥 Importer JSON</button><input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)"></div>
+<div class="card"><div class="card-title">⚠️ Danger Zone</div><button class="btn btn-danger" onclick="resetAllData()">🗑️ Tout réinitialiser</button></div>
+</section>
+
+<div class="modal-overlay" id="newOrderModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('newOrderModal')">×</button></div>
+<div class="form-group"><label class="form-label">Client</label><select class="form-select" id="orderClient"></select></div>
+<div class="form-group"><label class="form-label">Nom du projet</label><input type="text" class="form-input" id="orderName" placeholder="ex: Support téléphone"></div>
+<div class="form-group"><label class="form-label">Type de prestation</label><select class="form-select" id="orderService" onchange="toggleOrderFields()"><option value="print">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception / Prototypage</option></select></div>
+<div class="form-group" id="printTypeGroup"><label class="form-label">Technologie</label><select class="form-select" id="orderType"><option value="fdm">FDM</option><option value="resin">Résine</option></select></div>
+<div class="form-group" id="machineGroup"><label class="form-label">Machine</label><select class="form-select" id="orderMachine"></select></div>
+<div class="form-group"><label class="form-label">Matériau</label><input type="text" class="form-input" id="orderMaterial" placeholder="ex: PLA, Résine..."></div>
+<div class="form-group"><label class="form-label">Poids estimé (g)</label><input type="number" class="form-input" id="orderWeight" placeholder="50"></div>
+<div class="form-group"><label class="form-label">Temps estimé (h)</label><input type="number" class="form-input" id="orderTime" placeholder="4"></div>
+<div class="form-group"><label class="form-label">Prix vendu (€)</label><input type="number" class="form-input" id="orderPrice" placeholder="15.00" step="0.01"></div>
+<div class="form-group"><label class="form-label">Priorité</label><select class="form-select" id="orderPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
+<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="orderNotes" placeholder="Détails..."></textarea></div>
+<button class="btn btn-primary" onclick="saveOrder()">Créer</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="orderDetailModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title" id="detailTitle">Détail</div><button class="modal-close" onclick="closeModal('orderDetailModal')">×</button></div>
+<div id="orderDetailContent"></div>
+<div class="form-group" style="margin-top:14px"><label class="form-label">Statut</label><select class="form-select" id="detailStatus" onchange="updateOrderStatus()"><option value="pending">À faire</option><option value="printing">En cours</option><option value="finished">Terminée</option><option value="delivered">Livrée / Payée</option></select></div>
+<div class="form-group"><label class="form-label">Photos</label><div class="photo-grid" id="detailPhotos"></div><button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Photo</button></div>
+<button class="btn btn-danger" onclick="deleteCurrentOrder()">🗑️ Supprimer</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="newClientModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('newClientModal')">×</button></div>
+<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="clientName" placeholder="Nom"></div>
+<div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" id="clientPhone" placeholder="06 12 34 56 78"></div>
+<div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="email@exemple.com"></div>
+<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
+<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
+<button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="newModelModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouveau modèle</div><button class="modal-close" onclick="closeModal('newModelModal')">×</button></div>
+<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="modelName" placeholder="ex: Porte-clés"></div>
+<div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="modelCategory"><option value="prototype">Prototype</option><option value="decoration">Décoration</option><option value="functional">Fonctionnel</option><option value="jewelry">Bijouterie</option><option value="other">Autre</option></select></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="modelType"><option value="fdm">FDM</option><option value="resin">Résine</option><option value="both">Les deux</option></select></div>
+<div class="form-group"><label class="form-label">Temps moyen (h)</label><input type="number" class="form-input" id="modelTime" placeholder="3"></div>
+<div class="form-group"><label class="form-label">Poids moyen (g)</label><input type="number" class="form-input" id="modelWeight" placeholder="30"></div>
+<div class="form-group"><label class="form-label">Prix base (€)</label><input type="number" class="form-input" id="modelPrice" placeholder="10.00" step="0.01"></div>
+<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="modelDesc" placeholder="Description..."></textarea></div>
+<button class="btn btn-primary" onclick="saveModel()">Ajouter</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="newStockModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" onclick="closeModal('newStockModal')">×</button></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="stockType"><option value="filament">Filament</option><option value="resin">Résine</option><option value="part">Pièce détachée</option><option value="tool">Outil</option><option value="other">Autre</option></select></div>
+<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="stockName" placeholder="ex: PLA Blanc 1.75mm"></div>
+<div class="form-group"><label class="form-label">Quantité</label><input type="number" class="form-input" id="stockQty" placeholder="1"></div>
+<div class="form-group"><label class="form-label">Unité</label><select class="form-select" id="stockUnit"><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="pcs">pièces</option><option value="m">mètres</option></select></div>
+<div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="stockAlert" value="1"></div>
+<div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="stockSupplier" placeholder="Amazon, 3DJake..."></div>
+<button class="btn btn-primary" onclick="saveStock()">Ajouter</button>
+</div>
+</div>
+
+<div class="modal-overlay" id="planningModal">
+<div class="modal-content"><div class="modal-header"><div class="modal-title">📅 Ajouter événement</div><button class="modal-close" onclick="closeModal('planningModal')">×</button></div>
+<div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="planTitle" placeholder="ex: Impression support Jean"></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="planType" onchange="togglePlanningFields()"><option value="printing">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception</option><option value="maintenance">Maintenance machine</option><option value="rdv">RDV client</option><option value="logistics">Logistique / Livraison</option><option value="other">Divers</option></select></div>
+<div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="planDate"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">Début</label><input type="time" class="form-input" id="planStartTime" value="09:00"></div><div class="form-group"><label class="form-label">Fin</label><input type="time" class="form-input" id="planEndTime" value="12:00"></div></div>
+<div class="form-group" id="planMachineGroup"><label class="form-label">Machine</label><select class="form-select" id="planMachine"></select></div>
+<div class="form-group"><label class="form-label">Assigné à</label><select class="form-select" id="planAssignee"><option value="florian">Florian</option><option value="elie">Élie</option><option value="both">Les deux</option></select></div>
+<div class="form-group"><label class="form-label">Priorité</label><select class="form-select" id="planPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
+<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="planNotes" placeholder="Détails..."></textarea></div>
+<button class="btn btn-primary" onclick="savePlanningEvent()">Ajouter</button>
+</div>
+</div>
+
+<div class="quality-overlay" id="qualityOverlay">
+<div class="quality-content"><div class="quality-header"><h3>✅ Validation qualité</h3><p id="qualityOrderName">Commande terminée</p></div><div id="qualityChecklist"></div><div class="progress-bar" style="margin:14px 0"><div class="progress-fill" id="qualityProgress" style="width:0%"></div></div><div style="text-align:center;font-size:.8rem;color:#888;margin-bottom:14px" id="qualityPercent">0% complété</div><div class="form-group" style="margin:14px 0"><label class="form-label">📷 Photo de la pièce finie</label><div class="photo-grid" id="qualityPhotoPreview" style="display:none;margin-bottom:8px"></div><button class="btn btn-secondary" onclick="openQualityCamera()" style="margin-top:0">📷 Prendre une photo</button></div><button class="btn btn-primary" id="qualityValidateBtn" onclick="validateQuality()" disabled>Valider la clôture</button><button class="btn btn-secondary" onclick="skipQuality()" style="margin-top:8px">Passer (pas une impression)</button></div>
+</div>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCameraFile(this)">
+<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleQualityCameraFile(this)">
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== CONFIG & STATE ====================
+let config={apiUrl:localStorage.getItem('tli5_apiUrl')||'',notifSound:localStorage.getItem('tli5_notifSound')!=='false',notifVibrate:localStorage.getItem('tli5_notifVibrate')!=='false',notifScreen:localStorage.getItem('tli5_notifScreen')!=='false'};
+let data={orders:[],clients:[{id:1,name:'Client Test',phone:'',email:'',address:'',notes:''}],models:[],stock:[],machines:[{id:1,name:'Elegoo Saturn 4 Ultra',type:'resin',status:'idle',currentJob:null},{id:2,name:'Bambulab P2S #1',type:'fdm',status:'idle',currentJob:null},{id:3,name:'Bambulab P2S #2',type:'fdm',status:'idle',currentJob:null},{id:4,name:'Bambulab H2C',type:'fdm',status:'idle',currentJob:null}],checklist:[{id:1,text:'Adhésion plateau OK',checked:false},{id:2,text:'Pas de warping / déformation',checked:false},{id:3,text:'Finition surface correcte',checked:false},{id:4,text:'Supports retirés proprement',checked:false},{id:5,text:'Post-traitement résine (lavage+UV)',checked:false},{id:6,text:'Dimensions conformes',checked:false},{id:7,text:'Emballage adapté',checked:false},{id:8,text:'Photo finale prise',checked:false}],planningEvents:[],qualityResults:{}};
+let activeTimers=[],finishedTimers=[],currentOrderId=null,photoOrderId=null,isOnline=navigator.onLine,wakeLock=null,planningCurrentDate=new Date(),selectedPlanningDay=null,qualityOrderId=null;
+
+// ==================== INIT ====================
+function init(){console.log('TLI v5 init');try{loadData();loadConfig();loadTimers();setupEvents();renderAll();startTimerLoop();calculateCost();console.log('TLI v5 ready')}catch(err){console.error('Init error:',err);showToast('Erreur démarrage','error')}}
+function setupEvents(){window.addEventListener('online',()=>{isOnline=true;document.getElementById('offlineBanner').classList.remove('show');showToast('Connexion rétablie','success')});window.addEventListener('offline',()=>{isOnline=false;document.getElementById('offlineBanner').classList.add('show');showToast('Hors-ligne','warning')});if(!isOnline)document.getElementById('offlineBanner').classList.add('show');if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)})})}
+function loadData(){const saved=localStorage.getItem('tli5_data');if(saved){try{const p=JSON.parse(saved);data={...data,...p};if(!data.planningEvents)data.planningEvents=[];if(!data.qualityResults)data.qualityResults={}}catch(e){}}}
+function saveData(){localStorage.setItem('tli5_data',JSON.stringify(data))}
+function loadConfig(){const el=document.getElementById('apiUrl');if(el)el.value=config.apiUrl;document.getElementById('notifSound').checked=config.notifSound;document.getElementById('notifVibrate').checked=config.notifVibrate;document.getElementById('notifScreen').checked=config.notifScreen}
+function saveConfig(){config.apiUrl=(document.getElementById('apiUrl').value||'').trim();localStorage.setItem('tli5_apiUrl',config.apiUrl);showToast('Config sauvegardée','success')}
+function loadTimers(){const saved=localStorage.getItem('tli5_timers');if(saved){try{const p=JSON.parse(saved);activeTimers=p.active||[];finishedTimers=p.finished||[]}catch(e){}}}
+function saveTimers(){localStorage.setItem('tli5_timers',JSON.stringify({active:activeTimers,finished:finishedTimers}))}
+
+// ==================== WAKE LOCK ====================
+async function requestWakeLock(){try{if('wakeLock'in navigator){wakeLock=await navigator.wakeLock.request('screen');showToast('Écran allumé','success')}else{showToast('Non supporté','warning')}}catch(e){showToast('Impossible','error')}}
+
+// ==================== SYNC ====================
+async function syncWithGoogle(){if(!isOnline){showToast('Hors-ligne','warning');return}if(!config.apiUrl){showToast('URL API non configurée','warning');return}const btn=document.getElementById('syncBtn'),icon=document.getElementById('syncIcon'),text=document.getElementById('syncText');btn.classList.add('syncing');icon.textContent='⏳';text.textContent='Sync...';try{const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),10000);const r=await fetch(config.apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'syncAll',orders:data.orders,clients:data.clients,models:data.models,stock:data.stock,machines:data.machines,planningEvents:data.planningEvents}),signal:ctrl.signal});clearTimeout(to);if(!r.ok)throw new Error('HTTP '+r.status);const res=await r.json();if(!res.success)throw new Error(res.error||'Sync failed');btn.classList.remove('syncing');btn.classList.add('synced');icon.textContent='✅';text.textContent='OK';showToast('Synchronisé','success');setTimeout(()=>{btn.classList.remove('synced');icon.textContent='🔄';text.textContent='Sync'},3000)}catch(e){btn.classList.remove('syncing');btn.classList.add('error');icon.textContent='❌';text.textContent='Erreur';showToast('Sync: '+e.message,'error');setTimeout(()=>{btn.classList.remove('error');icon.textContent='🔄';text.textContent='Sync'},3000)}}
+async function testConnection(){if(!config.apiUrl){showToast('URL API non configurée','warning');return}try{const r=await fetch(config.apiUrl+'?action=getAll');showToast(r.ok?'Connexion OK':'Erreur '+r.status,r.ok?'success':'error')}catch(e){showToast('Connexion impossible','error')}}
+
+// ==================== NAV ====================
+function showSection(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));const s=document.getElementById(id),t=document.querySelector('[data-section="'+id+'"]');if(s)s.classList.add('active');if(t)t.classList.add('active');renderAll()}
+
+// ==================== RENDER ALL ====================
+function renderAll(){renderDashboard();renderOrders();renderClients();renderCatalog();renderStock();renderMachines();renderTimers();renderPlanning();updateClientSelect();updateMachineSelects()}
+function renderDashboard(){updateStats();renderActiveTimers();const alerts=data.stock.filter(s=>parseFloat(s.qty)<=parseFloat(s.alert));const div=document.getElementById('stockAlerts');if(alerts.length===0)div.innerHTML='<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';else div.innerHTML=alerts.map(s=>'<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>'+s.name+'</strong> — '+s.qty+' '+s.unit+' restant(s)</div>').join('');const today=new Date();const todayEvents=data.planningEvents.filter(e=>{const d=new Date(e.date);return d.getDate()===today.getDate()&&d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()});const tdiv=document.getElementById('todayEvents');if(todayEvents.length===0)tdiv.innerHTML='<div class="empty-state"><div class="icon">📅</div>Rien de prévu</div>';else tdiv.innerHTML=todayEvents.map(e=>renderEventItem(e)).join('')}
+function updateStats(){const active=data.orders.filter(o=>o.status!=='delivered').length;const finished=data.orders.filter(o=>{const d=new Date(o.date);const n=new Date();return o.status==='finished'&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;const revenue=data.orders.filter(o=>o.status==='delivered').reduce((s,o)=>s+(parseFloat(o.price)||0),0);document.getElementById('statOrders').textContent=active;document.getElementById('statFinished').textContent=finished;document.getElementById('statRevenue').textContent=revenue.toFixed(0)+'€'}
+function renderActiveTimers(){const card=document.getElementById('activeTimersCard'),list=document.getElementById('activeTimersList');const active=activeTimers.filter(t=>!t.finished);if(active.length===0){card.style.display='none';return}card.style.display='block';list.innerHTML=active.map(t=>{const remaining=Math.max(0,t.endTime-Date.now());const pct=Math.min(100,((t.duration-remaining)/t.duration)*100);return'<div class="timer-card"><div class="timer-name">'+t.name+'</div><div class="timer-info">🖨️ '+t.machineName+' • '+formatDuration(t.duration)+'</div><div class="timer-remaining">'+formatTime(remaining)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>'}).join('')}
+function renderOrders(){const search=(document.getElementById('orderSearch')?.value||'').toLowerCase();let orders=[...data.orders].sort((a,b)=>b.id-a.id);if(search)orders=orders.filter(o=>(o.name||'').toLowerCase().includes(search)||(o.clientName||'').toLowerCase().includes(search));const div=document.getElementById('ordersList');if(orders.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>';return}div.innerHTML=orders.map(o=>{const svc=o.service==='print'?'🖨️ Impression':o.service==='modeling'?'🎨 Modélisation':o.service==='design'?'💡 Conception':o.service;return'<div class="order-item" onclick="openOrderDetail('+o.id+')"><div class="order-item-header"><span class="order-item-title">#'+o.id+' — '+(o.name||'Sans nom')+'</span><span class="badge badge-'+(o.status||'pending')+'">'+getStatusLabel(o.status)+'</span></div><div class="order-item-meta"><span>👤 '+(o.clientName||'Inconnu')+'</span><span>'+svc+'</span><span>💰 '+(o.price||0)+'€</span>'+(o.photos?.length>0?'<span>📷</span>':'')+'</div></div>'}).join('')}
+function getStatusLabel(s){const l={pending:'À faire',printing:'En cours',finished:'Terminée',delivered:'Livrée'};return l[s]||s}
+function renderClients(){const div=document.getElementById('clientsList');if(data.clients.length===0){div.innerHTML='<div class="empty-state"><div class="icon">👥</div>Aucun client</div>';return}div.innerHTML=data.clients.map(c=>'<div class="card" style="cursor:pointer" onclick="showClientOrders('+c.id+')"><div style="font-weight:700;font-size:1.05rem">'+(c.name||'Sans nom')+'</div><div style="font-size:.8rem;color:#888;margin-top:4px">'+(c.phone?'📞 '+c.phone:'')+' '+(c.email?'✉️ '+c.email:'')+'</div><div style="font-size:.75rem;color:#666;margin-top:4px">'+data.orders.filter(o=>o.clientId===c.id).length+' commande(s)</div></div>').join('')}
+function renderCatalog(){const div=document.getElementById('catalogList');if(data.models.length===0){div.innerHTML='<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>';return}div.innerHTML=data.models.map(m=>'<div class="card"><div style="font-weight:700">'+(m.name||'Sans nom')+'</div><div style="font-size:.8rem;color:#888;margin-top:4px">'+(m.category||'')+' • '+(m.type==='fdm'?'FDM':m.type==='resin'?'Résine':'FDM + Résine')+'</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ '+(m.time||0)+'h</span><span>⚖️ '+(m.weight||0)+'g</span><span style="color:var(--primary);font-weight:700">'+(m.price||0)+'€</span></div></div>').join('')}
+function renderStock(){const div=document.getElementById('stockList');if(data.stock.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📋</div>Stock vide</div>';return}div.innerHTML=data.stock.map(s=>{const qty=parseFloat(s.qty)||0,alert=parseFloat(s.alert)||0,isLow=qty<=alert;return'<div class="card" style="border-left:'+(isLow?'3px solid var(--warning)':'3px solid var(--success)')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">'+(s.name||'Sans nom')+'</div><div style="font-size:.75rem;color:#888">'+(s.type||'')+'</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:'+(isLow?'var(--warning)':'var(--success)')+'">'+qty+' '+(s.unit||'')+'</div><div style="font-size:.7rem;color:#666">Seuil: '+alert+'</div></div></div></div>'}).join('')}
+function renderMachines(){const div=document.getElementById('machinesList');if(!div)return;div.innerHTML=data.machines.map(m=>{const activeTimer=activeTimers.find(t=>t.machineId===m.id&&!t.finished);return'<div class="machine-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">'+(m.name||'Machine')+'</div><div style="font-size:.75rem;color:#888">'+(m.type==='fdm'?'FDM':'Résine')+'</div></div><div class="machine-status '+(m.status||'idle')+'">'+(m.status==='idle'?'Disponible':m.status==='busy'?'En impression':'Hors ligne')+'</div></div>'+(m.currentJob?'<div style="margin-top:6px;font-size:.8rem;color:var(--primary)">➤ '+m.currentJob+'</div>':'')+(activeTimer?'<div style="margin-top:4px;font-size:.75rem;color:var(--warning)">⏰ '+formatTime(activeTimer.endTime-Date.now())+'</div>':'')+'</div>'}).join('')}
+
+// ==================== PLANNING ====================
+function renderPlanning(){const calDiv=document.getElementById('planningCalendar');if(!calDiv)return;const year=planningCurrentDate.getFullYear(),month=planningCurrentDate.getMonth();const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];const label=document.getElementById('planningMonthLabel');if(label)label.textContent=monthNames[month]+' '+year;const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate();const days=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];let html='';days.forEach(d=>html+='<div class="planning-day-header">'+d+'</div>');for(let i=0;i<firstDay;i++)html+='<div></div>';const today=new Date();for(let d=1;d<=daysInMonth;d++){const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();const dayEvents=data.planningEvents.filter(e=>{const ed=new Date(e.date);return ed.getDate()===d&&ed.getMonth()===month&&ed.getFullYear()===year});let dots='',labels='';dayEvents.slice(0,3).forEach(e=>{dots+='<span class="planning-event-dot event-type-'+e.type+'"></span>';if(dayEvents.length<=2)labels+='<div style="font-size:.6rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>'});html+='<div class="planning-day '+(isToday?'today':'')+'" onclick="selectPlanningDay('+d+')"><div class="planning-day-number">'+d+'</div><div>'+dots+'</div>'+labels+'</div>'}calDiv.innerHTML=html;renderPlanningEventsList()}
+function changePlanningMonth(delta){planningCurrentDate.setMonth(planningCurrentDate.getMonth()+delta);renderPlanning()}
+function selectPlanningDay(day){selectedPlanningDay=new Date(planningCurrentDate.getFullYear(),planningCurrentDate.getMonth(),day);document.getElementById('planDate').value=selectedPlanningDay.toISOString().split('T')[0];renderPlanningEventsList()}
+function renderPlanningEventsList(){const div=document.getElementById('planningEventsList');if(!div)return;const target=selectedPlanningDay||new Date();const events=data.planningEvents.filter(e=>{const d=new Date(e.date);return d.getDate()===target.getDate()&&d.getMonth()===target.getMonth()&&d.getFullYear()===target.getFullYear()}).sort((a,b)=>a.startTime.localeCompare(b.startTime));if(events.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📅</div>Aucun événement</div>';return}div.innerHTML=events.map(e=>renderEventItem(e)).join('')}
+function renderEventItem(e){const typeLabels={printing:'Impression',modeling:'Modélisation',design:'Conception',maintenance:'Maintenance',rdv:'RDV',logistics:'Logistique',other:'Divers'};const typeColors={printing:'var(--primary)',modeling:'var(--warning)',design:'#ff6b81',maintenance:'var(--secondary)',rdv:'#a855f7',logistics:'#22d3ee',other:'#888'};return'<div class="event-item" style="border-left-color:'+(typeColors[e.type]||'var(--primary)')+'" onclick="editPlanningEvent('+e.id+')"><div class="event-item-header"><span class="event-item-title">'+e.title+'</span><span style="font-size:.7rem;color:'+(typeColors[e.type]||'var(--primary)')+';font-weight:700">'+(typeLabels[e.type]||e.type)+'</span></div><div class="event-item-meta"><span>🕐 '+e.startTime+' — '+e.endTime+'</span>'+(e.machineName?'<span>🖨️ '+e.machineName+'</span>':'')+'<span>👤 '+(e.assignee==='florian'?'Florian':e.assignee==='elie'?'Élie':'Les deux')+'</span>'+(e.priority==='high'?'<span style="color:var(--secondary)">🔴 Haute</span>':e.priority==='medium'?'<span style="color:var(--warning)">🟡 Moyenne</span>':'<span style="color:var(--success)">🟢 Basse</span>')+'</div></div>'}
+function openPlanningModal(){if(!document.getElementById('planDate').value)document.getElementById('planDate').value=new Date().toISOString().split('T')[0];updateMachineSelects();document.getElementById('planningModal').classList.add('active')}
+function togglePlanningFields(){const type=document.getElementById('planType').value;const mg=document.getElementById('planMachineGroup');mg.style.display=(type==='printing'||type==='maintenance')?'block':'none'}
+function savePlanningEvent(){try{const title=document.getElementById('planTitle').value.trim(),type=document.getElementById('planType').value,date=document.getElementById('planDate').value,startTime=document.getElementById('planStartTime').value,endTime=document.getElementById('planEndTime').value,machineId=document.getElementById('planMachine').value,assignee=document.getElementById('planAssignee').value,priority=document.getElementById('planPriority').value,notes=document.getElementById('planNotes').value;if(!title||!date){showToast('Titre et date obligatoires','warning');return}const machine=data.machines.find(m=>m.id===parseInt(machineId));const event={id:Date.now(),title,type,date,startTime,endTime,machineId:machineId?parseInt(machineId):null,machineName:machine?machine.name:null,assignee,priority,notes};data.planningEvents.push(event);saveData();closeModal('planningModal');showToast('Événement ajouté','success');renderPlanning();document.getElementById('planTitle').value='';document.getElementById('planNotes').value=''}catch(err){showToast('Erreur','error')}}
+function editPlanningEvent(id){if(!confirm('Supprimer cet événement ?'))return;data.planningEvents=data.planningEvents.filter(e=>e.id!==id);saveData();renderPlanning();showToast('Supprimé','warning')}
+
+// ==================== TIMER ====================
+function updateMachineSelects(){['timerMachine','orderMachine','planMachine'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;sel.innerHTML=data.machines.map(m=>'<option value="'+m.id+'">'+m.name+'</option>').join('')})}
+function startPrintTimer(){const name=document.getElementById('timerName').value.trim(),machineId=parseInt(document.getElementById('timerMachine').value),hours=parseFloat(document.getElementById('timerHours').value)||0,minutes=parseFloat(document.getElementById('timerMinutes').value)||0;if(!name||!machineId){showToast('Remplis tous les champs','warning');return}const machine=data.machines.find(m=>m.id===machineId);if(!machine)return;const duration=(hours*60+minutes)*60*1000;const timer={id:Date.now(),name,machineId,machineName:machine.name,duration,endTime:Date.now()+duration,startTime:Date.now(),finished:false};activeTimers.push(timer);machine.status='busy';machine.currentJob=name;saveTimers();saveData();showToast('Timer démarré','success');document.getElementById('timerName').value='';if(config.notifScreen)requestWakeLock();renderAll();showSection('timer')}
+function renderTimers(){const as=document.getElementById('activeTimersSection'),fs=document.getElementById('finishedTimersSection'),al=document.getElementById('timerList'),fl=document.getElementById('finishedTimerList');const active=activeTimers.filter(t=>!t.finished),finished=finishedTimers.slice(-5).reverse();if(active.length===0)as.style.display='none';else{as.style.display='block';al.innerHTML=active.map(t=>{const remaining=Math.max(0,t.endTime-Date.now());const pct=Math.min(100,((t.duration-remaining)/t.duration)*100);return'<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">'+t.name+'</div><button class="btn btn-sm btn-danger" onclick="stopTimer('+t.id+')" style="width:auto;margin-top:0">Arrêter</button></div><div class="timer-info">🖨️ '+t.machineName+' • '+formatDuration(t.duration)+'</div><div class="timer-remaining" id="timer_'+t.id+'">'+formatTime(remaining)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>'}).join('')}if(finished.length===0)fs.style.display='none';else{fs.style.display='block';fl.innerHTML=finished.map(t=>'<div class="timer-card finished"><div class="timer-name">✅ '+t.name+'</div><div class="timer-info">🖨️ '+t.machineName+' • '+new Date(t.endTime).toLocaleTimeString('fr-FR')+'</div></div>').join('')}}
+function startTimerLoop(){setInterval(()=>{let changed=false;activeTimers.forEach(t=>{if(!t.finished&&Date.now()>=t.endTime){t.finished=true;finishedTimers.push(t);const machine=data.machines.find(m=>m.id===t.machineId);if(machine){machine.status='idle';machine.currentJob=null}showNotification('Impression terminée',t.name+' est prête !');if(config.notifSound)playSound();if(config.notifVibrate&&navigator.vibrate)navigator.vibrate([200,100,200,100,200]);changed=true}});activeTimers=activeTimers.filter(t=>!t.finished);if(changed){saveTimers();saveData();renderAll()}activeTimers.forEach(t=>{const el=document.getElementById('timer_'+t.id);if(el)el.textContent=formatTime(Math.max(0,t.endTime-Date.now()))});renderActiveTimers()},1000)}
+function stopTimer(timerId){const timer=activeTimers.find(t=>t.id===timerId);if(!timer)return;timer.finished=true;finishedTimers.push(timer);activeTimers=activeTimers.filter(t=>t.id!==timerId);const machine=data.machines.find(m=>m.id===timer.machineId);if(machine){machine.status='idle';machine.currentJob=null}saveTimers();saveData();renderAll();showToast('Timer arrêté','warning')}
+function formatTime(ms){if(ms<=0)return'00:00:00';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0')}
+function formatDuration(ms){const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'h'+(m>0?m+'min':''):m+'min'}
+
+// ==================== NOTIFICATIONS ====================
+function showNotification(title,text){const badge=document.getElementById('notifBadge');document.getElementById('notifTitle').textContent=title;document.getElementById('notifText').textContent=text;badge.classList.add('show');if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body:text,requireInteraction:true});setTimeout(()=>hideNotification(),10000)}
+function hideNotification(){document.getElementById('notifBadge').classList.remove('show')}
+function playSound(){try{const ctx=new(window.AudioContext||window.webkitAudioContext);[600,800,1000].forEach((freq,i)=>{setTimeout(()=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=freq;osc.type='sine';gain.gain.setValueAtTime(0.3,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.4);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.4)},i*150)})}catch(e){}}
+
+// ==================== MODALS ====================
+function openModal(id){const el=document.getElementById(id);if(el){el.classList.add('active');if(id==='newOrderModal'){updateClientSelect();updateMachineSelects()}}}
+function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('active')}
+function updateClientSelect(){const sel=document.getElementById('orderClient');if(sel)sel.innerHTML=data.clients.map(c=>'<option value="'+c.id+'">'+(c.name||'Sans nom')+'</option>').join('')}
+function toggleOrderFields(){const service=document.getElementById('orderService').value;document.getElementById('printTypeGroup').style.display=(service==='print')?'block':'none';document.getElementById('machineGroup').style.display=(service==='print')?'block':'none'}
+
+// ==================== SAVE FUNCTIONS ====================
+function saveOrder(){try{const clientId=parseInt(document.getElementById('orderClient').value),client=data.clients.find(c=>c.id===clientId),service=document.getElementById('orderService').value;const order={id:Date.now(),clientId,clientName:client?client.name:'Inconnu',name:document.getElementById('orderName').value||'Sans nom',service:service,type:service==='print'?document.getElementById('orderType').value:null,machineId:service==='print'?parseInt(document.getElementById('orderMachine').value):null,material:document.getElementById('orderMaterial').value||'',weight:document.getElementById('orderWeight').value||0,time:document.getElementById('orderTime').value||0,price:document.getElementById('orderPrice').value||0,priority:document.getElementById('orderPriority').value,notes:document.getElementById('orderNotes').value||'',status:'pending',date:new Date().toISOString(),photos:[]};data.orders.push(order);saveData();closeModal('newOrderModal');showToast('Commande créée','success');renderAll();document.getElementById('orderName').value='';document.getElementById('orderMaterial').value='';document.getElementById('orderWeight').value='';document.getElementById('orderTime').value='';document.getElementById('orderPrice').value='';document.getElementById('orderNotes').value=''}catch(err){showToast('Erreur','error')}}
+function saveClient(){try{const client={id:Date.now(),name:document.getElementById('clientName').value||'Sans nom',phone:document.getElementById('clientPhone').value||'',email:document.getElementById('clientEmail').value||'',address:document.getElementById('clientAddress').value||'',notes:document.getElementById('clientNotes').value||''};data.clients.push(client);saveData();closeModal('newClientModal');showToast('Client ajouté','success');renderAll();document.getElementById('clientName').value='';document.getElementById('clientPhone').value='';document.getElementById('clientEmail').value='';document.getElementById('clientAddress').value='';document.getElementById('clientNotes').value=''}catch(err){showToast('Erreur','error')}}
+function saveModel(){try{const model={id:Date.now(),name:document.getElementById('modelName').value||'Sans nom',category:document.getElementById('modelCategory').value,type:document.getElementById('modelType').value,time:document.getElementById('modelTime').value||0,weight:document.getElementById('modelWeight').value||0,price:document.getElementById('modelPrice').value||0,description:document.getElementById('modelDesc').value||''};data.models.push(model);saveData();closeModal('newModelModal');showToast('Modèle ajouté','success');renderAll();document.getElementById('modelName').value='';document.getElementById('modelTime').value='';document.getElementById('modelWeight').value='';document.getElementById('modelPrice').value='';document.getElementById('modelDesc').value=''}catch(err){showToast('Erreur','error')}}
+function saveStock(){try{const item={id:Date.now(),type:document.getElementById('stockType').value,name:document.getElementById('stockName').value||'Sans nom',qty:parseFloat(document.getElementById('stockQty').value)||0,unit:document.getElementById('stockUnit').value,alert:parseFloat(document.getElementById('stockAlert').value)||1,supplier:document.getElementById('stockSupplier').value||''};data.stock.push(item);saveData();closeModal('newStockModal');showToast('Stock ajouté','success');renderAll();document.getElementById('stockName').value='';document.getElementById('stockQty').value='';document.getElementById('stockSupplier').value=''}catch(err){showToast('Erreur','error')}}
+
+// ==================== ORDER DETAIL & QUALITY ====================
+function openOrderDetail(id){currentOrderId=id;const order=data.orders.find(o=>o.id===id);if(!order)return;document.getElementById('detailTitle').textContent='#'+order.id+' — '+(order.name||'Sans nom');document.getElementById('detailStatus').value=order.status||'pending';const content=document.getElementById('orderDetailContent');const svc=order.service==='print'?'🖨️ Impression':order.service==='modeling'?'🎨 Modélisation':order.service==='design'?'💡 Conception':order.service;content.innerHTML='<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">'+(order.clientName||'Inconnu')+'</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>'+svc+'</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>'+(order.type==='fdm'?'FDM':order.type==='resin'?'Résine':'-')+'</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>'+(order.weight||0)+'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>'+(order.time||0)+'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">'+(order.price||0)+'€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>'+new Date(order.date).toLocaleDateString('fr-FR')+'</div></div></div>'+(order.notes?'<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">'+order.notes+'</div></div>':'');renderOrderPhotos(order);openModal('orderDetailModal')}
+function renderOrderPhotos(order){const div=document.getElementById('detailPhotos');if(!order.photos||order.photos.length===0){div.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>';return}div.innerHTML=order.photos.map((photo,idx)=>'<div class="photo-item"><img src="'+photo+'" alt="Photo"><button class="photo-delete" onclick="deletePhoto('+order.id+','+idx+')">×</button></div>').join('')}
+function updateOrderStatus(){const order=data.orders.find(o=>o.id===currentOrderId);if(!order)return;const oldStatus=order.status;order.status=document.getElementById('detailStatus').value;saveData();if(oldStatus!=='finished'&&order.status==='finished'&&order.service==='print')showQualityOverlay(order.id,order.name);showToast('Statut mis à jour','success');renderAll()}
+function showQualityOverlay(orderId,orderName){qualityOrderId=orderId;document.getElementById('qualityOrderName').textContent=orderName||'Commande';if(!data.qualityResults[orderId])data.qualityResults[orderId]=data.checklist.map(item=>({...item,checked:false}));const div=document.getElementById('qualityChecklist');div.innerHTML=data.qualityResults[orderId].map((item,idx)=>'<div class="checklist-item"><input type="checkbox" id="quality_'+idx+'" '+(item.checked?'checked':'')+' onchange="toggleQualityCheck('+idx+')"><label for="quality_'+idx+'">'+item.text+'</label></div>').join('');updateQualityProgress();document.getElementById('qualityOverlay').classList.add('active')}
+function toggleQualityCheck(idx){if(!data.qualityResults[qualityOrderId])return;data.qualityResults[qualityOrderId][idx].checked=!data.qualityResults[qualityOrderId][idx].checked;saveData();updateQualityProgress();const div=document.getElementById('qualityChecklist');div.innerHTML=data.qualityResults[qualityOrderId].map((item,i)=>'<div class="checklist-item"><input type="checkbox" id="quality_'+i+'" '+(item.checked?'checked':'')+' onchange="toggleQualityCheck('+i+')"><label for="quality_'+i+'">'+item.text+'</label></div>').join('')}
+function updateQualityProgress(){if(!data.qualityResults[qualityOrderId])return;const checked=data.qualityResults[qualityOrderId].filter(i=>i.checked).length,total=data.qualityResults[qualityOrderId].length,pct=Math.round((checked/total)*100);document.getElementById('qualityProgress').style.width=pct+'%';document.getElementById('qualityPercent').textContent=pct+'% complété';document.getElementById('qualityValidateBtn').disabled=pct<100}
+function validateQuality(){if(window.tempQualityPhoto&&qualityOrderId){const order=data.orders.find(o=>o.id===qualityOrderId);if(order){if(!order.photos)order.photos=[];order.photos.push(window.tempQualityPhoto);saveData()}window.tempQualityPhoto=null}document.getElementById('qualityOverlay').classList.remove('active');showToast('Qualité validée ! Commande clôturée','success')}
+function skipQuality(){window.tempQualityPhoto=null;document.getElementById('qualityOverlay').classList.remove('active');showToast('Clôture sans validation','warning')}
+function deleteCurrentOrder(){if(!confirm('Supprimer ?'))return;data.orders=data.orders.filter(o=>o.id!==currentOrderId);saveData();closeModal('orderDetailModal');showToast('Supprimé','warning');renderAll()}
+function deletePhoto(orderId,photoIdx){const order=data.orders.find(o=>o.id===orderId);if(order&&order.photos){order.photos.splice(photoIdx,1);saveData();renderOrderPhotos(order);showToast('Photo supprimée','warning')}}
+function showClientOrders(clientId){const client=data.clients.find(c=>c.id===clientId);if(!client)return;const clientOrders=data.orders.filter(o=>o.clientId===clientId);let html='<div style="margin-bottom:12px;font-weight:700">Commandes de '+(client.name||'Client')+'</div>';if(clientOrders.length===0)html+='<div style="color:#888">Aucune commande</div>';else html+=clientOrders.map(o=>'<div class="order-item" onclick="openOrderDetail('+o.id+');closeModal('orderDetailModal')"><div class="order-item-header"><span>'+(o.name||'Sans nom')+'</span><span class="badge badge-'+(o.status||'pending')+'">'+getStatusLabel(o.status)+'</span></div><div class="order-item-meta">'+(o.price||0)+'€ • '+new Date(o.date).toLocaleDateString('fr-FR')+'</div></div>').join('');document.getElementById('orderDetailContent').innerHTML=html;document.getElementById('detailTitle').textContent=client.name||'Client';document.getElementById('detailStatus').style.display='none';openModal('orderDetailModal')}
+
+// ==================== CAMERA ====================
+function openCamera(){photoOrderId=currentOrderId;document.getElementById('cameraInput').click()}
+function handleCameraFile(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const photoData=e.target.result;const order=data.orders.find(o=>o.id===photoOrderId);if(order){if(!order.photos)order.photos=[];order.photos.push(photoData);saveData();renderOrderPhotos(order);showToast('Photo ajoutée','success')}};reader.readAsDataURL(file);input.value=''}
+function openQualityCamera(){document.getElementById('qualityCameraInput').click()}
+function handleQualityCameraFile(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{window.tempQualityPhoto=e.target.result;const preview=document.getElementById('qualityPhotoPreview');if(preview){preview.innerHTML='<div class="photo-item"><img src="'+window.tempQualityPhoto+'" alt="Photo qualité"></div>';preview.style.display='grid'}showToast('Photo qualité prise','success')};reader.readAsDataURL(file);input.value=''}
+
+// ==================== CALCULATOR ====================
+function calculateCost(){const service=document.getElementById('calcService').value,type=document.getElementById('calcType').value,weight=parseFloat(document.getElementById('calcWeight').value)||0,time=parseFloat(document.getElementById('calcTime').value)||0,complexity=parseFloat(document.getElementById('calcComplexity').value)||1,qty=parseInt(document.getElementById('calcQty').value)||1;let materialCost=0,hourlyRate=0,serviceMultiplier=1;if(service==='print'){if(type==='fdm'){materialCost=(weight/1000)*25;hourlyRate=2}else{materialCost=(weight/1000)*60;hourlyRate=3}}else if(service==='modeling'){hourlyRate=35;serviceMultiplier=1.2}else if(service==='design'){hourlyRate=45;serviceMultiplier=1.3}const total=(materialCost+(time*hourlyRate))*complexity*qty*serviceMultiplier;document.getElementById('calcTotal').textContent=total.toFixed(2)+'€'}
+
+// ==================== EXPORT / IMPORT ====================
+function exportData(){const blob=new Blob([JSON.stringify({data,timers:{active:activeTimers,finished:finishedTimers},exportDate:new Date().toISOString()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TLI_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showToast('Export réussi','success')}
+function importData(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const imported=JSON.parse(e.target.result);if(imported.data)data=imported.data;if(imported.timers){activeTimers=imported.timers.active||[];finishedTimers=imported.timers.finished||[]}saveData();saveTimers();renderAll();showToast('Import réussi','success')}catch(err){showToast('Erreur import','error')}};reader.readAsText(file);input.value=''}
+function resetAllData(){if(!confirm('Tout supprimer ?'))return;if(!confirm('Vraiment ?'))return;data={orders:[],clients:[],models:[],stock:[],machines:[{id:1,name:'Elegoo Saturn 4 Ultra',type:'resin',status:'idle',currentJob:null},{id:2,name:'Bambulab P2S #1',type:'fdm',status:'idle',currentJob:null},{id:3,name:'Bambulab P2S #2',type:'fdm',status:'idle',currentJob:null},{id:4,name:'Bambulab H2C',type:'fdm',status:'idle',currentJob:null}],checklist:[{id:1,text:'Adhésion plateau OK',checked:false},{id:2,text:'Pas de warping / déformation',checked:false},{id:3,text:'Finition surface correcte',checked:false},{id:4,text:'Supports retirés proprement',checked:false},{id:5,text:'Post-traitement résine (lavage+UV)',checked:false},{id:6,text:'Dimensions conformes',checked:false},{id:7,text:'Emballage adapté',checked:false},{id:8,text:'Photo finale prise',checked:false}],planningEvents:[],qualityResults:{}};activeTimers=[];finishedTimers=[];saveData();saveTimers();renderAll();showToast('Réinitialisé','warning')}
+
+// ==================== UTILS ====================
+function showToast(msg,type){const toast=document.getElementById('toast');toast.textContent=msg;toast.className='toast'+(type?' '+type:'');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2500)}
+
+// ==================== BOOT ====================
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
