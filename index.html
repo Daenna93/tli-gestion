@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<title>TLI v12 - Technical Layer Innovation</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>TLI v14 - Technical Layer Innovation</title>
 <style>
-:root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
+:root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--danger:#ff3333;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:var(--light);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
 .app-header{background:linear-gradient(135deg,var(--dark) 0%,var(--accent) 100%);padding:18px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;justify-content:space-between;align-items:center}
@@ -27,16 +30,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
 .btn-secondary{background:var(--glass);border:1px solid var(--glass-border);color:var(--light)}
 .btn-danger{background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff}
+.btn-success{background:linear-gradient(135deg,var(--success),#00cc66);color:#fff}
 .btn-sm{padding:8px 14px;font-size:.8rem;width:auto}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.btn-row .btn{margin-top:0}
 .form-group{margin-bottom:14px}
 .form-label{display:block;margin-bottom:5px;font-size:.8rem;color:#aaa}
 .form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
 .form-textarea{min-height:70px;resize:vertical}
+.search-box{width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:.9rem;outline:none;margin-bottom:12px}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
 .badge-pending{background:rgba(255,170,0,0.2);color:var(--warning)}
 .badge-printing{background:rgba(0,212,255,0.2);color:var(--primary)}
 .badge-finished{background:rgba(0,255,136,0.2);color:var(--success)}
 .badge-delivered{background:rgba(123,44,191,0.2);color:#c77dff}
+.badge-low{background:rgba(0,255,136,0.2);color:var(--success)}
+.badge-medium{background:rgba(255,170,0,0.2);color:var(--warning)}
+.badge-high{background:rgba(255,51,51,0.2);color:var(--danger)}
 .order-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
 .order-item:hover{border-color:var(--primary)}
 .order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -53,7 +63,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .toast-success{border-color:var(--success)}.toast-error{border-color:var(--secondary)}.toast-warning{border-color:var(--warning)}
 .empty-state{text-align:center;padding:30px 20px;color:#666}
 .empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
-.timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
+.timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px;position:relative}
 .timer-card.finished{border-color:var(--success);background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,255,136,0.05))}
 .timer-name{font-weight:700;margin-bottom:4px}
 .timer-info{font-size:.8rem;color:#888}
@@ -64,16 +74,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .planning-day-header{text-align:center;font-size:.7rem;color:#888;padding:6px 2px}
 .planning-day{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:5px;min-height:55px;cursor:pointer;transition:all .2s;position:relative}
 .planning-day:hover{border-color:var(--primary)}.planning-day.today{border-color:var(--primary);background:rgba(0,212,255,0.1)}
+.planning-day.selected{border-color:var(--success);background:rgba(0,255,136,0.1)}
 .planning-day-number{font-size:.75rem;font-weight:700;margin-bottom:3px}
 .planning-day.today .planning-day-number{color:var(--primary)}
+.planning-day.selected .planning-day-number{color:var(--success)}
 .planning-event-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
-.event-type-printing{background:var(--primary)}.event-type-modeling{background:var(--warning)}.event-type-design{background:#ff6b81}
-.event-type-maintenance{background:var(--secondary)}.event-type-rdv{background:#a855f7}.event-type-logistics{background:#22d3ee}.event-type-other{background:#888}
-.event-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--primary)}
+.event-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--primary);position:relative}
 .event-item:hover{border-color:var(--primary)}
 .event-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .event-item-title{font-weight:700;font-size:.9rem}
 .event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
+.event-item-actions{position:absolute;top:8px;right:8px;display:flex;gap:6px}
+.event-item-actions button{background:var(--glass);border:1px solid var(--glass-border);color:var(--light);border-radius:6px;width:28px;height:28px;font-size:.8rem;cursor:pointer}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative;cursor:pointer}
 .photo-item img{width:100%;height:100%;object-fit:cover}
@@ -101,7 +113,36 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .client-info{font-size:.8rem;color:#888;margin-top:4px}
 .client-orders{font-size:.75rem;color:#666;margin-top:4px}
 .client-order-row{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer}
+.machine-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s;border-left:3px solid var(--primary)}
+.machine-card:hover{border-color:var(--primary)}
+.machine-card.busy{border-left-color:var(--warning)}
+.machine-card.available{border-left-color:var(--success)}
+.machine-name{font-weight:700;font-size:1.05rem}
+.machine-info{font-size:.8rem;color:#888;margin-top:4px}
+.machine-hours{font-size:.75rem;color:#666;margin-top:4px}
+.maintenance-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px;margin-bottom:6px}
+.maintenance-item-header{display:flex;justify-content:space-between;align-items:center}
+.maintenance-item-title{font-weight:700;font-size:.9rem}
+.maintenance-item-date{font-size:.75rem;color:#888}
+.maintenance-item-notes{font-size:.8rem;color:#aaa;margin-top:4px}
+.ca-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px;text-align:center}
+.ca-amount{font-size:1.8rem;font-weight:800;color:var(--primary)}
+.ca-label{font-size:.75rem;color:#888;margin-top:4px}
+.call-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}
+.call-overlay.active{display:flex}
+.call-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:350px;text-align:center}
+.call-content h3{color:var(--primary);margin-bottom:8px}
+.call-content p{color:#888;margin-bottom:20px}
+.call-number{font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:20px}
+.plan-filter-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.plan-filter-row .btn{margin-top:0}
+.date-info{font-size:.75rem;color:#888;margin-top:4px}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TLI">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 
@@ -118,12 +159,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="nav-tab" data-section="stock">📋 Stock</div>
   <div class="nav-tab" data-section="planning">📅 Planning</div>
   <div class="nav-tab" data-section="timer">⏰ Timer</div>
+  <div class="nav-tab" data-section="machines">🖨️ Machines</div>
   <div class="nav-tab" data-section="calculator">🧮 Devis</div>
   <div class="nav-tab" data-section="settings">⚙️ Config</div>
 </nav>
 
 <section id="dashboard" class="section active">
   <div class="card"><div class="card-title">📊 Stats</div><div id="statsDisplay">Chargement...</div></div>
+  <div class="card">
+    <div class="card-title">💰 Chiffre d'affaires</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ca-card"><div class="ca-amount" id="caMonth">0€</div><div class="ca-label">Ce mois</div></div>
+      <div class="ca-card"><div class="ca-amount" id="caYear">0€</div><div class="ca-label">Cette année</div></div>
+    </div>
+  </div>
   <div class="card">
     <div class="card-title">⚡ Actions rapides</div>
     <button class="btn btn-primary" id="btnNewOrderDash">+ Nouvelle commande</button>
@@ -151,17 +200,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 
 <section id="clients" class="section">
   <button class="btn btn-primary" id="btnNewClient">+ Nouveau client</button>
-  <div id="clientsList" style="margin-top:12px"></div>
+  <input type="text" class="search-box" id="clientSearch" placeholder="🔍 Rechercher un client...">
+  <div id="clientsList"></div>
 </section>
 
 <section id="catalog" class="section">
   <button class="btn btn-primary" id="btnNewModel">+ Ajouter modele</button>
-  <div id="catalogList" style="margin-top:12px"></div>
+  <input type="text" class="search-box" id="catalogSearch" placeholder="🔍 Rechercher un modele...">
+  <div id="catalogList"></div>
 </section>
 
 <section id="stock" class="section">
   <button class="btn btn-primary" id="btnNewStock">+ Ajouter stock</button>
-  <div id="stockList" style="margin-top:12px"></div>
+  <input type="text" class="search-box" id="stockSearch" placeholder="🔍 Rechercher un article...">
+  <div id="stockList"></div>
 </section>
 
 <section id="planning" class="section">
@@ -176,6 +228,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
   <div class="card">
     <div class="card-title">📋 Evenements</div>
+    <div class="plan-filter-row">
+      <div id="planSelectedDayLabel" style="font-size:.85rem;color:#888"></div>
+      <button class="btn btn-sm btn-secondary" id="btnShowAllEvents" style="width:auto;margin-left:auto">Tout afficher</button>
+    </div>
     <div id="planningEventsList"></div>
   </div>
   <button class="btn btn-primary" id="btnNewEvent">+ Ajouter evenement</button>
@@ -200,18 +256,41 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </section>
 
+<section id="machines" class="section">
+  <div class="card">
+    <div class="card-title">🖨️ Parc machine</div>
+    <button class="btn btn-primary" id="btnAddMachine" style="margin-bottom:12px">+ Ajouter machine</button>
+    <div id="machinesList"></div>
+  </div>
+</section>
+
 <section id="calculator" class="section">
   <div class="card">
     <div class="card-title">🧮 Calculateur de devis</div>
-    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="calcService"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
+    <div class="form-group"><label class="form-label">Type de service</label><select class="form-select" id="calcService"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
     <div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
     <div class="form-group"><label class="form-label">Poids (g)</label><input type="number" class="form-input" id="calcWeight" value="50"></div>
-    <div class="form-group"><label class="form-label">Temps (h)</label><input type="number" class="form-input" id="calcTime" value="4"></div>
-    <div class="form-group"><label class="form-label">Complexite</label><select class="form-select" id="calcComplexity"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
+    <div class="form-group"><label class="form-label">Heures d'impression</label><input type="number" class="form-input" id="calcPrintHours" value="0" step="0.5"></div>
+    <div class="form-group"><label class="form-label">Heures de modelisation</label><input type="number" class="form-input" id="calcModelingHours" value="0" step="0.5"></div>
+    <div class="form-group"><label class="form-label">Heures de conception</label><input type="number" class="form-input" id="calcDesignHours" value="0" step="0.5"></div>
+    <div class="form-group"><label class="form-label">Heures de post-production</label><input type="number" class="form-input" id="calcPostProdHours" value="0" step="0.5"></div>
     <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="calcQty" value="1" min="1"></div>
     <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px">
       <div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estime</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div>
     </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚙️ Tarifs personnalises</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Modelisation (€/h)</label><input type="number" class="form-input" id="rateModeling" value="35" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Conception (€/h)</label><input type="number" class="form-input" id="rateDesign" value="45" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Impression FDM (€/h)</label><input type="number" class="form-input" id="rateFdm" value="2" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Impression Resine (€/h)</label><input type="number" class="form-input" id="rateResin" value="3" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Post-prod (€/h)</label><input type="number" class="form-input" id="ratePostProd" value="15" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Filament (€/kg)</label><input type="number" class="form-input" id="priceFilament" value="25" step="0.5"></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Resine (€/kg)</label><input type="number" class="form-input" id="priceResinKg" value="60" step="0.5"></div>
+    </div>
+    <button class="btn btn-secondary" id="btnSaveRates" style="margin-top:12px">💾 Sauvegarder les tarifs</button>
   </div>
 </section>
 
@@ -239,6 +318,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </section>
 
+<!-- MODALS -->
 <div class="modal-overlay" id="newOrderModal">
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" data-close="newOrderModal">×</button></div>
@@ -283,6 +363,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" data-close="newClientModal">×</button></div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="clientName" placeholder="Nom"></div>
+    <div class="form-group"><label class="form-label">Entreprise</label><input type="text" class="form-input" id="clientCompany" placeholder="Nom de l'entreprise"></div>
+    <div class="form-group"><label class="form-label">Fonction</label><input type="text" class="form-input" id="clientRole" placeholder="ex: Directeur, Responsable..."></div>
     <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" id="clientPhone" placeholder="06 12 34 56 78"></div>
     <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="email@exemple.com"></div>
     <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
@@ -291,11 +373,29 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<div class="modal-overlay" id="editClientModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Modifier client</div><button class="modal-close" data-close="editClientModal">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="editClientName"></div>
+    <div class="form-group"><label class="form-label">Entreprise</label><input type="text" class="form-input" id="editClientCompany"></div>
+    <div class="form-group"><label class="form-label">Fonction</label><input type="text" class="form-input" id="editClientRole"></div>
+    <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" id="editClientPhone"></div>
+    <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="editClientEmail"></div>
+    <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="editClientAddress"></textarea></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="editClientNotes"></textarea></div>
+    <button class="btn btn-primary" id="btnUpdateClient">💾 Enregistrer</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="clientDetailModal">
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Client</div><button class="modal-close" data-close="clientDetailModal">×</button></div>
     <div id="clientDetailContent"></div>
-    <button class="btn btn-danger" id="btnDeleteClient">🗑️ Supprimer</button>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnCallClient" style="flex:1">📞 Appeler</button>
+      <button class="btn btn-secondary" id="btnEditClient" style="flex:1">✏️ Modifier</button>
+    </div>
+    <button class="btn btn-danger" id="btnDeleteClient" style="margin-top:8px">🗑️ Supprimer</button>
   </div>
 </div>
 
@@ -313,6 +413,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<div class="modal-overlay" id="editModelModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Modifier modele</div><button class="modal-close" data-close="editModelModal">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="editModelName"></div>
+    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="editModelCategory"><option value="prototype">Prototype</option><option value="decoration">Decoration</option><option value="functional">Fonctionnel</option><option value="jewelry">Bijouterie</option><option value="other">Autre</option></select></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="editModelType"><option value="fdm">FDM</option><option value="resin">Resine</option><option value="both">Les deux</option></select></div>
+    <div class="form-group"><label class="form-label">Temps moyen (h)</label><input type="number" class="form-input" id="editModelTime"></div>
+    <div class="form-group"><label class="form-label">Poids moyen (g)</label><input type="number" class="form-input" id="editModelWeight"></div>
+    <div class="form-group"><label class="form-label">Prix base (€)</label><input type="number" class="form-input" id="editModelPrice" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="editModelDesc"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnUpdateModel" style="flex:1">💾 Enregistrer</button>
+      <button class="btn btn-danger" id="btnDeleteModel" style="flex:1">🗑️ Supprimer</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="newStockModal">
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" data-close="newStockModal">×</button></div>
@@ -323,6 +440,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="stockAlert" value="1"></div>
     <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="stockSupplier" placeholder="Amazon, 3DJake..."></div>
     <button class="btn btn-primary" id="btnSaveStock">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editStockModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Modifier stock</div><button class="modal-close" data-close="editStockModal">×</button></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="editStockType"><option value="filament">Filament</option><option value="resin">Resine</option><option value="part">Piece detachee</option><option value="tool">Outil</option><option value="other">Autre</option></select></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="editStockName"></div>
+    <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="editStockQty"></div>
+    <div class="form-group"><label class="form-label">Unite</label><select class="form-select" id="editStockUnit"><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="pcs">pieces</option><option value="m">metres</option></select></div>
+    <div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="editStockAlert"></div>
+    <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="editStockSupplier"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnUpdateStock" style="flex:1">💾 Enregistrer</button>
+      <button class="btn btn-danger" id="btnDeleteStock" style="flex:1">🗑️ Supprimer</button>
+    </div>
   </div>
 </div>
 
@@ -343,6 +476,77 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<div class="modal-overlay" id="editPlanningModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">📅 Modifier evenement</div><button class="modal-close" data-close="editPlanningModal">×</button></div>
+    <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="editPlanTitle"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="editPlanType"><option value="printing">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option><option value="maintenance">Maintenance</option><option value="rdv">RDV client</option><option value="logistics">Logistique</option><option value="other">Divers</option></select></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="editPlanDate"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label class="form-label">Debut</label><input type="time" class="form-input" id="editPlanStartTime"></div>
+      <div class="form-group"><label class="form-label">Fin</label><input type="time" class="form-input" id="editPlanEndTime"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Assigne a</label><select class="form-select" id="editPlanAssignee"><option value="florian">Florian</option><option value="elie">Elie</option><option value="both">Les deux</option></select></div>
+    <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="editPlanPriority"><option value="low">Basse</option><option value="medium">Moyenne</option><option value="high">Haute</option></select></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="editPlanNotes"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnUpdateEvent" style="flex:1">💾 Enregistrer</button>
+      <button class="btn btn-danger" id="btnDeleteEvent" style="flex:1">🗑️ Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="machineDetailModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title" id="machineDetailTitle">Machine</div><button class="modal-close" data-close="machineDetailModal">×</button></div>
+    <div id="machineDetailContent"></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">🔧 Ajouter entretien</div>
+      <div class="form-group"><label class="form-label">Type d'entretien</label><select class="form-select" id="maintType"><option value="cleaning">Nettoyage / Graissage</option><option value="nozzle">Changement de buse</option><option value="belt">Tension courroies</option><option value="bed">Nivellement plateau</option><option value="firmware">Mise a jour firmware</option><option value="filter">Filtre / Ventilation</option><option value="other">Autre</option></select></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="maintDate"></div>
+      <div class="form-group"><label class="form-label">Heures machine au moment de l'entretien</label><input type="number" class="form-input" id="maintHours" placeholder="ex: 150"></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="maintNotes" placeholder="Details..."></textarea></div>
+      <button class="btn btn-primary" id="btnSaveMaint">Ajouter</button>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">📋 Historique entretien</div>
+      <div id="machineMaintList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addMachineModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">🖨️ Ajouter machine</div><button class="modal-close" data-close="addMachineModal">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="newMachineName" placeholder="ex: Bambulab X1C"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="newMachineType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
+    <button class="btn btn-primary" id="btnSaveNewMachine">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editMachineInfoModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Modifier machine</div><button class="modal-close" data-close="editMachineInfoModal">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="editMachineInfoName"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="editMachineInfoType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnUpdateMachineInfo" style="flex:1">💾 Enregistrer</button>
+      <button class="btn btn-danger" id="btnDeleteMachineInfo" style="flex:1">🗑️ Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rdvClientModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">📅 Lier un client au RDV</div><button class="modal-close" data-close="rdvClientModal">×</button></div>
+    <p style="color:#888;font-size:.85rem;margin-bottom:14px;text-align:center">Souhaites-tu lier ce rendez-vous a un client ?</p>
+    <button class="btn btn-primary" id="btnRdvExisting">👥 Client existant</button>
+    <button class="btn btn-secondary" id="btnRdvNew" style="margin-top:8px">➕ Nouveau client</button>
+    <button class="btn btn-secondary" id="btnRdvSkip" style="margin-top:8px">⏭️ Passer</button>
+    <div id="rdvClientList" style="display:none;margin-top:12px;max-height:220px;overflow-y:auto"></div>
+  </div>
+</div>
+
 <div class="quality-overlay" id="qualityOverlay">
   <div class="quality-content">
     <div class="quality-header"><h3>✅ Validation qualite</h3><p id="qualityOrderName">Commande terminee</p></div>
@@ -359,6 +563,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<div class="call-overlay" id="callOverlay">
+  <div class="call-content">
+    <h3>📞 Confirmer l'appel</h3>
+    <p id="callClientName">Client</p>
+    <div class="call-number" id="callNumber">06 12 34 56 78</div>
+    <div class="btn-row">
+      <button class="btn btn-danger" id="btnCancelCall" style="flex:1">❌ Annuler</button>
+      <button class="btn btn-success" id="btnConfirmCall" style="flex:1">✅ Appeler</button>
+    </div>
+  </div>
+</div>
+
 <div class="photo-overlay" id="photoOverlay">
   <button class="photo-overlay-close" id="btnClosePhoto">×</button>
   <img id="photoOverlayImg" src="" alt="Photo">
@@ -367,26 +583,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
 <input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none">
 <div class="toast" id="toast"></div>
-
 <script>
 // ============================================================
-// TLI v12 - Technical Layer Innovation
-// Application de gestion pour impression 3D (PWA)
-// Tous les event listeners sont attaches en JS pur (pas de onclick inline)
+// TLI v14 - Technical Layer Innovation
 // ============================================================
+
+var defaultMachines = [
+  {id: 1, name: "Elegoo Saturn 4 Ultra", type: "resin", totalHours: 0, maintenance: []},
+  {id: 2, name: "Bambulab P2S #1", type: "fdm", totalHours: 0, maintenance: []},
+  {id: 3, name: "Bambulab P2S #2", type: "fdm", totalHours: 0, maintenance: []},
+  {id: 4, name: "Bambulab H2C", type: "fdm", totalHours: 0, maintenance: []}
+];
 
 var data = {
   orders: [],
-  clients: [{id: 1, name: "Client Test", phone: "", email: ""}],
+  clients: [{id: 1, name: "Client Test", company: "", role: "", phone: "", email: ""}],
   models: [],
   stock: [],
   planningEvents: [],
-  machines: [
-    {id: 1, name: "Elegoo Saturn 4 Ultra", type: "resin"},
-    {id: 2, name: "Bambulab P2S #1", type: "fdm"},
-    {id: 3, name: "Bambulab P2S #2", type: "fdm"},
-    {id: 4, name: "Bambulab H2C", type: "fdm"}
-  ],
+  machines: JSON.parse(JSON.stringify(defaultMachines)),
   checklist: [
     {id: 1, text: "Adhesion plateau OK", checked: false},
     {id: 2, text: "Pas de warping / deformation", checked: false},
@@ -404,10 +619,30 @@ var activeTimers = [];
 var finishedTimers = [];
 var currentOrderId = null;
 var currentClientId = null;
+var currentModelId = null;
+var currentStockId = null;
+var currentEventId = null;
+var currentMachineId = null;
 var photoOrderId = null;
 var qualityOrderId = null;
 var planningCurrentDate = new Date();
+var planningSelectedDay = null;
+var planningSelectedDayStr = null;
 var currentOrderFilter = "all";
+var pendingEventData = null;
+var pendingRdvClientId = null;
+var isRdvPending = false;
+var callNumber = "";
+
+var rates = {
+  modeling: 35,
+  design: 45,
+  fdm: 2,
+  resin: 3,
+  postProd: 15,
+  filamentKg: 25,
+  resinKg: 60
+};
 
 // ============================================================
 // INITIALISATION
@@ -416,6 +651,7 @@ function init() {
   try {
     loadData();
     loadTimers();
+    loadRates();
     renderAll();
     calculateCost();
     updateMachineSelects();
@@ -425,7 +661,7 @@ function init() {
 
 function loadData() {
   try {
-    var saved = localStorage.getItem("tli12_data");
+    var saved = localStorage.getItem("tli14_data");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.orders) data.orders = parsed.orders;
@@ -434,41 +670,59 @@ function loadData() {
       if (parsed.stock) data.stock = parsed.stock;
       if (parsed.planningEvents) data.planningEvents = parsed.planningEvents;
       if (parsed.qualityResults) data.qualityResults = parsed.qualityResults;
+      if (parsed.machines && parsed.machines.length > 0) data.machines = parsed.machines;
     }
   } catch(e) { console.error("loadData error:", e); }
 }
 
 function saveData() {
-  try { localStorage.setItem("tli12_data", JSON.stringify(data)); } catch(e) { console.error("saveData error:", e); }
+  try { localStorage.setItem("tli14_data", JSON.stringify(data)); } catch(e) { console.error("saveData error:", e); }
 }
 
 function saveTimers() {
-  try { localStorage.setItem("tli12_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) { console.error("saveTimers error:", e); }
+  try { localStorage.setItem("tli14_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
 }
 
 function loadTimers() {
   try {
-    var saved = localStorage.getItem("tli12_timers");
+    var saved = localStorage.getItem("tli14_timers");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.active) activeTimers = parsed.active;
       if (parsed.finished) finishedTimers = parsed.finished;
     }
-  } catch(e) { console.error("loadTimers error:", e); }
+  } catch(e) {}
+}
+
+function saveRates() {
+  try { localStorage.setItem("tli14_rates", JSON.stringify(rates)); } catch(e) {}
+}
+
+function loadRates() {
+  try {
+    var saved = localStorage.getItem("tli14_rates");
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      rates = parsed;
+      document.getElementById("rateModeling").value = rates.modeling;
+      document.getElementById("rateDesign").value = rates.design;
+      document.getElementById("rateFdm").value = rates.fdm;
+      document.getElementById("rateResin").value = rates.resin;
+      document.getElementById("ratePostProd").value = rates.postProd;
+      document.getElementById("priceFilament").value = rates.filamentKg;
+      document.getElementById("priceResinKg").value = rates.resinKg;
+    }
+  } catch(e) {}
 }
 
 // ============================================================
-// EVENT LISTENERS STATIQUES (attaches une seule fois au demarrage)
+// EVENT LISTENERS
 // ============================================================
 function attachStaticListeners() {
-  // Navigation
   document.querySelectorAll('.nav-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      showSection(this.dataset.section, this);
-    });
+    tab.addEventListener('click', function() { showSection(this.dataset.section, this); });
   });
 
-  // Boutons dashboard
   document.getElementById('btnNewOrderDash').addEventListener('click', function() { openModal('newOrderModal'); });
   document.getElementById('btnNewClientDash').addEventListener('click', function() { openModal('newClientModal'); });
   document.getElementById('btnTimerDash').addEventListener('click', function() {
@@ -476,83 +730,118 @@ function attachStaticListeners() {
   });
   document.getElementById('btnSync').addEventListener('click', syncWithGoogle);
 
-  // Boutons principaux
   document.getElementById('btnNewOrder').addEventListener('click', function() { openModal('newOrderModal'); });
   document.getElementById('btnNewClient').addEventListener('click', function() { openModal('newClientModal'); });
   document.getElementById('btnNewModel').addEventListener('click', function() { openModal('newModelModal'); });
   document.getElementById('btnNewStock').addEventListener('click', function() { openModal('newStockModal'); });
-  document.getElementById('btnNewEvent').addEventListener('click', function() { openModal('planningModal'); });
+  document.getElementById('btnNewEvent').addEventListener('click', function() {
+    var pd = document.getElementById("planDate");
+    if (planningSelectedDayStr && pd) {
+      pd.value = planningSelectedDayStr;
+    } else if (pd && !pd.value) {
+      var now = new Date();
+      pd.value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+    }
+    openModal('planningModal');
+  });
+  document.getElementById('btnAddMachine').addEventListener('click', function() { openModal('addMachineModal'); });
 
-  // Filtres commandes
   document.querySelectorAll('.order-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      filterOrders(this.dataset.filter, this);
-    });
+    tab.addEventListener('click', function() { filterOrders(this.dataset.filter, this); });
   });
 
-  // Planning navigation
   document.getElementById('btnPlanPrev').addEventListener('click', function() { changePlanningMonth(-1); });
   document.getElementById('btnPlanNext').addEventListener('click', function() { changePlanningMonth(1); });
+  document.getElementById('btnShowAllEvents').addEventListener('click', function() {
+    planningSelectedDay = null;
+    planningSelectedDayStr = null;
+    renderPlanning();
+  });
 
-  // Timer
   document.getElementById('btnStartTimer').addEventListener('click', startPrintTimer);
 
-  // Calculateur
-  ['calcService','calcType','calcWeight','calcTime','calcComplexity','calcQty'].forEach(function(id) {
+  ['calcService','calcType','calcWeight','calcPrintHours','calcModelingHours','calcDesignHours','calcPostProdHours','calcQty'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', calculateCost);
   });
+  ['rateModeling','rateDesign','rateFdm','rateResin','ratePostProd','priceFilament','priceResinKg'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', calculateCost);
+  });
+  document.getElementById('btnSaveRates').addEventListener('click', function() {
+    rates.modeling = parseFloat(document.getElementById("rateModeling").value) || 35;
+    rates.design = parseFloat(document.getElementById("rateDesign").value) || 45;
+    rates.fdm = parseFloat(document.getElementById("rateFdm").value) || 2;
+    rates.resin = parseFloat(document.getElementById("rateResin").value) || 3;
+    rates.postProd = parseFloat(document.getElementById("ratePostProd").value) || 15;
+    rates.filamentKg = parseFloat(document.getElementById("priceFilament").value) || 25;
+    rates.resinKg = parseFloat(document.getElementById("priceResinKg").value) || 60;
+    saveRates();
+    showToast("Tarifs sauvegardes !");
+    calculateCost();
+  });
 
-  // Settings
   document.getElementById('btnSaveConfig').addEventListener('click', saveConfig);
   document.getElementById('btnTestConn').addEventListener('click', testConnection);
   document.getElementById('btnExport').addEventListener('click', exportData);
-  document.getElementById('btnImportTrigger').addEventListener('click', function() {
-    document.getElementById('importFile').click();
-  });
+  document.getElementById('btnImportTrigger').addEventListener('click', function() { document.getElementById('importFile').click(); });
   document.getElementById('importFile').addEventListener('change', function() { importData(this); });
   document.getElementById('btnClearAll').addEventListener('click', clearAll);
 
-  // Modals - fermeture via data-close
   document.querySelectorAll('.modal-close').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var modalId = this.dataset.close;
-      if (modalId) closeModal(modalId);
-    });
+    btn.addEventListener('click', function() { var id = this.dataset.close; if (id) closeModal(id); });
   });
 
-  // Sauvegardes modals
   document.getElementById('btnSaveOrder').addEventListener('click', saveOrder);
   document.getElementById('btnSaveClient').addEventListener('click', saveClient);
+  document.getElementById('btnUpdateClient').addEventListener('click', updateClient);
   document.getElementById('btnSaveModel').addEventListener('click', saveModel);
+  document.getElementById('btnUpdateModel').addEventListener('click', updateModel);
+  document.getElementById('btnDeleteModel').addEventListener('click', deleteCurrentModel);
   document.getElementById('btnSaveStock').addEventListener('click', saveStock);
+  document.getElementById('btnUpdateStock').addEventListener('click', updateStock);
+  document.getElementById('btnDeleteStock').addEventListener('click', deleteCurrentStock);
   document.getElementById('btnSaveEvent').addEventListener('click', savePlanningEvent);
+  document.getElementById('btnUpdateEvent').addEventListener('click', updatePlanningEvent);
+  document.getElementById('btnDeleteEvent').addEventListener('click', deleteCurrentEvent);
+  document.getElementById('btnSaveMaint').addEventListener('click', saveMaintenance);
+  document.getElementById('btnSaveNewMachine').addEventListener('click', saveNewMachine);
+  document.getElementById('btnRdvExisting').addEventListener('click', showRdvClientList);
+  document.getElementById('btnRdvNew').addEventListener('click', newRdvClient);
+  document.getElementById('btnRdvSkip').addEventListener('click', skipRdvClient);
+  document.getElementById('btnUpdateMachineInfo').addEventListener('click', updateMachineInfo);
+  document.getElementById('btnDeleteMachineInfo').addEventListener('click', deleteMachineInfo);
 
-  // Detail modals
   document.getElementById('detailStatus').addEventListener('change', updateOrderStatus);
   document.getElementById('btnAddPhoto').addEventListener('click', openCamera);
   document.getElementById('btnDeleteOrder').addEventListener('click', deleteCurrentOrder);
   document.getElementById('btnDeleteClient').addEventListener('click', deleteCurrentClient);
+  document.getElementById('btnCallClient').addEventListener('click', openCallOverlay);
+  document.getElementById('btnEditClient').addEventListener('click', openEditClient);
 
-  // Photo overlay
   document.getElementById('photoOverlay').addEventListener('click', closePhotoOverlay);
   document.getElementById('btnClosePhoto').addEventListener('click', closePhotoOverlay);
 
-  // Quality
   document.getElementById('btnQualityCam').addEventListener('click', openQualityCamera);
   document.getElementById('qualityValidateBtn').addEventListener('click', validateQuality);
   document.getElementById('btnSkipQuality').addEventListener('click', skipQuality);
 
-  // Camera inputs
   document.getElementById('cameraInput').addEventListener('change', function() { handleCameraFile(this); });
   document.getElementById('qualityCameraInput').addEventListener('change', function() { handleQualityCameraFile(this); });
 
-  // Order service toggle
   document.getElementById('orderService').addEventListener('change', toggleOrderFields);
+
+  document.getElementById('btnCancelCall').addEventListener('click', closeCallOverlay);
+  document.getElementById('btnConfirmCall').addEventListener('click', confirmCall);
+
+  // Recherche
+  document.getElementById('clientSearch').addEventListener('input', function() { renderClients(); });
+  document.getElementById('catalogSearch').addEventListener('input', function() { renderCatalog(); });
+  document.getElementById('stockSearch').addEventListener('input', function() { renderStock(); });
 }
 
 // ============================================================
-// NAVIGATION & UI
+// NAVIGATION
 // ============================================================
 function showSection(id, tabEl) {
   var sections = document.querySelectorAll(".section");
@@ -567,6 +856,7 @@ function showSection(id, tabEl) {
   if (id === "stock") renderStock();
   if (id === "planning") renderPlanning();
   if (id === "timer") renderTimers();
+  if (id === "machines") renderMachines();
   if (id === "dashboard") renderStats();
 }
 
@@ -575,9 +865,21 @@ function openModal(id) {
   if (el) {
     el.classList.add("active");
     if (id === "newOrderModal") { updateClientSelect(); updateMachineSelects(); }
-    if (id === "planningModal") { 
+    if (id === "planningModal") {
       var pd = document.getElementById("planDate");
-      if (pd && !pd.value) pd.value = new Date().toISOString().split("T")[0]; 
+      if (planningSelectedDayStr && pd) {
+        pd.value = planningSelectedDayStr;
+      } else if (pd && !pd.value) {
+        var now = new Date();
+        pd.value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+      }
+    }
+    if (id === "machineDetailModal") {
+      var md = document.getElementById("maintDate");
+      if (md && !md.value) {
+        var now = new Date();
+        md.value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+      }
     }
   }
 }
@@ -619,6 +921,71 @@ function toggleOrderFields() {
 }
 
 // ============================================================
+// MACHINES CRUD
+// ============================================================
+function saveNewMachine() {
+  var name = document.getElementById("newMachineName").value.trim();
+  var type = document.getElementById("newMachineType").value;
+  if (!name) { showToast("Nom obligatoire", "warning"); return; }
+  var maxId = 0;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id > maxId) maxId = data.machines[i].id;
+  var machine = {id: maxId + 1, name: name, type: type, totalHours: 0, maintenance: []};
+  data.machines.push(machine);
+  saveData();
+  closeModal("addMachineModal");
+  showToast("Machine ajoute !");
+  document.getElementById("newMachineName").value = "";
+  renderMachines();
+  updateMachineSelects();
+}
+
+function updateMachineInfo() {
+  var machine = null;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === currentMachineId) machine = data.machines[i];
+  if (!machine) return;
+  machine.name = document.getElementById("editMachineInfoName").value || machine.name;
+  machine.type = document.getElementById("editMachineInfoType").value;
+  saveData();
+  closeModal("editMachineInfoModal");
+  showToast("Machine mise a jour !");
+  renderMachines();
+  updateMachineSelects();
+}
+
+function deleteMachineInfo() {
+  if (!confirm("Supprimer cette machine ? Les commandes et timers associes ne pourront plus l'utiliser.")) return;
+  var machineId = currentMachineId;
+  // Verifier si machine utilisee par commande en cours
+  var inUse = false;
+  for (var i = 0; i < data.orders.length; i++) {
+    if (data.orders[i].machineId === machineId && data.orders[i].status === "printing") { inUse = true; break; }
+  }
+  for (var i = 0; i < activeTimers.length; i++) {
+    if (activeTimers[i].machineId === machineId && !activeTimers[i].finished) { inUse = true; break; }
+  }
+  if (inUse) { showToast("Impossible : machine en cours d'utilisation", "error"); return; }
+  var filtered = [];
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id !== machineId) filtered.push(data.machines[i]);
+  data.machines = filtered;
+  saveData();
+  closeModal("editMachineInfoModal");
+  closeModal("machineDetailModal");
+  showToast("Machine supprimee", "warning");
+  renderMachines();
+  updateMachineSelects();
+}
+
+function isMachineBusy(machineId) {
+  for (var i = 0; i < data.orders.length; i++) {
+    if (data.orders[i].machineId === machineId && data.orders[i].status === "printing") return true;
+  }
+  for (var i = 0; i < activeTimers.length; i++) {
+    if (activeTimers[i].machineId === machineId && !activeTimers[i].finished) return true;
+  }
+  return false;
+}
+
+// ============================================================
 // SAUVEGARDE ENTITES
 // ============================================================
 function saveOrder() {
@@ -627,6 +994,7 @@ function saveOrder() {
     var client = null;
     for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
     var service = document.getElementById("orderService").value;
+    var machineId = service === "print" ? parseInt(document.getElementById("orderMachine").value) : null;
     var order = {
       id: Date.now(),
       clientId: clientId,
@@ -634,7 +1002,7 @@ function saveOrder() {
       name: document.getElementById("orderName").value || "Sans nom",
       service: service,
       type: service === "print" ? document.getElementById("orderType").value : null,
-      machineId: service === "print" ? parseInt(document.getElementById("orderMachine").value) : null,
+      machineId: machineId,
       material: document.getElementById("orderMaterial").value || "",
       weight: document.getElementById("orderWeight").value || 0,
       time: document.getElementById("orderTime").value || 0,
@@ -642,7 +1010,9 @@ function saveOrder() {
       priority: document.getElementById("orderPriority").value,
       notes: document.getElementById("orderNotes").value || "",
       status: "pending",
-      date: new Date().toISOString(),
+      dateCreated: new Date().toISOString(),
+      dateFinished: null,
+      dateDelivered: null,
       photos: []
     };
     data.orders.push(order);
@@ -665,6 +1035,8 @@ function saveClient() {
     var client = {
       id: Date.now(),
       name: document.getElementById("clientName").value || "Sans nom",
+      company: document.getElementById("clientCompany").value || "",
+      role: document.getElementById("clientRole").value || "",
       phone: document.getElementById("clientPhone").value || "",
       email: document.getElementById("clientEmail").value || "",
       address: document.getElementById("clientAddress").value || "",
@@ -674,28 +1046,65 @@ function saveClient() {
     saveData();
     closeModal("newClientModal");
     showToast("Client ajoute !");
-    renderStats();
-    renderClients();
-    document.getElementById("clientName").value = "";
-    document.getElementById("clientPhone").value = "";
-    document.getElementById("clientEmail").value = "";
-    document.getElementById("clientAddress").value = "";
-    document.getElementById("clientNotes").value = "";
+    if (isRdvPending && pendingEventData) {
+      pendingEventData.clientId = client.id;
+      pendingEventData.clientName = client.name;
+      createEvent(pendingEventData);
+    } else {
+      renderStats();
+      renderClients();
+      document.getElementById("clientName").value = "";
+      document.getElementById("clientCompany").value = "";
+      document.getElementById("clientRole").value = "";
+      document.getElementById("clientPhone").value = "";
+      document.getElementById("clientEmail").value = "";
+      document.getElementById("clientAddress").value = "";
+      document.getElementById("clientNotes").value = "";
+    }
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+function openEditClient() {
+  var client = null;
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === currentClientId) client = data.clients[i];
+  if (!client) return;
+  document.getElementById("editClientName").value = client.name || "";
+  document.getElementById("editClientCompany").value = client.company || "";
+  document.getElementById("editClientRole").value = client.role || "";
+  document.getElementById("editClientPhone").value = client.phone || "";
+  document.getElementById("editClientEmail").value = client.email || "";
+  document.getElementById("editClientAddress").value = client.address || "";
+  document.getElementById("editClientNotes").value = client.notes || "";
+  closeModal("clientDetailModal");
+  openModal("editClientModal");
+}
+
+function updateClient() {
+  var client = null;
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === currentClientId) client = data.clients[i];
+  if (!client) return;
+  client.name = document.getElementById("editClientName").value || client.name;
+  client.company = document.getElementById("editClientCompany").value || "";
+  client.role = document.getElementById("editClientRole").value || "";
+  client.phone = document.getElementById("editClientPhone").value || "";
+  client.email = document.getElementById("editClientEmail").value || "";
+  client.address = document.getElementById("editClientAddress").value || "";
+  client.notes = document.getElementById("editClientNotes").value || "";
+  // Mettre a jour les noms dans les commandes
+  for (var i = 0; i < data.orders.length; i++) {
+    if (data.orders[i].clientId === currentClientId) data.orders[i].clientName = client.name;
+  }
+  saveData();
+  closeModal("editClientModal");
+  showToast("Client mis a jour !");
+  renderClients();
+  renderOrders();
+  renderStats();
 }
 
 function saveModel() {
   try {
-    var model = {
-      id: Date.now(),
-      name: document.getElementById("modelName").value || "Sans nom",
-      category: document.getElementById("modelCategory").value,
-      type: document.getElementById("modelType").value,
-      time: document.getElementById("modelTime").value || 0,
-      weight: document.getElementById("modelWeight").value || 0,
-      price: document.getElementById("modelPrice").value || 0,
-      description: document.getElementById("modelDesc").value || ""
-    };
+    var model = {id: Date.now(), name: document.getElementById("modelName").value || "Sans nom", category: document.getElementById("modelCategory").value, type: document.getElementById("modelType").value, time: document.getElementById("modelTime").value || 0, weight: document.getElementById("modelWeight").value || 0, price: document.getElementById("modelPrice").value || 0, description: document.getElementById("modelDesc").value || ""};
     data.models.push(model);
     saveData();
     closeModal("newModelModal");
@@ -704,17 +1113,37 @@ function saveModel() {
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
+function updateModel() {
+  var model = null;
+  for (var i = 0; i < data.models.length; i++) if (data.models[i].id === currentModelId) model = data.models[i];
+  if (!model) return;
+  model.name = document.getElementById("editModelName").value || model.name;
+  model.category = document.getElementById("editModelCategory").value;
+  model.type = document.getElementById("editModelType").value;
+  model.time = document.getElementById("editModelTime").value || 0;
+  model.weight = document.getElementById("editModelWeight").value || 0;
+  model.price = document.getElementById("editModelPrice").value || 0;
+  model.description = document.getElementById("editModelDesc").value || "";
+  saveData();
+  closeModal("editModelModal");
+  showToast("Modele mis a jour !");
+  renderCatalog();
+}
+
+function deleteCurrentModel() {
+  if (!confirm("Supprimer ce modele ?")) return;
+  var filtered = [];
+  for (var i = 0; i < data.models.length; i++) if (data.models[i].id !== currentModelId) filtered.push(data.models[i]);
+  data.models = filtered;
+  saveData();
+  closeModal("editModelModal");
+  showToast("Modele supprime", "warning");
+  renderCatalog();
+}
+
 function saveStock() {
   try {
-    var item = {
-      id: Date.now(),
-      type: document.getElementById("stockType").value,
-      name: document.getElementById("stockName").value || "Sans nom",
-      qty: parseFloat(document.getElementById("stockQty").value) || 0,
-      unit: document.getElementById("stockUnit").value,
-      alert: parseFloat(document.getElementById("stockAlert").value) || 1,
-      supplier: document.getElementById("stockSupplier").value || ""
-    };
+    var item = {id: Date.now(), type: document.getElementById("stockType").value, name: document.getElementById("stockName").value || "Sans nom", qty: parseFloat(document.getElementById("stockQty").value) || 0, unit: document.getElementById("stockUnit").value, alert: parseFloat(document.getElementById("stockAlert").value) || 1, supplier: document.getElementById("stockSupplier").value || ""};
     data.stock.push(item);
     saveData();
     closeModal("newStockModal");
@@ -723,15 +1152,42 @@ function saveStock() {
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
+function updateStock() {
+  var item = null;
+  for (var i = 0; i < data.stock.length; i++) if (data.stock[i].id === currentStockId) item = data.stock[i];
+  if (!item) return;
+  item.type = document.getElementById("editStockType").value;
+  item.name = document.getElementById("editStockName").value || item.name;
+  item.qty = parseFloat(document.getElementById("editStockQty").value) || 0;
+  item.unit = document.getElementById("editStockUnit").value;
+  item.alert = parseFloat(document.getElementById("editStockAlert").value) || 1;
+  item.supplier = document.getElementById("editStockSupplier").value || "";
+  saveData();
+  closeModal("editStockModal");
+  showToast("Stock mis a jour !");
+  renderStock();
+}
+
+function deleteCurrentStock() {
+  if (!confirm("Supprimer cet article de stock ?")) return;
+  var filtered = [];
+  for (var i = 0; i < data.stock.length; i++) if (data.stock[i].id !== currentStockId) filtered.push(data.stock[i]);
+  data.stock = filtered;
+  saveData();
+  closeModal("editStockModal");
+  showToast("Stock supprime", "warning");
+  renderStock();
+}
+
 function savePlanningEvent() {
   try {
     var title = document.getElementById("planTitle").value.trim();
     var date = document.getElementById("planDate").value;
     if (!title || !date) { showToast("Titre et date obligatoires", "warning"); return; }
-    var event = {
-      id: Date.now(),
+    var type = document.getElementById("planType").value;
+    var eventData = {
       title: title,
-      type: document.getElementById("planType").value,
+      type: type,
       date: date,
       startTime: document.getElementById("planStartTime").value,
       endTime: document.getElementById("planEndTime").value,
@@ -739,14 +1195,128 @@ function savePlanningEvent() {
       priority: document.getElementById("planPriority").value,
       notes: document.getElementById("planNotes").value || ""
     };
-    data.planningEvents.push(event);
-    saveData();
-    closeModal("planningModal");
-    showToast("Evenement ajoute !");
-    renderPlanning();
-    document.getElementById("planTitle").value = "";
-    document.getElementById("planNotes").value = "";
+    if (type === "rdv") {
+      pendingEventData = eventData;
+      openRdvClientModal();
+      return;
+    }
+    createEvent(eventData);
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+function createEvent(eventData) {
+  var event = {
+    id: Date.now(),
+    title: eventData.title,
+    type: eventData.type,
+    date: eventData.date,
+    startTime: eventData.startTime,
+    endTime: eventData.endTime,
+    assignee: eventData.assignee,
+    priority: eventData.priority,
+    notes: eventData.notes,
+    clientId: eventData.clientId || null,
+    clientName: eventData.clientName || null
+  };
+  data.planningEvents.push(event);
+  saveData();
+  closeModal("planningModal");
+  closeModal("rdvClientModal");
+  showToast("Evenement ajoute !");
+  renderPlanning();
+  document.getElementById("planTitle").value = "";
+  document.getElementById("planNotes").value = "";
+  pendingEventData = null;
+  pendingRdvClientId = null;
+  isRdvPending = false;
+}
+
+function openRdvClientModal() {
+  isRdvPending = true;
+  document.getElementById("rdvClientList").style.display = "none";
+  document.getElementById("btnRdvExisting").style.display = "flex";
+  document.getElementById("btnRdvNew").style.display = "flex";
+  document.getElementById("btnRdvSkip").style.display = "flex";
+  openModal("rdvClientModal");
+}
+
+function showRdvClientList() {
+  var div = document.getElementById("rdvClientList");
+  div.style.display = "block";
+  document.getElementById("btnRdvExisting").style.display = "none";
+  document.getElementById("btnRdvNew").style.display = "none";
+  document.getElementById("btnRdvSkip").style.display = "none";
+  div.innerHTML = '<div style="margin-bottom:10px;font-size:.85rem;color:#888">Selectionne un client :</div>';
+  if (data.clients.length === 0) {
+    div.innerHTML += '<div style="color:#888;padding:10px">Aucun client enregistre</div>';
+  } else {
+    for (var i = 0; i < data.clients.length; i++) {
+      var c = data.clients[i];
+      var row = document.createElement('div');
+      row.className = 'client-card';
+      row.style.marginBottom = '8px';
+      row.innerHTML = '<div class="client-name">' + escapeHtml(c.name) + '</div><div class="client-info" style="font-size:.75rem">' + (c.company ? escapeHtml(c.company) + ' • ' : "") + (c.phone ? escapeHtml(c.phone) : "") + '</div>';
+      (function(cid, cname) {
+        row.addEventListener('click', function() {
+          pendingEventData.clientId = cid;
+          pendingEventData.clientName = cname;
+          createEvent(pendingEventData);
+        });
+      })(c.id, c.name);
+      div.appendChild(row);
+    }
+  }
+  var backBtn = document.createElement('button');
+  backBtn.className = 'btn btn-secondary';
+  backBtn.style.marginTop = '10px';
+  backBtn.textContent = '◀ Retour';
+  backBtn.addEventListener('click', function() {
+    div.style.display = 'none';
+    document.getElementById("btnRdvExisting").style.display = "flex";
+    document.getElementById("btnRdvNew").style.display = "flex";
+    document.getElementById("btnRdvSkip").style.display = "flex";
+  });
+  div.appendChild(backBtn);
+}
+
+function newRdvClient() {
+  closeModal("rdvClientModal");
+  openModal("newClientModal");
+}
+
+function skipRdvClient() {
+  pendingEventData.clientId = null;
+  pendingEventData.clientName = null;
+  createEvent(pendingEventData);
+}
+
+function updatePlanningEvent() {
+  var event = null;
+  for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id === currentEventId) event = data.planningEvents[i];
+  if (!event) return;
+  event.title = document.getElementById("editPlanTitle").value || event.title;
+  event.type = document.getElementById("editPlanType").value;
+  event.date = document.getElementById("editPlanDate").value;
+  event.startTime = document.getElementById("editPlanStartTime").value;
+  event.endTime = document.getElementById("editPlanEndTime").value;
+  event.assignee = document.getElementById("editPlanAssignee").value;
+  event.priority = document.getElementById("editPlanPriority").value;
+  event.notes = document.getElementById("editPlanNotes").value || "";
+  saveData();
+  closeModal("editPlanningModal");
+  showToast("Evenement mis a jour !");
+  renderPlanning();
+}
+
+function deleteCurrentEvent() {
+  if (!confirm("Supprimer cet evenement ?")) return;
+  var filtered = [];
+  for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== currentEventId) filtered.push(data.planningEvents[i]);
+  data.planningEvents = filtered;
+  saveData();
+  closeModal("editPlanningModal");
+  showToast("Evenement supprime", "warning");
+  renderPlanning();
 }
 
 // ============================================================
@@ -763,7 +1333,13 @@ function openOrderDetail(id) {
   var svc = order.service === "print" ? "🖨️ Impression" : order.service === "modeling" ? "🎨 Modelisation" : order.service === "design" ? "💡 Conception" : order.service;
   var typeLabel = order.type === "fdm" ? "FDM" : order.type === "resin" ? "Resine" : "-";
   var notesHtml = order.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + escapeHtml(order.notes) + '</div></div>' : "";
+  var datesHtml = '<div style="margin-bottom:12px;font-size:.75rem;color:#888">';
+  datesHtml += '📅 Cree : ' + new Date(order.dateCreated).toLocaleDateString("fr-FR") + ' ' + new Date(order.dateCreated).toLocaleTimeString("fr-FR", {hour: '2-digit', minute:'2-digit'}) + '<br>';
+  if (order.dateFinished) datesHtml += '✅ Terminee : ' + new Date(order.dateFinished).toLocaleDateString("fr-FR") + '<br>';
+  if (order.dateDelivered) datesHtml += '📦 Livree : ' + new Date(order.dateDelivered).toLocaleDateString("fr-FR") + '<br>';
+  datesHtml += '</div>';
   content.innerHTML = 
+    datesHtml +
     '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">' + escapeHtml(order.clientName || "Inconnu") + '</div></div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">' +
     '<div><div style="font-size:.8rem;color:#888">Service</div><div>' + svc + '</div></div>' +
@@ -771,7 +1347,7 @@ function openOrderDetail(id) {
     '<div><div style="font-size:.8rem;color:#888">Poids</div><div>' + (order.weight || 0) + 'g</div></div>' +
     '<div><div style="font-size:.8rem;color:#888">Temps</div><div>' + (order.time || 0) + 'h</div></div>' +
     '<div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">' + (order.price || 0) + '€</div></div>' +
-    '<div><div style="font-size:.8rem;color:#888">Date</div><div>' + new Date(order.date).toLocaleDateString("fr-FR") + '</div></div>' +
+    '<div><div style="font-size:.8rem;color:#888">Priorite</div><div>' + (order.priority || "medium") + '</div></div>' +
     '</div>' + notesHtml;
   renderOrderPhotos(order);
   openModal("orderDetailModal");
@@ -787,27 +1363,18 @@ function renderOrderPhotos(order) {
   for (var i = 0; i < order.photos.length; i++) {
     var item = document.createElement('div');
     item.className = 'photo-item';
-    item.innerHTML = '<img src="' + escapeHtml(order.photos[i]) + '" alt="Photo">' +
-      '<button class="photo-delete">×</button>';
+    item.innerHTML = '<img src="' + escapeHtml(order.photos[i]) + '" alt="Photo"><button class="photo-delete">×</button>';
     (function(photoSrc, idx) {
-      item.querySelector('img').addEventListener('click', function(e) {
-        e.stopPropagation();
-        openPhotoOverlay(photoSrc);
-      });
-      item.querySelector('.photo-delete').addEventListener('click', function(e) {
-        e.stopPropagation();
-        deletePhoto(order.id, idx);
-      });
+      item.querySelector('img').addEventListener('click', function(e) { e.stopPropagation(); openPhotoOverlay(photoSrc); });
+      item.querySelector('.photo-delete').addEventListener('click', function(e) { e.stopPropagation(); deletePhoto(order.id, idx); });
     })(order.photos[i], i);
     div.appendChild(item);
   }
 }
 
 function openPhotoOverlay(src) {
-  var overlay = document.getElementById("photoOverlay");
-  var img = document.getElementById("photoOverlayImg");
-  img.src = src;
-  overlay.classList.add("active");
+  document.getElementById("photoOverlayImg").src = src;
+  document.getElementById("photoOverlay").classList.add("active");
 }
 
 function closePhotoOverlay() {
@@ -820,13 +1387,37 @@ function updateOrderStatus() {
   if (!order) return;
   var oldStatus = order.status;
   order.status = document.getElementById("detailStatus").value;
-  saveData();
-  if (oldStatus !== "finished" && order.status === "finished" && order.service === "print") {
-    showQualityOverlay(order.id, order.name);
+  var now = new Date().toISOString();
+  if (oldStatus !== "finished" && order.status === "finished") {
+    order.dateFinished = now;
+    updateMachineHours(order);
+    if (order.service === "print") showQualityOverlay(order.id, order.name);
   }
+  if (oldStatus !== "delivered" && order.status === "delivered") {
+    order.dateDelivered = now;
+    if (!order.dateFinished) order.dateFinished = now;
+    updateMachineHours(order);
+  }
+  if (order.status === "printing" && oldStatus !== "printing") {
+    // Rien de special, la machine est marquee busy par isMachineBusy
+  }
+  saveData();
   showToast("Statut mis a jour");
   renderOrders();
   renderStats();
+  renderMachines();
+}
+
+function updateMachineHours(order) {
+  if (order.machineId && order.time) {
+    for (var i = 0; i < data.machines.length; i++) {
+      if (data.machines[i].id === order.machineId) {
+        data.machines[i].totalHours = (data.machines[i].totalHours || 0) + parseFloat(order.time);
+        saveData();
+        break;
+      }
+    }
+  }
 }
 
 // ============================================================
@@ -856,9 +1447,7 @@ function renderQualityChecklist() {
     row.className = 'checklist-item';
     row.innerHTML = '<input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + '><label for="quality_' + i + '">' + escapeHtml(item.text) + '</label>';
     (function(idx) {
-      row.querySelector('input').addEventListener('change', function() {
-        toggleQualityCheck(idx);
-      });
+      row.querySelector('input').addEventListener('change', function() { toggleQualityCheck(idx); });
     })(i);
     div.appendChild(row);
   }
@@ -875,9 +1464,7 @@ function toggleQualityCheck(idx) {
 function updateQualityProgress() {
   if (!data.qualityResults[qualityOrderId]) return;
   var checked = 0;
-  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) {
-    if (data.qualityResults[qualityOrderId][i].checked) checked++;
-  }
+  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) if (data.qualityResults[qualityOrderId][i].checked) checked++;
   var total = data.qualityResults[qualityOrderId].length;
   var pct = total > 0 ? Math.round((checked / total) * 100) : 0;
   document.getElementById("qualityProgress").style.width = pct + "%";
@@ -889,11 +1476,7 @@ function validateQuality() {
   if (window.tempQualityPhoto && qualityOrderId) {
     var order = null;
     for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === qualityOrderId) order = data.orders[i];
-    if (order) { 
-      if (!order.photos) order.photos = []; 
-      order.photos.push(window.tempQualityPhoto); 
-      saveData(); 
-    }
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(window.tempQualityPhoto); saveData(); }
     window.tempQualityPhoto = null;
   }
   document.getElementById("qualityOverlay").classList.remove("active");
@@ -909,15 +1492,14 @@ function skipQuality() {
 function deleteCurrentOrder() { 
   if (!confirm("Supprimer cette commande ?")) return; 
   var filtered = []; 
-  for (var i = 0; i < data.orders.length; i++) {
-    if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]);
-  }
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]);
   data.orders = filtered; 
   saveData(); 
   closeModal("orderDetailModal"); 
   showToast("Supprime", "warning"); 
   renderOrders(); 
   renderStats(); 
+  renderMachines();
 }
 
 function deletePhoto(orderId, photoIdx) { 
@@ -941,6 +1523,8 @@ function openClientDetail(id) {
   if (!client) return;
   document.getElementById("clientDetailTitle").textContent = client.name || "Client";
   var content = document.getElementById("clientDetailContent");
+  var company = client.company ? '<div style="margin-bottom:8px"><span style="color:#888">🏢 </span>' + escapeHtml(client.company) + '</div>' : "";
+  var role = client.role ? '<div style="margin-bottom:8px"><span style="color:#888">💼 </span>' + escapeHtml(client.role) + '</div>' : "";
   var phone = client.phone ? '<div style="margin-bottom:8px"><span style="color:#888">📞 </span>' + escapeHtml(client.phone) + '</div>' : "";
   var email = client.email ? '<div style="margin-bottom:8px"><span style="color:#888">✉️ </span>' + escapeHtml(client.email) + '</div>' : "";
   var address = client.address ? '<div style="margin-bottom:8px"><span style="color:#888">📍 </span>' + escapeHtml(client.address) + '</div>' : "";
@@ -961,31 +1545,60 @@ function openClientDetail(id) {
       var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
       var row = document.createElement('div');
       row.className = 'client-order-row';
-      row.innerHTML = '<div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:.9rem">' + escapeHtml(o.name) + '</span><span style="font-size:.7rem;color:var(--warning)">' + statusLabel + '</span></div><div style="font-size:.8rem;color:#888">' + o.price + '€ • ' + new Date(o.date).toLocaleDateString("fr-FR") + '</div>';
-      (function(oid) {
-        row.addEventListener('click', function() {
-          closeModal("clientDetailModal");
-          openOrderDetail(oid);
-        });
-      })(o.id);
+      row.innerHTML = '<div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:.9rem">' + escapeHtml(o.name) + '</span><span style="font-size:.7rem;color:var(--warning)">' + statusLabel + '</span></div><div style="font-size:.8rem;color:#888">' + o.price + '€ • ' + new Date(o.dateCreated).toLocaleDateString("fr-FR") + '</div>';
+      (function(oid) { row.addEventListener('click', function() { closeModal("clientDetailModal"); openOrderDetail(oid); }); })(o.id);
       ordersSection.appendChild(row);
     }
   }
 
-  content.innerHTML = phone + email + address + notes;
+  content.innerHTML = company + role + phone + email + address + notes;
   content.appendChild(ordersSection);
+
+  var callBtn = document.getElementById('btnCallClient');
+  callNumber = client.phone || "";
+  callBtn.style.display = callNumber ? "flex" : "none";
+
+  var delBtn = document.getElementById('btnDeleteClient');
+  if (clientOrders.length > 0) {
+    delBtn.textContent = "🔒 Verrouille (" + clientOrders.length + " commande(s))";
+    delBtn.disabled = true;
+    delBtn.style.opacity = "0.5";
+  } else {
+    delBtn.textContent = "🗑️ Supprimer";
+    delBtn.disabled = false;
+    delBtn.style.opacity = "1";
+  }
+
   openModal("clientDetailModal");
 }
 
+function openCallOverlay() {
+  if (!callNumber) return;
+  var client = null;
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === currentClientId) client = data.clients[i];
+  document.getElementById("callClientName").textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
+  document.getElementById("callNumber").textContent = callNumber;
+  document.getElementById("callOverlay").classList.add("active");
+}
+
+function closeCallOverlay() {
+  document.getElementById("callOverlay").classList.remove("active");
+}
+
+function confirmCall() {
+  if (callNumber) window.location.href = "tel:" + callNumber.replace(/\s/g, "");
+  closeCallOverlay();
+}
+
 function deleteCurrentClient() {
-  if (!confirm("Supprimer ce client et toutes ses commandes ?")) return;
+  if (!confirm("Supprimer ce client ?")) return;
   var clientId = currentClientId;
+  var orderCount = 0;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId === clientId) orderCount++;
+  if (orderCount > 0) { showToast("Impossible : " + orderCount + " commande(s) liee(s)", "error"); return; }
   var filteredClients = [];
   for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id !== clientId) filteredClients.push(data.clients[i]);
   data.clients = filteredClients;
-  var filteredOrders = [];
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId !== clientId) filteredOrders.push(data.orders[i]);
-  data.orders = filteredOrders;
   saveData();
   closeModal("clientDetailModal");
   showToast("Client supprime", "warning");
@@ -1010,13 +1623,7 @@ function handleCameraFile(input) {
     var photoData = e.target.result;
     var order = null;
     for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
-    if (order) { 
-      if (!order.photos) order.photos = []; 
-      order.photos.push(photoData); 
-      saveData(); 
-      renderOrderPhotos(order); 
-      showToast("Photo ajoutee", "success"); 
-    }
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast("Photo ajoutee", "success"); }
   };
   reader.readAsDataURL(file);
   input.value = "";
@@ -1033,10 +1640,7 @@ function handleQualityCameraFile(input) {
   reader.onload = function(e) {
     window.tempQualityPhoto = e.target.result;
     var preview = document.getElementById("qualityPhotoPreview");
-    if (preview) { 
-      preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualite"></div>'; 
-      preview.style.display = "grid"; 
-    }
+    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualite"></div>'; preview.style.display = "grid"; }
     showToast("Photo qualite prise", "success");
   };
   reader.readAsDataURL(file);
@@ -1054,6 +1658,7 @@ function renderAll() {
   renderStock();
   renderPlanning();
   renderTimers();
+  renderMachines();
 }
 
 function renderStats() {
@@ -1067,10 +1672,22 @@ function renderStats() {
   html += "</div>";
   document.getElementById("statsDisplay").innerHTML = html;
 
-  var alerts = [];
-  for (var i = 0; i < data.stock.length; i++) {
-    if (parseFloat(data.stock[i].qty) <= parseFloat(data.stock[i].alert)) alerts.push(data.stock[i]);
+  var now = new Date();
+  var caMonth = 0, caYear = 0;
+  for (var i = 0; i < data.orders.length; i++) {
+    var o = data.orders[i];
+    if (o.status === "delivered" || o.status === "finished") {
+      var d = new Date(o.dateCreated);
+      var price = parseFloat(o.price) || 0;
+      if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) caMonth += price;
+      if (d.getFullYear() === now.getFullYear()) caYear += price;
+    }
   }
+  document.getElementById("caMonth").textContent = caMonth.toFixed(2) + "€";
+  document.getElementById("caYear").textContent = caYear.toFixed(2) + "€";
+
+  var alerts = [];
+  for (var i = 0; i < data.stock.length; i++) if (parseFloat(data.stock[i].qty) <= parseFloat(data.stock[i].alert)) alerts.push(data.stock[i]);
   var adiv = document.getElementById("stockAlerts");
   if (alerts.length === 0) adiv.innerHTML = '<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';
   else {
@@ -1111,9 +1728,7 @@ function renderOrders() {
     var item = document.createElement('div');
     item.className = 'order-item';
     item.innerHTML = '<div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + escapeHtml(o.name) + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + escapeHtml(o.clientName) + '</span><span>💰 ' + o.price + '€</span>' + hasPhotos + '</div>';
-    (function(oid) {
-      item.addEventListener('click', function() { openOrderDetail(oid); });
-    })(o.id);
+    (function(oid) { item.addEventListener('click', function() { openOrderDetail(oid); }); })(o.id);
     div.appendChild(item);
   }
 }
@@ -1121,22 +1736,24 @@ function renderOrders() {
 function renderClients() {
   var div = document.getElementById("clientsList");
   div.innerHTML = "";
-  if (data.clients.length === 0) { 
-    div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; 
-    return; 
-  }
-  for (var i = 0; i < data.clients.length; i++) {
-    var c = data.clients[i];
+  var search = (document.getElementById("clientSearch")?.value || "").toLowerCase();
+  var clients = data.clients.filter(function(c) {
+    if (!search) return true;
+    var text = (c.name + " " + (c.company || "") + " " + (c.role || "") + " " + (c.phone || "") + " " + (c.email || "")).toLowerCase();
+    return text.indexOf(search) !== -1;
+  });
+  if (clients.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; return; }
+  for (var i = 0; i < clients.length; i++) {
+    var c = clients[i];
     var phone = c.phone ? '📞 ' + escapeHtml(c.phone) : "";
     var email = c.email ? '✉️ ' + escapeHtml(c.email) : "";
+    var company = c.company ? '🏢 ' + escapeHtml(c.company) : "";
     var orderCount = 0;
     for (var j = 0; j < data.orders.length; j++) if (data.orders[j].clientId === c.id) orderCount++;
     var item = document.createElement('div');
     item.className = 'client-card';
-    item.innerHTML = '<div class="client-name">' + escapeHtml(c.name || "Sans nom") + '</div><div class="client-info">' + phone + ' ' + email + '</div><div class="client-orders">' + orderCount + ' commande(s)</div>';
-    (function(cid) {
-      item.addEventListener('click', function() { openClientDetail(cid); });
-    })(c.id);
+    item.innerHTML = '<div class="client-name">' + escapeHtml(c.name || "Sans nom") + '</div><div class="client-info">' + company + ' ' + phone + ' ' + email + '</div><div class="client-orders">' + orderCount + ' commande(s)</div>';
+    (function(cid) { item.addEventListener('click', function() { openClientDetail(cid); }); })(c.id);
     div.appendChild(item);
   }
 }
@@ -1144,37 +1761,79 @@ function renderClients() {
 function renderCatalog() {
   var div = document.getElementById("catalogList");
   div.innerHTML = "";
-  if (data.models.length === 0) { 
-    div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; 
-    return; 
-  }
-  var html = "";
-  for (var i = 0; i < data.models.length; i++) {
-    var m = data.models[i];
+  var search = (document.getElementById("catalogSearch")?.value || "").toLowerCase();
+  var models = data.models.filter(function(m) {
+    if (!search) return true;
+    var text = (m.name + " " + (m.category || "") + " " + (m.description || "")).toLowerCase();
+    return text.indexOf(search) !== -1;
+  });
+  if (models.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; return; }
+  for (var i = 0; i < models.length; i++) {
+    var m = models[i];
     var typeLabel = m.type === "fdm" ? "FDM" : m.type === "resin" ? "Resine" : "FDM + Resine";
-    html += '<div class="card"><div style="font-weight:700">' + escapeHtml(m.name || "Sans nom") + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || "") + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div></div>';
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.cursor = 'pointer';
+    card.innerHTML = '<div style="font-weight:700">' + escapeHtml(m.name || "Sans nom") + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || "") + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div>';
+    (function(mid) { card.addEventListener('click', function() { openEditModel(mid); }); })(m.id);
+    div.appendChild(card);
   }
-  div.innerHTML = html;
+}
+
+function openEditModel(id) {
+  currentModelId = id;
+  var model = null;
+  for (var i = 0; i < data.models.length; i++) if (data.models[i].id === id) model = data.models[i];
+  if (!model) return;
+  document.getElementById("editModelName").value = model.name || "";
+  document.getElementById("editModelCategory").value = model.category || "prototype";
+  document.getElementById("editModelType").value = model.type || "fdm";
+  document.getElementById("editModelTime").value = model.time || 0;
+  document.getElementById("editModelWeight").value = model.weight || 0;
+  document.getElementById("editModelPrice").value = model.price || 0;
+  document.getElementById("editModelDesc").value = model.description || "";
+  openModal("editModelModal");
 }
 
 function renderStock() {
   var div = document.getElementById("stockList");
   div.innerHTML = "";
-  if (data.stock.length === 0) { 
-    div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; 
-    return; 
-  }
-  var html = "";
-  for (var i = 0; i < data.stock.length; i++) {
-    var s = data.stock[i];
+  var search = (document.getElementById("stockSearch")?.value || "").toLowerCase();
+  var stock = data.stock.filter(function(s) {
+    if (!search) return true;
+    var text = (s.name + " " + (s.type || "") + " " + (s.supplier || "")).toLowerCase();
+    return text.indexOf(search) !== -1;
+  });
+  if (stock.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; return; }
+  for (var i = 0; i < stock.length; i++) {
+    var s = stock[i];
     var qty = parseFloat(s.qty) || 0;
     var alert = parseFloat(s.alert) || 0;
     var isLow = qty <= alert;
     var borderColor = isLow ? "3px solid var(--warning)" : "3px solid var(--success)";
     var qtyColor = isLow ? "var(--warning)" : "var(--success)";
-    html += '<div class="card" style="border-left:' + borderColor + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">' + escapeHtml(s.name || "Sans nom") + '</div><div style="font-size:.75rem;color:#888">' + (s.type || "") + '</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:' + qtyColor + '">' + qty + ' ' + (s.unit || "") + '</div><div style="font-size:.7rem;color:#666">Seuil: ' + alert + '</div></div></div></div>';
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.cursor = 'pointer';
+    card.style.borderLeft = borderColor;
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">' + escapeHtml(s.name || "Sans nom") + '</div><div style="font-size:.75rem;color:#888">' + (s.type || "") + '</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:' + qtyColor + '">' + qty + ' ' + (s.unit || "") + '</div><div style="font-size:.7rem;color:#666">Seuil: ' + alert + '</div></div></div>';
+    (function(sid) { card.addEventListener('click', function() { openEditStock(sid); }); })(s.id);
+    div.appendChild(card);
   }
-  div.innerHTML = html;
+}
+
+function openEditStock(id) {
+  currentStockId = id;
+  var item = null;
+  for (var i = 0; i < data.stock.length; i++) if (data.stock[i].id === id) item = data.stock[i];
+  if (!item) return;
+  document.getElementById("editStockType").value = item.type || "filament";
+  document.getElementById("editStockName").value = item.name || "";
+  document.getElementById("editStockQty").value = item.qty || 0;
+  document.getElementById("editStockUnit").value = item.unit || "kg";
+  document.getElementById("editStockAlert").value = item.alert || 1;
+  document.getElementById("editStockSupplier").value = item.supplier || "";
+  openModal("editStockModal");
 }
 
 function renderPlanning() {
@@ -1194,43 +1853,113 @@ function renderPlanning() {
   var today = new Date();
   for (var d = 1; d <= daysInMonth; d++) {
     var isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    var isSelected = planningSelectedDay && d === planningSelectedDay.getDate() && month === planningSelectedDay.getMonth() && year === planningSelectedDay.getFullYear();
     var dayEvents = [];
     for (var i = 0; i < data.planningEvents.length; i++) {
       var ed = new Date(data.planningEvents[i].date);
       if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(data.planningEvents[i]);
     }
     var dots = "";
-    for (var i = 0; i < Math.min(dayEvents.length, 3); i++) dots += '<span class="planning-event-dot event-type-' + dayEvents[i].type + '"></span>';
+    for (var i = 0; i < Math.min(dayEvents.length, 3); i++) {
+      var color = dayEvents[i].priority === "high" ? "var(--danger)" : dayEvents[i].priority === "medium" ? "var(--warning)" : "var(--success)";
+      dots += '<span class="planning-event-dot" style="background:' + color + '"></span>';
+    }
     var todayClass = isToday ? "today" : "";
-    html += '<div class="planning-day ' + todayClass + '"><div class="planning-day-number">' + d + '</div><div>' + dots + '</div></div>';
+    var selectedClass = isSelected ? "selected" : "";
+    html += '<div class="planning-day ' + todayClass + ' ' + selectedClass + '" data-day="' + d + '"><div class="planning-day-number">' + d + '</div><div>' + dots + '</div></div>';
   }
   calDiv.innerHTML = html;
+
+  calDiv.querySelectorAll('.planning-day[data-day]').forEach(function(dayEl) {
+    dayEl.addEventListener('click', function() {
+      var d = parseInt(this.dataset.day);
+      planningSelectedDay = new Date(year, month, d, 12, 0, 0);
+      planningSelectedDayStr = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+      renderPlanning();
+    });
+  });
+
   renderPlanningEvents();
 }
 
 function changePlanningMonth(delta) { 
   planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta); 
+  planningSelectedDay = null;
+  planningSelectedDayStr = null;
   renderPlanning(); 
 }
 
 function renderPlanningEvents() {
   var div = document.getElementById("planningEventsList");
+  var label = document.getElementById("planSelectedDayLabel");
   if (!div) return;
   div.innerHTML = "";
+
   var events = data.planningEvents;
+  if (planningSelectedDayStr) {
+    var filtered = [];
+    for (var i = 0; i < events.length; i++) {
+      if (events[i].date === planningSelectedDayStr) filtered.push(events[i]);
+    }
+    events = filtered;
+    if (label) label.textContent = "📅 " + planningSelectedDay.toLocaleDateString("fr-FR");
+  } else {
+    if (label) label.textContent = "📅 Tous les evenements";
+  }
+
   if (events.length === 0) { 
     div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun evenement</div>'; 
     return; 
   }
+
   for (var i = 0; i < events.length; i++) {
     var e = events[i];
     var typeLabels = {printing: "Impression", modeling: "Modelisation", design: "Conception", maintenance: "Maintenance", rdv: "RDV", logistics: "Logistique", other: "Divers"};
     var typeLabel = typeLabels[e.type] || e.type;
+    var priorityColor = e.priority === "high" ? "var(--danger)" : e.priority === "medium" ? "var(--warning)" : "var(--success)";
+    var priorityLabel = e.priority === "high" ? "🔴 Haute" : e.priority === "medium" ? "🟠 Moyenne" : "🟢 Basse";
+    var clientInfo = "";
+    if (e.type === "rdv" && e.clientName) {
+      clientInfo = '<span>👤 ' + escapeHtml(e.clientName) + '</span>';
+    } else if (e.type === "rdv") {
+      clientInfo = '<span>👤 Sans client lie</span>';
+    }
     var item = document.createElement('div');
     item.className = 'event-item';
-    item.innerHTML = '<div class="event-item-header"><span class="event-item-title">' + escapeHtml(e.title) + '</span><span style="font-size:.7rem;color:var(--primary);font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span><span>👤 ' + (e.assignee === "florian" ? "Florian" : e.assignee === "elie" ? "Elie" : "Les deux") + '</span></div>';
+    item.style.borderLeftColor = priorityColor;
+    item.innerHTML = '<div class="event-item-header"><span class="event-item-title">' + escapeHtml(e.title) + '</span><span style="font-size:.7rem;color:' + priorityColor + ';font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span><span>👤 ' + (e.assignee === "florian" ? "Florian" : e.assignee === "elie" ? "Elie" : "Les deux") + '</span><span style="color:' + priorityColor + '">' + priorityLabel + '</span>' + (clientInfo ? ' • ' + clientInfo : '') + '</div><div class="event-item-actions"><button class="btn-edit-event">✏️</button><button class="btn-delete-event">🗑️</button></div>';
+    (function(eid) {
+      item.querySelector('.btn-edit-event').addEventListener('click', function(ev) { ev.stopPropagation(); openEditEvent(eid); });
+      item.querySelector('.btn-delete-event').addEventListener('click', function(ev) { ev.stopPropagation(); deleteEventDirect(eid); });
+    })(e.id);
     div.appendChild(item);
   }
+}
+
+function openEditEvent(id) {
+  currentEventId = id;
+  var event = null;
+  for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id === id) event = data.planningEvents[i];
+  if (!event) return;
+  document.getElementById("editPlanTitle").value = event.title || "";
+  document.getElementById("editPlanType").value = event.type || "printing";
+  document.getElementById("editPlanDate").value = event.date || "";
+  document.getElementById("editPlanStartTime").value = event.startTime || "09:00";
+  document.getElementById("editPlanEndTime").value = event.endTime || "12:00";
+  document.getElementById("editPlanAssignee").value = event.assignee || "florian";
+  document.getElementById("editPlanPriority").value = event.priority || "medium";
+  document.getElementById("editPlanNotes").value = event.notes || "";
+  openModal("editPlanningModal");
+}
+
+function deleteEventDirect(id) {
+  if (!confirm("Supprimer cet evenement ?")) return;
+  var filtered = [];
+  for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== id) filtered.push(data.planningEvents[i]);
+  data.planningEvents = filtered;
+  saveData();
+  showToast("Evenement supprime", "warning");
+  renderPlanning();
 }
 
 // ============================================================
@@ -1245,23 +1974,42 @@ function startPrintTimer() {
   var machine = null;
   for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === machineId) machine = data.machines[i];
   if (!machine) return;
+  if (isMachineBusy(machineId)) { showToast("Cette machine est deja en cours d'utilisation", "warning"); return; }
   var duration = (hours * 60 + minutes) * 60 * 1000;
-  var timer = {
-    id: Date.now(),
-    name: name,
-    machineId: machineId,
-    machineName: machine.name,
-    duration: duration,
-    endTime: Date.now() + duration,
-    startTime: Date.now(),
-    finished: false
-  };
+  var timer = {id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false};
   activeTimers.push(timer);
   saveTimers();
   showToast("Timer demarre !");
   document.getElementById("timerName").value = "";
   renderTimers();
+  renderMachines();
   showSection("timer", document.querySelector('.nav-tab[data-section="timer"]'));
+}
+
+function stopTimer(id) {
+  if (!confirm("Arreter ce timer ?")) return;
+  for (var i = 0; i < activeTimers.length; i++) {
+    if (activeTimers[i].id === id) {
+      activeTimers[i].finished = true;
+      activeTimers[i].endTime = Date.now();
+      finishedTimers.push(activeTimers[i]);
+      saveTimers();
+      showToast("Timer arrete", "warning");
+      renderTimers();
+      renderMachines();
+      return;
+    }
+  }
+}
+
+function deleteFinishedTimer(id) {
+  if (!confirm("Supprimer ce timer termine ?")) return;
+  var filtered = [];
+  for (var i = 0; i < finishedTimers.length; i++) if (finishedTimers[i].id !== id) filtered.push(finishedTimers[i]);
+  finishedTimers = filtered;
+  saveTimers();
+  showToast("Timer supprime", "warning");
+  renderTimers();
 }
 
 function renderTimers() {
@@ -1272,8 +2020,9 @@ function renderTimers() {
   var active = [];
   for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
   var finished = [];
-  for (var i = Math.max(0, finishedTimers.length - 5); i < finishedTimers.length; i++) finished.push(finishedTimers[i]);
+  for (var i = Math.max(0, finishedTimers.length - 10); i < finishedTimers.length; i++) finished.push(finishedTimers[i]);
   finished.reverse();
+
   if (active.length === 0) as.style.display = "none";
   else {
     as.style.display = "block";
@@ -1285,10 +2034,14 @@ function renderTimers() {
       var card = document.createElement('div');
       card.className = 'timer-card';
       card.id = 'timerCard_' + t.id;
-      card.innerHTML = '<div class="timer-name">' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" id="timerBar_' + t.id + '" style="width:' + pct + '%"></div></div>';
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">' + escapeHtml(t.name) + '</div><button class="btn btn-sm btn-danger btn-stop-timer" style="width:auto">⏹️ Arreter</button></div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" id="timerBar_' + t.id + '" style="width:' + pct + '%"></div></div>';
+      (function(tid) {
+        card.querySelector('.btn-stop-timer').addEventListener('click', function(e) { e.stopPropagation(); stopTimer(tid); });
+      })(t.id);
       al.appendChild(card);
     }
   }
+
   if (finished.length === 0) fs.style.display = "none";
   else {
     fs.style.display = "block";
@@ -1297,10 +2050,14 @@ function renderTimers() {
       var t = finished[i];
       var card = document.createElement('div');
       card.className = 'timer-card finished';
-      card.innerHTML = '<div class="timer-name">✅ ' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + ' • ' + new Date(t.endTime).toLocaleTimeString("fr-FR") + '</div>';
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">✅ ' + escapeHtml(t.name) + '</div><button class="btn btn-sm btn-danger btn-del-timer" style="width:auto">🗑️</button></div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + ' • ' + new Date(t.endTime).toLocaleTimeString("fr-FR") + '</div>';
+      (function(tid) {
+        card.querySelector('.btn-del-timer').addEventListener('click', function(e) { e.stopPropagation(); deleteFinishedTimer(tid); });
+      })(t.id);
       fl.appendChild(card);
     }
   }
+
   var card = document.getElementById("activeTimersCard");
   if (card) card.style.display = active.length > 0 ? "block" : "none";
   var list = document.getElementById("activeTimersList");
@@ -1334,7 +2091,7 @@ function startTimerLoop() {
     var filtered = [];
     for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) filtered.push(activeTimers[i]);
     activeTimers = filtered;
-    if (changed) { saveTimers(); renderTimers(); renderStats(); }
+    if (changed) { saveTimers(); renderTimers(); renderStats(); renderMachines(); }
     for (var i = 0; i < activeTimers.length; i++) {
       var t = activeTimers[i];
       var remaining = Math.max(0, t.endTime - Date.now());
@@ -1383,18 +2140,126 @@ function calculateCost() {
   var service = document.getElementById("calcService").value;
   var type = document.getElementById("calcType").value;
   var weight = parseFloat(document.getElementById("calcWeight").value) || 0;
-  var time = parseFloat(document.getElementById("calcTime").value) || 0;
-  var complexity = parseFloat(document.getElementById("calcComplexity").value) || 1;
+  var printHours = parseFloat(document.getElementById("calcPrintHours").value) || 0;
+  var modelingHours = parseFloat(document.getElementById("calcModelingHours").value) || 0;
+  var designHours = parseFloat(document.getElementById("calcDesignHours").value) || 0;
+  var postProdHours = parseFloat(document.getElementById("calcPostProdHours").value) || 0;
   var qty = parseInt(document.getElementById("calcQty").value) || 1;
-  var materialCost = 0, hourlyRate = 0, serviceMultiplier = 1;
-  if (service === "print") { 
-    if (type === "fdm") { materialCost = (weight / 1000) * 25; hourlyRate = 2; } 
-    else { materialCost = (weight / 1000) * 60; hourlyRate = 3; } 
+
+  rates.modeling = parseFloat(document.getElementById("rateModeling").value) || 35;
+  rates.design = parseFloat(document.getElementById("rateDesign").value) || 45;
+  rates.fdm = parseFloat(document.getElementById("rateFdm").value) || 2;
+  rates.resin = parseFloat(document.getElementById("rateResin").value) || 3;
+  rates.postProd = parseFloat(document.getElementById("ratePostProd").value) || 15;
+  rates.filamentKg = parseFloat(document.getElementById("priceFilament").value) || 25;
+  rates.resinKg = parseFloat(document.getElementById("priceResinKg").value) || 60;
+
+  var materialCost = 0, printRate = type === "fdm" ? rates.fdm : rates.resin;
+  var matPrice = type === "fdm" ? rates.filamentKg : rates.resinKg;
+  materialCost = (weight / 1000) * matPrice;
+
+  var total = 0;
+  if (service === "print") {
+    total = (materialCost + (printHours * printRate) + (postProdHours * rates.postProd)) * qty;
+  } else if (service === "modeling") {
+    total = (modelingHours * rates.modeling) * qty;
+  } else if (service === "design") {
+    total = (designHours * rates.design) * qty;
   }
-  else if (service === "modeling") { hourlyRate = 35; serviceMultiplier = 1.2; }
-  else if (service === "design") { hourlyRate = 45; serviceMultiplier = 1.3; }
-  var total = (materialCost + (time * hourlyRate)) * complexity * qty * serviceMultiplier;
+
   document.getElementById("calcTotal").textContent = total.toFixed(2) + "€";
+}
+
+// ============================================================
+// MACHINES
+// ============================================================
+function renderMachines() {
+  var div = document.getElementById("machinesList");
+  if (!div) return;
+  div.innerHTML = "";
+  if (data.machines.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">🖨️</div>Aucune machine</div>'; return; }
+
+  for (var i = 0; i < data.machines.length; i++) {
+    var m = data.machines[i];
+    var busy = isMachineBusy(m.id);
+    var statusText = busy ? "🔴 Indisponible" : "🟢 Disponible";
+    var statusClass = busy ? "busy" : "available";
+    var hours = m.totalHours || 0;
+    var maintCount = m.maintenance ? m.maintenance.length : 0;
+
+    var card = document.createElement('div');
+    card.className = 'machine-card ' + statusClass;
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><div class="machine-name">' + escapeHtml(m.name) + '</div><span style="font-size:.75rem;font-weight:700">' + statusText + '</span></div><div class="machine-info">' + (m.type === "fdm" ? "FDM" : "Resine") + '</div><div class="machine-hours">⏱️ ' + hours.toFixed(1) + 'h cumulees • 🔧 ' + maintCount + ' entretien(s)</div>';
+    (function(mid) { card.addEventListener('click', function() { openMachineDetail(mid); }); })(m.id);
+    div.appendChild(card);
+  }
+}
+
+function openMachineDetail(id) {
+  currentMachineId = id;
+  var machine = null;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === id) machine = data.machines[i];
+  if (!machine) return;
+  document.getElementById("machineDetailTitle").textContent = machine.name;
+
+  var busy = isMachineBusy(machine.id);
+  var statusText = busy ? "🔴 Indisponible (en cours d'impression)" : "🟢 Disponible";
+  var hours = machine.totalHours || 0;
+
+  var content = document.getElementById("machineDetailContent");
+  content.innerHTML = '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Statut</div><div style="font-weight:700">' + statusText + '</div></div>' +
+    '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Type</div><div>' + (machine.type === "fdm" ? "FDM" : "Resine") + '</div></div>' +
+    '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Heures de fonctionnement cumulees</div><div style="font-size:1.4rem;font-weight:800;color:var(--primary)">' + hours.toFixed(1) + 'h</div></div>' +
+    '<div class="btn-row"><button class="btn btn-secondary" id="btnEditMachineInfo" style="flex:1">✏️ Modifier</button></div>';
+
+  document.getElementById('btnEditMachineInfo').addEventListener('click', function() {
+    document.getElementById("editMachineInfoName").value = machine.name || "";
+    document.getElementById("editMachineInfoType").value = machine.type || "fdm";
+    openModal('editMachineInfoModal');
+  });
+
+  renderMachineMaintenance(machine);
+  openModal("machineDetailModal");
+}
+
+function renderMachineMaintenance(machine) {
+  var div = document.getElementById("machineMaintList");
+  if (!div) return;
+  div.innerHTML = "";
+  if (!machine.maintenance || machine.maintenance.length === 0) {
+    div.innerHTML = '<div style="color:#888;font-size:.85rem">Aucun entretien enregistre</div>';
+    return;
+  }
+  var sorted = machine.maintenance.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  for (var i = 0; i < sorted.length; i++) {
+    var m = sorted[i];
+    var typeLabels = {cleaning: "Nettoyage / Graissage", nozzle: "Changement de buse", belt: "Tension courroies", bed: "Nivellement plateau", firmware: "Mise a jour firmware", filter: "Filtre / Ventilation", other: "Autre"};
+    var item = document.createElement('div');
+    item.className = 'maintenance-item';
+    item.innerHTML = '<div class="maintenance-item-header"><span class="maintenance-item-title">' + (typeLabels[m.type] || m.type) + '</span><span class="maintenance-item-date">' + new Date(m.date).toLocaleDateString("fr-FR") + '</span></div>' + (m.hours ? '<div style="font-size:.75rem;color:#888">A ' + m.hours + 'h</div>' : '') + (m.notes ? '<div class="maintenance-item-notes">' + escapeHtml(m.notes) + '</div>' : '');
+    div.appendChild(item);
+  }
+}
+
+function saveMaintenance() {
+  var machine = null;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === currentMachineId) machine = data.machines[i];
+  if (!machine) return;
+  var maint = {
+    id: Date.now(),
+    type: document.getElementById("maintType").value,
+    date: document.getElementById("maintDate").value,
+    hours: document.getElementById("maintHours").value || "",
+    notes: document.getElementById("maintNotes").value || ""
+  };
+  if (!machine.maintenance) machine.maintenance = [];
+  machine.maintenance.push(maint);
+  saveData();
+  showToast("Entretien ajoute !");
+  document.getElementById("maintHours").value = "";
+  document.getElementById("maintNotes").value = "";
+  renderMachineMaintenance(machine);
+  renderMachines();
 }
 
 // ============================================================
@@ -1402,8 +2267,8 @@ function calculateCost() {
 // ============================================================
 function syncWithGoogle() {
   if (!navigator.onLine) { showToast("Hors-ligne", "warning"); return; }
-  var apiUrl = localStorage.getItem("tli12_apiUrl") || "";
-  if (!apiUrl) { showToast("URL API non configuree. Va dans Config et colle ton lien Apps Script.", "warning"); return; }
+  var apiUrl = localStorage.getItem("tli14_apiUrl") || "";
+  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
   showToast("Synchronisation en cours...", "success");
   fetch(apiUrl, {
     method: "POST",
@@ -1415,21 +2280,21 @@ function syncWithGoogle() {
   }).then(function(res) {
     if (!res.success) throw new Error(res.error || "Sync failed");
     showToast("Synchronise !", "success");
-  }).catch(function(e) { showToast("Erreur sync: " + e.message + " | Verifie que ton Apps Script autorise les requetes POST.", "error"); });
+  }).catch(function(e) { showToast("Erreur sync: " + e.message, "error"); });
 }
 
 function testConnection() {
-  var apiUrl = localStorage.getItem("tli12_apiUrl") || "";
+  var apiUrl = localStorage.getItem("tli14_apiUrl") || "";
   if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
   showToast("Test en cours...");
   fetch(apiUrl + "?action=getAll").then(function(r) {
     showToast(r.ok ? "Connexion OK !" : "Erreur " + r.status, r.ok ? "success" : "error");
-  }).catch(function(e) { showToast("Connexion impossible: " + e.message + " | Verifie l'URL et que ton Apps Script est deploye en mode 'Anyone'.", "error"); });
+  }).catch(function(e) { showToast("Connexion impossible: " + e.message, "error"); });
 }
 
 function saveConfig() {
   var el = document.getElementById("apiUrl");
-  localStorage.setItem("tli12_apiUrl", el ? (el.value || "").trim() : "");
+  localStorage.setItem("tli14_apiUrl", el ? (el.value || "").trim() : "");
   showToast("Config sauvegardee");
 }
 
@@ -1437,7 +2302,7 @@ function saveConfig() {
 // EXPORT / IMPORT
 // ============================================================
 function exportData() {
-  var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: "application/json"});
+  var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, rates: rates, exportDate: new Date().toISOString()}, null, 2)], {type: "application/json"});
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
   a.href = url;
@@ -1456,7 +2321,8 @@ function importData(input) {
       var imported = JSON.parse(e.target.result);
       if (imported.data) data = imported.data;
       if (imported.timers) { activeTimers = imported.timers.active || []; finishedTimers = imported.timers.finished || []; }
-      saveData(); saveTimers(); renderAll(); showToast("Import reussi !", "success");
+      if (imported.rates) rates = imported.rates;
+      saveData(); saveTimers(); saveRates(); renderAll(); showToast("Import reussi !", "success");
     } catch(err) { showToast("Erreur import", "error"); }
   };
   reader.readAsText(file);
@@ -1466,11 +2332,12 @@ function importData(input) {
 function clearAll() {
   if (!confirm("Tout supprimer ? Cette action est irreversible.")) return;
   data.orders = [];
-  data.clients = [{id: 1, name: "Client Test", phone: "", email: ""}];
+  data.clients = [{id: 1, name: "Client Test", company: "", role: "", phone: "", email: ""}];
   data.models = [];
   data.stock = [];
   data.planningEvents = [];
   data.qualityResults = {};
+  data.machines = JSON.parse(JSON.stringify(defaultMachines));
   activeTimers = [];
   finishedTimers = [];
   saveData();
@@ -1502,6 +2369,17 @@ function escapeHtml(text) {
 // ============================================================
 init();
 startTimerLoop();
+</script>
+
+<script>
+// Enregistrement du Service Worker pour mode offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+      .then(function(reg) { console.log('SW registered:', reg.scope); })
+      .catch(function(err) { console.log('SW failed:', err); });
+  });
+}
 </script>
 </body>
 </html>
