@@ -795,7 +795,7 @@ function attachStaticListeners() {
   document.getElementById('btnImportTrigger').addEventListener('click', function() { document.getElementById('importFile').click(); });
   document.getElementById('importFile').addEventListener('change', function() { importData(this); });
   document.getElementById('btnClearAll').addEventListener('click', clearAll);
-  document.getElementById('btnLogout').addEventListener('click', logoutUser);
+  
 
 
   document.querySelectorAll('.modal-close').forEach(function(btn) {
@@ -843,8 +843,6 @@ function attachStaticListeners() {
 
   document.getElementById('btnCancelCall').addEventListener('click', closeCallOverlay);
   document.getElementById('btnConfirmCall').addEventListener('click', confirmCall);
-  document.getElementById('btnLogin').addEventListener('click', loginUser);
-  document.getElementById('btnRegister').addEventListener('click', registerUser);
 
 
   // Recherche
@@ -2601,6 +2599,11 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
   window.addEventListener('load', initFirebase);
 }
+
+// Attacher les listeners de connexion (les fonctions existent maintenant)
+document.getElementById('btnLogin').addEventListener('click', loginUser);
+document.getElementById('btnRegister').addEventListener('click', registerUser);
+document.getElementById('btnLogout').addEventListener('click', logoutUser);
 
 // Mettre à jour l'affichage du compte dans les paramètres
 function updateAuthDisplay() {

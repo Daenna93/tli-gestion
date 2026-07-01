@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tli-v14-cache-v3';
+const CACHE_NAME = 'tli-v14-cache-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -11,7 +11,7 @@ const ASSETS = [
 // INSTALLATION : mise en cache + activation immédiate
 // ============================================================
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing v3...');
+  console.log('[SW] Installing v4...');
 
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -31,7 +31,7 @@ self.addEventListener('install', (event) => {
 // ACTIVATION : nettoyage des anciens caches + prise de contrôle
 // ============================================================
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating v3...');
+  console.log('[SW] Activating v4...');
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -50,7 +50,7 @@ self.addEventListener('activate', (event) => {
       // Notifier tous les clients que la mise à jour est prête
       return self.clients.matchAll({ type: 'window' }).then((clients) => {
         clients.forEach((client) => {
-          client.postMessage({ type: 'SW_UPDATED', version: 'v3' });
+          client.postMessage({ type: 'SW_UPDATED', version: 'v4' });
         });
       });
     })
