@@ -2270,29 +2270,16 @@ function saveMaintenance() {
 // ============================================================
 function syncWithGoogle() {
   if (!navigator.onLine) { showToast("Hors-ligne", "warning"); return; }
-  var apiUrl = localStorage.getItem("tli14_apiUrl") || "";
-  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
+  if (!isOnline || !currentUserId) { showToast("Firebase non connecté", "warning"); return; }
   showToast("Synchronisation en cours...", "success");
-  fetch(apiUrl, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({action: "syncAll", orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents})
-  }).then(function(r) {
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
-  }).then(function(res) {
-    if (!res.success) throw new Error(res.error || "Sync failed");
-    showToast("Synchronise !", "success");
-  }).catch(function(e) { showToast("Erreur sync: " + e.message, "error"); });
+  pushToFirebase();
+  pushTimersToFirebase();
+  showToast("Synchronise !", "success");
 }
 
 function testConnection() {
-  var apiUrl = localStorage.getItem("tli14_apiUrl") || "";
-  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
-  showToast("Test en cours...");
-  fetch(apiUrl + "?action=getAll").then(function(r) {
-    showToast(r.ok ? "Connexion OK !" : "Erreur " + r.status, r.ok ? "success" : "error");
-  }).catch(function(e) { showToast("Connexion impossible: " + e.message, "error"); });
+  if (!isOnline || !currentUserId) { showToast("Firebase non connecté", "error"); return; }
+  showToast("Connexion Firebase OK !", "success");
 }
 
 function saveConfig() {
