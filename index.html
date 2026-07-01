@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<title>TLI v11 - Complet</title>
+<title>TLI v12</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -87,17 +87,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .quality-header{text-align:center;margin-bottom:18px}
 .quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
 .quality-header p{color:#888;font-size:.85rem;margin-top:6px}
-/* SOUS-ONGLETS COMMANDES */
 .order-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
 .order-tabs::-webkit-scrollbar{display:none}
 .order-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .order-tab.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent}
-/* OVERLAY PHOTO */
 .photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
 .photo-overlay.active{display:flex}
 .photo-overlay img{max-width:100%;max-height:80vh;border-radius:12px;object-fit:contain}
 .photo-overlay-close{position:absolute;top:20px;right:20px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
-/* CLIENT CARD */
 .client-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
 .client-card:hover{border-color:var(--primary)}
 .client-name{font-weight:700;font-size:1.05rem}
@@ -124,12 +121,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="nav-tab" onclick="showSection('settings', this)">⚙️ Config</div>
 </nav>
 
-<!-- DASHBOARD -->
 <section id="dashboard" class="section active">
-  <div class="card">
-    <div class="card-title">📊 Stats</div>
-    <div id="statsDisplay">Chargement...</div>
-  </div>
+  <div class="card"><div class="card-title">📊 Stats</div><div id="statsDisplay">Chargement...</div></div>
   <div class="card">
     <div class="card-title">⚡ Actions rapides</div>
     <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
@@ -140,13 +133,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="card-title">🔥 Impressions en cours</div>
     <div id="activeTimersList"></div>
   </div>
-  <div class="card">
-    <div class="card-title">🔔 Alertes stock</div>
-    <div id="stockAlerts"></div>
-  </div>
+  <div class="card"><div class="card-title">🔔 Alertes stock</div><div id="stockAlerts"></div></div>
 </section>
 
-<!-- ORDERS -->
 <section id="orders" class="section">
   <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
   <div class="order-tabs" style="margin-top:12px">
@@ -159,25 +148,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div id="ordersList"></div>
 </section>
 
-<!-- CLIENTS -->
 <section id="clients" class="section">
   <button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button>
   <div id="clientsList" style="margin-top:12px"></div>
 </section>
 
-<!-- CATALOG -->
 <section id="catalog" class="section">
   <button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modele</button>
   <div id="catalogList" style="margin-top:12px"></div>
 </section>
 
-<!-- STOCK -->
 <section id="stock" class="section">
   <button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button>
   <div id="stockList" style="margin-top:12px"></div>
 </section>
 
-<!-- PLANNING -->
 <section id="planning" class="section">
   <div class="card">
     <div class="card-title">📅 Calendrier</div>
@@ -195,7 +180,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <button class="btn btn-primary" onclick="openModal('planningModal')">+ Ajouter evenement</button>
 </section>
 
-<!-- TIMER -->
 <section id="timer" class="section">
   <div class="card">
     <div class="card-title">⏰ Nouveau timer</div>
@@ -215,7 +199,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </section>
 
-<!-- CALCULATOR -->
 <section id="calculator" class="section">
   <div class="card">
     <div class="card-title">🧮 Calculateur de devis</div>
@@ -231,7 +214,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </section>
 
-<!-- SETTINGS -->
 <section id="settings" class="section">
   <div class="card">
     <div class="card-title">🔗 Synchronisation</div>
@@ -256,7 +238,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </section>
 
-<!-- MODALS -->
 <div class="modal-overlay" id="newOrderModal">
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('newOrderModal')">×</button></div>
@@ -361,7 +342,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
-<!-- QUALITY OVERLAY -->
 <div class="quality-overlay" id="qualityOverlay">
   <div class="quality-content">
     <div class="quality-header"><h3>✅ Validation qualite</h3><p id="qualityOrderName">Commande terminee</p></div>
@@ -378,7 +358,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
-<!-- PHOTO OVERLAY -->
 <div class="photo-overlay" id="photoOverlay" onclick="closePhotoOverlay()">
   <button class="photo-overlay-close" onclick="closePhotoOverlay()">×</button>
   <img id="photoOverlayImg" src="" alt="Photo">
@@ -389,7 +368,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== DATA ====================
 var data = {
   orders: [],
   clients: [{id: 1, name: "Client Test", phone: "", email: ""}],
@@ -424,7 +402,6 @@ var qualityOrderId = null;
 var planningCurrentDate = new Date();
 var currentOrderFilter = "all";
 
-// ==================== INIT ====================
 function init() {
   try {
     loadData();
@@ -436,7 +413,7 @@ function init() {
 
 function loadData() {
   try {
-    var saved = localStorage.getItem("tli11_data");
+    var saved = localStorage.getItem("tli12_data");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.orders) data.orders = parsed.orders;
@@ -450,16 +427,16 @@ function loadData() {
 }
 
 function saveData() {
-  try { localStorage.setItem("tli11_data", JSON.stringify(data)); } catch(e) {}
+  try { localStorage.setItem("tli12_data", JSON.stringify(data)); } catch(e) {}
 }
 
 function saveTimers() {
-  try { localStorage.setItem("tli11_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
+  try { localStorage.setItem("tli12_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
 }
 
 function loadTimers() {
   try {
-    var saved = localStorage.getItem("tli11_timers");
+    var saved = localStorage.getItem("tli12_timers");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.active) activeTimers = parsed.active;
@@ -468,7 +445,6 @@ function loadTimers() {
   } catch(e) {}
 }
 
-// ==================== NAV ====================
 function showSection(id, tabEl) {
   var sections = document.querySelectorAll(".section");
   for (var i = 0; i < sections.length; i++) sections[i].classList.remove("active");
@@ -485,7 +461,6 @@ function showSection(id, tabEl) {
   if (id === "dashboard") renderStats();
 }
 
-// ==================== MODALS ====================
 function openModal(id) {
   var el = document.getElementById(id);
   if (el) {
@@ -525,7 +500,6 @@ function toggleOrderFields() {
   document.getElementById("machineGroup").style.display = (service === "print") ? "block" : "none";
 }
 
-// ==================== SAVE FUNCTIONS ====================
 function saveOrder() {
   try {
     var clientId = parseInt(document.getElementById("orderClient").value);
@@ -616,7 +590,6 @@ function savePlanningEvent() {
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
-// ==================== ORDER DETAIL & QUALITY ====================
 function openOrderDetail(id) {
   currentOrderId = id;
   var order = null;
@@ -730,7 +703,6 @@ function skipQuality() {
 function deleteCurrentOrder() { if (!confirm("Supprimer ?")) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal("orderDetailModal"); showToast("Supprime", "warning"); renderOrders(); renderStats(); }
 function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast("Photo supprimee", "warning"); } }
 
-// ==================== CLIENT DETAIL ====================
 function openClientDetail(id) {
   currentClientId = id;
   var client = null;
@@ -761,8 +733,12 @@ function openClientDetail(id) {
 function deleteCurrentClient() {
   if (!confirm("Supprimer ce client et toutes ses commandes ?")) return;
   var clientId = currentClientId;
-  data.clients = data.clients.filter(function(c) { return c.id !== clientId; });
-  data.orders = data.orders.filter(function(o) { return o.clientId !== clientId; });
+  var filteredClients = [];
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id !== clientId) filteredClients.push(data.clients[i]);
+  data.clients = filteredClients;
+  var filteredOrders = [];
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId !== clientId) filteredOrders.push(data.orders[i]);
+  data.orders = filteredOrders;
   saveData();
   closeModal("clientDetailModal");
   showToast("Client supprime", "warning");
@@ -771,7 +747,6 @@ function deleteCurrentClient() {
   renderOrders();
 }
 
-// ==================== CAMERA ====================
 function openCamera() { photoOrderId = currentOrderId; document.getElementById("cameraInput").click(); }
 function handleCameraFile(input) {
   var file = input.files[0];
@@ -801,7 +776,6 @@ function handleQualityCameraFile(input) {
   input.value = "";
 }
 
-// ==================== RENDER ====================
 function renderAll() {
   renderStats();
   renderOrders();
@@ -908,7 +882,6 @@ function renderStock() {
   div.innerHTML = html;
 }
 
-// ==================== PLANNING ====================
 function renderPlanning() {
   var calDiv = document.getElementById("planningCalendar");
   if (!calDiv) return;
@@ -957,7 +930,6 @@ function renderPlanningEvents() {
   div.innerHTML = html;
 }
 
-// ==================== TIMER ====================
 function startPrintTimer() {
   var name = document.getElementById("timerName").value.trim();
   var machineId = parseInt(document.getElementById("timerMachine").value);
@@ -1082,7 +1054,6 @@ function playSound() {
   } catch(e) {}
 }
 
-// ==================== CALCULATOR ====================
 function calculateCost() {
   var service = document.getElementById("calcService").value;
   var type = document.getElementById("calcType").value;
@@ -1098,10 +1069,9 @@ function calculateCost() {
   document.getElementById("calcTotal").textContent = total.toFixed(2) + "€";
 }
 
-// ==================== SYNC ====================
 function syncWithGoogle() {
   if (!navigator.onLine) { showToast("Hors-ligne", "warning"); return; }
-  var apiUrl = localStorage.getItem("tli11_apiUrl") || "";
+  var apiUrl = localStorage.getItem("tli12_apiUrl") || "";
   if (!apiUrl) { showToast("URL API non configuree. Va dans Config et colle ton lien Apps Script.", "warning"); return; }
   showToast("Synchronisation en cours...", "success");
   fetch(apiUrl, {
@@ -1118,7 +1088,7 @@ function syncWithGoogle() {
 }
 
 function testConnection() {
-  var apiUrl = localStorage.getItem("tli11_apiUrl") || "";
+  var apiUrl = localStorage.getItem("tli12_apiUrl") || "";
   if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
   showToast("Test en cours...");
   fetch(apiUrl + "?action=getAll").then(function(r) {
@@ -1128,11 +1098,10 @@ function testConnection() {
 
 function saveConfig() {
   var el = document.getElementById("apiUrl");
-  localStorage.setItem("tli11_apiUrl", el ? (el.value || "").trim() : "");
+  localStorage.setItem("tli12_apiUrl", el ? (el.value || "").trim() : "");
   showToast("Config sauvegardee");
 }
 
-// ==================== EXPORT / IMPORT / RESET ====================
 function exportData() {
   var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: "application/json"});
   var url = URL.createObjectURL(blob);
@@ -1176,7 +1145,6 @@ function clearAll() {
   renderAll();
 }
 
-// ==================== UTILS ====================
 function showToast(msg, type) {
   var toast = document.getElementById("toast");
   toast.textContent = msg;
@@ -1185,7 +1153,6 @@ function showToast(msg, type) {
   setTimeout(function() { toast.classList.remove("show"); }, 3000);
 }
 
-// ==================== BOOT ====================
 init();
 loadTimers();
 startTimerLoop();
