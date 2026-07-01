@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Technical Layer Innovation</title>
+<title>TLI - Gestion 3D</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -14,8 +14,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .app-header h1{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:6px}
 .app-header .white{color:#fff}.app-header .blue{color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.4)}
 .sync-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--light);padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
-.sync-btn.syncing{color:var(--primary);animation:pulse 1s infinite}.sync-btn.synced{color:var(--success)}.sync-btn.error{color:var(--secondary)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .nav-tabs{display:flex;gap:8px;padding:12px 10px;overflow-x:auto;background:var(--dark);position:sticky;top:58px;z-index:99;border-bottom:1px solid var(--glass-border);scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{flex-shrink:0;padding:8px 16px;border-radius:25px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap;font-family:inherit}
@@ -34,7 +32,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .form-group{margin-bottom:14px}
 .form-label{display:block;margin-bottom:5px;font-size:.8rem;color:#aaa}
 .form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
 .form-textarea{min-height:70px;resize:vertical}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
 .badge-pending{background:rgba(255,170,0,0.2);color:var(--warning)}
@@ -59,17 +56,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);border:1px solid var(--primary);color:var(--light);padding:12px 20px;border-radius:12px;font-size:.9rem;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast-success{border-color:var(--success)}.toast-error{border-color:var(--secondary)}.toast-warning{border-color:var(--warning)}
-.notif-badge{position:fixed;top:70px;right:12px;background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff;padding:14px 18px;border-radius:12px;font-size:.9rem;z-index:2000;transform:translateX(150%);transition:transform .4s;max-width:300px}
-.notif-badge.show{transform:translateX(0)}
-.notif-title{font-weight:700;margin-bottom:4px}.notif-text{font-size:.8rem;opacity:.9}
-.notif-close{position:absolute;top:6px;right:10px;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer}
-.offline-banner{background:linear-gradient(90deg,var(--warning),#cc8800);color:var(--darker);padding:8px;text-align:center;font-size:.8rem;font-weight:700;position:fixed;top:0;left:0;right:0;z-index:1001;transform:translateY(-100%);transition:transform .3s}
-.offline-banner.show{transform:translateY(0)}
 .progress-bar{height:6px;background:var(--darker);border-radius:3px;overflow:hidden;margin-top:8px}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .5s}
-.checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
-.checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
-.checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
 .timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
 .timer-card.finished{border-color:var(--success);background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,255,136,0.05));animation:glow 2s infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 5px rgba(0,255,136,0.2)}50%{box-shadow:0 0 20px rgba(0,255,136,0.4)}}
@@ -84,10 +72,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .search-bar{position:relative;margin-bottom:12px}
 .search-bar input{width:100%;padding:12px 15px 12px 42px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
 .search-bar::before{content:"🔍";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem}
-.machine-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px}
-.machine-status{display:inline-flex;align-items:center;gap:6px;font-size:.8rem}
-.machine-status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--success)}
-.machine-status.busy::before{background:var(--warning)}.machine-status.offline::before{background:var(--secondary)}
 .planning-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
 .planning-day-header{text-align:center;font-size:.7rem;color:#888;padding:6px 2px}
 .planning-day{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:5px;min-height:55px;cursor:pointer;transition:all .2s;position:relative}
@@ -108,12 +92,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .quality-header{text-align:center;margin-bottom:18px}
 .quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
 .quality-header p{color:#888;font-size:.85rem;margin-top:6px}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
+.checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
+/* DEBUG PANEL */
+#debugPanel{background:#ff0066;color:#fff;padding:10px;font-size:.75rem;position:fixed;top:0;left:0;right:0;z-index:9999;max-height:150px;overflow-y:auto;display:none;font-family:monospace}
+#debugPanel.show{display:block}
+#debugPanel div{border-bottom:1px solid rgba(255,255,255,0.2);padding:2px 0}
+#debugPanel .err{color:#ffcc00}
+#debugToggle{position:fixed;bottom:70px;right:10px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1rem;z-index:9998;cursor:pointer;opacity:.7}
 @media(min-width:768px){.app-header{padding:18px 40px}.section{padding:20px 40px;max-width:800px;margin:0 auto}.nav-tabs{padding:12px 40px;justify-content:center}}
 </style>
 </head>
 <body>
-<div class="offline-banner" id="offlineBanner">📴 Mode hors-ligne</div>
-<div class="notif-badge" id="notifBadge"><button class="notif-close" onclick="hideNotification()">×</button><div class="notif-title" id="notifTitle">Notification</div><div class="notif-text" id="notifText">Message</div></div>
+<div id="debugPanel"></div>
+<button id="debugToggle" onclick="toggleDebug()">🐛</button>
 
 <header class="app-header"><h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1><button class="sync-btn" id="syncBtn" onclick="syncWithGoogle()"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button></header>
 
@@ -131,6 +124,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 
 <section id="dashboard" class="section active">
 <div class="stats-grid"><div class="stat-box"><div class="stat-value" id="statOrders">0</div><div class="stat-label">En cours</div></div><div class="stat-box"><div class="stat-value" id="statFinished">0</div><div class="stat-label">Terminées</div></div><div class="stat-box"><div class="stat-value" id="statRevenue">0€</div><div class="stat-label">CA estimé</div></div><div class="stat-box"><div class="stat-value" id="statMachines">4</div><div class="stat-label">Machines</div></div></div>
+<div class="card"><div class="card-title">🧪 TEST</div><button class="btn btn-primary" onclick="testButton()">Clique ici pour tester</button><div id="testResult" style="margin-top:10px;color:var(--success);font-weight:700;text-align:center;"></div></div>
 <div class="card"><div class="card-title">⚡ Actions rapides</div><button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button><button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button><button class="btn btn-secondary" onclick="showSection('timer')" style="margin-top:8px">⏰ Lancer timer</button></div>
 <div class="card" id="activeTimersCard" style="display:none"><div class="card-title">🔥 Impressions en cours</div><div id="activeTimersList"></div></div>
 <div class="card"><div class="card-title">🔔 Alertes stock</div><div id="stockAlerts"></div></div>
@@ -138,19 +132,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 </section>
 
 <section id="orders" class="section"><div class="search-bar"><input type="text" id="orderSearch" placeholder="Rechercher..." oninput="renderOrders()"></div><div id="ordersList"></div></section>
-
 <section id="catalog" class="section"><button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modèle</button><div id="catalogList" style="margin-top:12px"></div></section>
-
 <section id="stock" class="section"><button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button><div id="stockList" style="margin-top:12px"></div></section>
-
 <section id="planning" class="section">
 <div class="card"><div class="card-title">📅 Calendrier</div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(-1)" style="width:auto">◀</button><div id="planningMonthLabel" style="font-weight:700"></div><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(1)" style="width:auto">▶</button></div><div class="planning-calendar" id="planningCalendar"></div></div>
-<div class="card"><div class="card-title">📋 Événements du jour</div><div id="planningEventsList"></div></div>
-<button class="btn btn-primary" onclick="openPlanningModal()">+ Ajouter événement</button>
+<div class="card"><div class="card-title">📋 Événements du jour</div><div id="planningEventsList"></div></div><button class="btn btn-primary" onclick="openPlanningModal()">+ Ajouter événement</button>
 </section>
-
 <section id="clients" class="section"><button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button><div id="clientsList" style="margin-top:12px"></div></section>
-
 <section id="calculator" class="section">
 <div class="card"><div class="card-title">🧮 Calculateur de devis</div>
 <div class="form-group"><label class="form-label">Type de prestation</label><select class="form-select" id="calcService" onchange="calculateCost()"><option value="print">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception / Prototypage</option></select></div>
@@ -162,7 +150,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px"><div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estimé</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div></div>
 </div>
 </section>
-
 <section id="timer" class="section">
 <div class="card"><div class="card-title">⏰ Nouveau timer</div>
 <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="timerName" placeholder="ex: Support téléphone"></div>
@@ -175,12 +162,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="card" id="activeTimersSection" style="display:none"><div class="card-title">🔥 En cours</div><div id="timerList"></div></div>
 <div class="card" id="finishedTimersSection" style="display:none"><div class="card-title">✅ Terminées</div><div id="finishedTimerList"></div></div>
 </section>
-
 <section id="settings" class="section">
 <div class="card"><div class="card-title">🔗 Synchronisation</div><div class="form-group"><label class="form-label">URL API Apps Script</label><input type="text" class="form-input" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"></div><button class="btn btn-primary" onclick="saveConfig()">💾 Sauvegarder</button><button class="btn btn-secondary" onclick="testConnection()" style="margin-top:8px">🧪 Tester</button></div>
 <div class="card"><div class="card-title">🔔 Notifications</div><div class="checklist-item"><input type="checkbox" id="notifSound" checked><label for="notifSound">Son timer terminé</label></div><div class="checklist-item"><input type="checkbox" id="notifVibrate" checked><label for="notifVibrate">Vibration</label></div><div class="checklist-item"><input type="checkbox" id="notifScreen" checked><label for="notifScreen">Garder écran allumé</label></div></div>
 <div class="card"><div class="card-title">📤 Export / Import</div><button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button><button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:8px">📥 Importer JSON</button><input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)"></div>
-<div class="card"><div class="card-title">⚠️ Danger Zone</div><button class="btn btn-danger" onclick="resetAllData()">🗑️ Tout réinitialiser</button></div>
+<div class="card"><div class="card-title">⚠️ Danger Zone</div><button class="btn btn-danger" onclick="resetAllData()">🗑️ Tout réinitialiser</button><button class="btn btn-secondary" onclick="clearCache()" style="margin-top:8px">🧹 Vider le cache local</button></div>
 </section>
 
 <div class="modal-overlay" id="newOrderModal">
@@ -268,112 +254,960 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="toast" id="toast"></div>
 
 <script>
+// ==================== DEBUG ====================
+var debugVisible = false;
+function toggleDebug() {
+  debugVisible = !debugVisible;
+  document.getElementById('debugPanel').className = debugVisible ? 'show' : '';
+}
+function log(msg, isErr) {
+  try {
+    var panel = document.getElementById('debugPanel');
+    var div = document.createElement('div');
+    div.textContent = (new Date().toLocaleTimeString()) + ' | ' + msg;
+    if (isErr) div.className = 'err';
+    panel.appendChild(div);
+    console.log(msg);
+  } catch(e) {}
+}
+window.onerror = function(msg, url, line) {
+  log('JS ERROR: ' + msg + ' (ligne ' + line + ')', true);
+  showToast('Erreur JS - voir debug', 'error');
+};
+
 // ==================== CONFIG & STATE ====================
-let config={apiUrl:localStorage.getItem('tli5_apiUrl')||'',notifSound:localStorage.getItem('tli5_notifSound')!=='false',notifVibrate:localStorage.getItem('tli5_notifVibrate')!=='false',notifScreen:localStorage.getItem('tli5_notifScreen')!=='false'};
-let data={orders:[],clients:[{id:1,name:'Client Test',phone:'',email:'',address:'',notes:''}],models:[],stock:[],machines:[{id:1,name:'Elegoo Saturn 4 Ultra',type:'resin',status:'idle',currentJob:null},{id:2,name:'Bambulab P2S #1',type:'fdm',status:'idle',currentJob:null},{id:3,name:'Bambulab P2S #2',type:'fdm',status:'idle',currentJob:null},{id:4,name:'Bambulab H2C',type:'fdm',status:'idle',currentJob:null}],checklist:[{id:1,text:'Adhésion plateau OK',checked:false},{id:2,text:'Pas de warping / déformation',checked:false},{id:3,text:'Finition surface correcte',checked:false},{id:4,text:'Supports retirés proprement',checked:false},{id:5,text:'Post-traitement résine (lavage+UV)',checked:false},{id:6,text:'Dimensions conformes',checked:false},{id:7,text:'Emballage adapté',checked:false},{id:8,text:'Photo finale prise',checked:false}],planningEvents:[],qualityResults:{}};
-let activeTimers=[],finishedTimers=[],currentOrderId=null,photoOrderId=null,isOnline=navigator.onLine,wakeLock=null,planningCurrentDate=new Date(),selectedPlanningDay=null,qualityOrderId=null;
+var config = {
+  apiUrl: localStorage.getItem('tli6_apiUrl') || '',
+  notifSound: localStorage.getItem('tli6_notifSound') !== 'false',
+  notifVibrate: localStorage.getItem('tli6_notifVibrate') !== 'false',
+  notifScreen: localStorage.getItem('tli6_notifScreen') !== 'false'
+};
+
+var defaultData = {
+  orders: [],
+  clients: [{ id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: '' }],
+  models: [],
+  stock: [],
+  machines: [
+    { id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null },
+    { id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null },
+    { id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null },
+    { id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null }
+  ],
+  checklist: [
+    { id: 1, text: 'Adhésion plateau OK', checked: false },
+    { id: 2, text: 'Pas de warping / déformation', checked: false },
+    { id: 3, text: 'Finition surface correcte', checked: false },
+    { id: 4, text: 'Supports retirés proprement', checked: false },
+    { id: 5, text: 'Post-traitement résine (lavage+UV)', checked: false },
+    { id: 6, text: 'Dimensions conformes', checked: false },
+    { id: 7, text: 'Emballage adapté', checked: false },
+    { id: 8, text: 'Photo finale prise', checked: false }
+  ],
+  planningEvents: [],
+  qualityResults: {}
+};
+
+var data = JSON.parse(JSON.stringify(defaultData));
+var activeTimers = [];
+var finishedTimers = [];
+var currentOrderId = null;
+var photoOrderId = null;
+var isOnline = navigator.onLine;
+var wakeLock = null;
+var planningCurrentDate = new Date();
+var selectedPlanningDay = null;
+var qualityOrderId = null;
 
 // ==================== INIT ====================
-function init(){console.log('TLI v5 init');try{loadData();loadConfig();loadTimers();setupEvents();renderAll();startTimerLoop();calculateCost();console.log('TLI v5 ready')}catch(err){console.error('Init error:',err);showToast('Erreur démarrage','error')}}
-function setupEvents(){window.addEventListener('online',()=>{isOnline=true;document.getElementById('offlineBanner').classList.remove('show');showToast('Connexion rétablie','success')});window.addEventListener('offline',()=>{isOnline=false;document.getElementById('offlineBanner').classList.add('show');showToast('Hors-ligne','warning')});if(!isOnline)document.getElementById('offlineBanner').classList.add('show');if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)})})}
-function loadData(){const saved=localStorage.getItem('tli5_data');if(saved){try{const p=JSON.parse(saved);data={...data,...p};if(!data.planningEvents)data.planningEvents=[];if(!data.qualityResults)data.qualityResults={}}catch(e){}}}
-function saveData(){localStorage.setItem('tli5_data',JSON.stringify(data))}
-function loadConfig(){const el=document.getElementById('apiUrl');if(el)el.value=config.apiUrl;document.getElementById('notifSound').checked=config.notifSound;document.getElementById('notifVibrate').checked=config.notifVibrate;document.getElementById('notifScreen').checked=config.notifScreen}
-function saveConfig(){config.apiUrl=(document.getElementById('apiUrl').value||'').trim();localStorage.setItem('tli5_apiUrl',config.apiUrl);showToast('Config sauvegardée','success')}
-function loadTimers(){const saved=localStorage.getItem('tli5_timers');if(saved){try{const p=JSON.parse(saved);activeTimers=p.active||[];finishedTimers=p.finished||[]}catch(e){}}}
-function saveTimers(){localStorage.setItem('tli5_timers',JSON.stringify({active:activeTimers,finished:finishedTimers}))}
+function init() {
+  log('TLI v6 init start');
+  try {
+    loadData();
+    log('Data loaded');
+    loadConfig();
+    log('Config loaded');
+    loadTimers();
+    log('Timers loaded');
+    setupEvents();
+    log('Events setup');
+    renderAll();
+    log('Render done');
+    startTimerLoop();
+    log('Timer loop started');
+    calculateCost();
+    log('TLI v6 ready');
+  } catch(err) {
+    log('Init error: ' + err.message, true);
+    showToast('Erreur démarrage: ' + err.message, 'error');
+  }
+}
+
+function setupEvents() {
+  window.addEventListener('online', function() { isOnline = true; showToast('Connexion rétablie', 'success'); });
+  window.addEventListener('offline', function() { isOnline = false; showToast('Hors-ligne', 'warning'); });
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+}
+
+function loadData() {
+  var saved = localStorage.getItem('tli6_data');
+  if (saved) {
+    try {
+      var p = JSON.parse(saved);
+      if (p && typeof p === 'object') {
+        if (Array.isArray(p.orders)) data.orders = p.orders;
+        if (Array.isArray(p.clients)) data.clients = p.clients;
+        if (Array.isArray(p.models)) data.models = p.models;
+        if (Array.isArray(p.stock)) data.stock = p.stock;
+        if (Array.isArray(p.machines)) data.machines = p.machines;
+        if (Array.isArray(p.checklist)) data.checklist = p.checklist;
+        if (Array.isArray(p.planningEvents)) data.planningEvents = p.planningEvents;
+        if (p.qualityResults && typeof p.qualityResults === 'object') data.qualityResults = p.qualityResults;
+      }
+    } catch(e) {
+      log('Load data error: ' + e.message, true);
+    }
+  }
+}
+function saveData() { localStorage.setItem('tli6_data', JSON.stringify(data)); }
+
+function loadConfig() {
+  var el = document.getElementById('apiUrl');
+  if (el) el.value = config.apiUrl;
+  var ns = document.getElementById('notifSound');
+  var nv = document.getElementById('notifVibrate');
+  var nsc = document.getElementById('notifScreen');
+  if (ns) ns.checked = config.notifSound;
+  if (nv) nv.checked = config.notifVibrate;
+  if (nsc) nsc.checked = config.notifScreen;
+}
+function saveConfig() {
+  var el = document.getElementById('apiUrl');
+  config.apiUrl = el ? (el.value || '').trim() : '';
+  localStorage.setItem('tli6_apiUrl', config.apiUrl);
+  showToast('Config sauvegardée', 'success');
+}
+function loadTimers() {
+  var saved = localStorage.getItem('tli6_timers');
+  if (saved) {
+    try {
+      var p = JSON.parse(saved);
+      if (p && Array.isArray(p.active)) activeTimers = p.active;
+      if (p && Array.isArray(p.finished)) finishedTimers = p.finished;
+    } catch(e) {}
+  }
+}
+function saveTimers() { localStorage.setItem('tli6_timers', JSON.stringify({ active: activeTimers, finished: finishedTimers })); }
 
 // ==================== WAKE LOCK ====================
-async function requestWakeLock(){try{if('wakeLock'in navigator){wakeLock=await navigator.wakeLock.request('screen');showToast('Écran allumé','success')}else{showToast('Non supporté','warning')}}catch(e){showToast('Impossible','error')}}
+function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      navigator.wakeLock.request('screen').then(function(wl) { wakeLock = wl; showToast('Écran allumé', 'success'); });
+    } else {
+      showToast('Non supporté', 'warning');
+    }
+  } catch(e) { showToast('Impossible', 'error'); }
+}
 
 // ==================== SYNC ====================
-async function syncWithGoogle(){if(!isOnline){showToast('Hors-ligne','warning');return}if(!config.apiUrl){showToast('URL API non configurée','warning');return}const btn=document.getElementById('syncBtn'),icon=document.getElementById('syncIcon'),text=document.getElementById('syncText');btn.classList.add('syncing');icon.textContent='⏳';text.textContent='Sync...';try{const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),10000);const r=await fetch(config.apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'syncAll',orders:data.orders,clients:data.clients,models:data.models,stock:data.stock,machines:data.machines,planningEvents:data.planningEvents}),signal:ctrl.signal});clearTimeout(to);if(!r.ok)throw new Error('HTTP '+r.status);const res=await r.json();if(!res.success)throw new Error(res.error||'Sync failed');btn.classList.remove('syncing');btn.classList.add('synced');icon.textContent='✅';text.textContent='OK';showToast('Synchronisé','success');setTimeout(()=>{btn.classList.remove('synced');icon.textContent='🔄';text.textContent='Sync'},3000)}catch(e){btn.classList.remove('syncing');btn.classList.add('error');icon.textContent='❌';text.textContent='Erreur';showToast('Sync: '+e.message,'error');setTimeout(()=>{btn.classList.remove('error');icon.textContent='🔄';text.textContent='Sync'},3000)}}
-async function testConnection(){if(!config.apiUrl){showToast('URL API non configurée','warning');return}try{const r=await fetch(config.apiUrl+'?action=getAll');showToast(r.ok?'Connexion OK':'Erreur '+r.status,r.ok?'success':'error')}catch(e){showToast('Connexion impossible','error')}}
+function syncWithGoogle() {
+  if (!isOnline) { showToast('Hors-ligne', 'warning'); return; }
+  if (!config.apiUrl) { showToast('URL API non configurée', 'warning'); return; }
+  var btn = document.getElementById('syncBtn');
+  var icon = document.getElementById('syncIcon');
+  var text = document.getElementById('syncText');
+  btn.style.color = 'var(--primary)';
+  icon.textContent = '⏳'; text.textContent = 'Sync...';
+  fetch(config.apiUrl, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'syncAll', orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents })
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(res) {
+    if (!res.success) throw new Error(res.error || 'Sync failed');
+    icon.textContent = '✅'; text.textContent = 'OK';
+    showToast('Synchronisé', 'success');
+    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
+  }).catch(function(e) {
+    icon.textContent = '❌'; text.textContent = 'Erreur';
+    showToast('Sync: ' + e.message, 'error');
+    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
+  });
+}
+function testConnection() {
+  if (!config.apiUrl) { showToast('URL API non configurée', 'warning'); return; }
+  fetch(config.apiUrl + '?action=getAll').then(function(r) {
+    showToast(r.ok ? 'Connexion OK' : 'Erreur ' + r.status, r.ok ? 'success' : 'error');
+  }).catch(function() { showToast('Connexion impossible', 'error'); });
+}
 
 // ==================== NAV ====================
-function showSection(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));const s=document.getElementById(id),t=document.querySelector('[data-section="'+id+'"]');if(s)s.classList.add('active');if(t)t.classList.add('active');renderAll()}
+function showSection(id) {
+  log('showSection: ' + id);
+  var sections = document.querySelectorAll('.section');
+  for (var i = 0; i < sections.length; i++) sections[i].classList.remove('active');
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  var s = document.getElementById(id);
+  var t = document.querySelector('[data-section="' + id + '"]');
+  if (s) s.classList.add('active');
+  if (t) t.classList.add('active');
+  renderAll();
+}
 
 // ==================== RENDER ALL ====================
-function renderAll(){renderDashboard();renderOrders();renderClients();renderCatalog();renderStock();renderMachines();renderTimers();renderPlanning();updateClientSelect();updateMachineSelects()}
-function renderDashboard(){updateStats();renderActiveTimers();const alerts=data.stock.filter(s=>parseFloat(s.qty)<=parseFloat(s.alert));const div=document.getElementById('stockAlerts');if(alerts.length===0)div.innerHTML='<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';else div.innerHTML=alerts.map(s=>'<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>'+s.name+'</strong> — '+s.qty+' '+s.unit+' restant(s)</div>').join('');const today=new Date();const todayEvents=data.planningEvents.filter(e=>{const d=new Date(e.date);return d.getDate()===today.getDate()&&d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()});const tdiv=document.getElementById('todayEvents');if(todayEvents.length===0)tdiv.innerHTML='<div class="empty-state"><div class="icon">📅</div>Rien de prévu</div>';else tdiv.innerHTML=todayEvents.map(e=>renderEventItem(e)).join('')}
-function updateStats(){const active=data.orders.filter(o=>o.status!=='delivered').length;const finished=data.orders.filter(o=>{const d=new Date(o.date);const n=new Date();return o.status==='finished'&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()}).length;const revenue=data.orders.filter(o=>o.status==='delivered').reduce((s,o)=>s+(parseFloat(o.price)||0),0);document.getElementById('statOrders').textContent=active;document.getElementById('statFinished').textContent=finished;document.getElementById('statRevenue').textContent=revenue.toFixed(0)+'€'}
-function renderActiveTimers(){const card=document.getElementById('activeTimersCard'),list=document.getElementById('activeTimersList');const active=activeTimers.filter(t=>!t.finished);if(active.length===0){card.style.display='none';return}card.style.display='block';list.innerHTML=active.map(t=>{const remaining=Math.max(0,t.endTime-Date.now());const pct=Math.min(100,((t.duration-remaining)/t.duration)*100);return'<div class="timer-card"><div class="timer-name">'+t.name+'</div><div class="timer-info">🖨️ '+t.machineName+' • '+formatDuration(t.duration)+'</div><div class="timer-remaining">'+formatTime(remaining)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>'}).join('')}
-function renderOrders(){const search=(document.getElementById('orderSearch')?.value||'').toLowerCase();let orders=[...data.orders].sort((a,b)=>b.id-a.id);if(search)orders=orders.filter(o=>(o.name||'').toLowerCase().includes(search)||(o.clientName||'').toLowerCase().includes(search));const div=document.getElementById('ordersList');if(orders.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>';return}div.innerHTML=orders.map(o=>{const svc=o.service==='print'?'🖨️ Impression':o.service==='modeling'?'🎨 Modélisation':o.service==='design'?'💡 Conception':o.service;return'<div class="order-item" onclick="openOrderDetail('+o.id+')"><div class="order-item-header"><span class="order-item-title">#'+o.id+' — '+(o.name||'Sans nom')+'</span><span class="badge badge-'+(o.status||'pending')+'">'+getStatusLabel(o.status)+'</span></div><div class="order-item-meta"><span>👤 '+(o.clientName||'Inconnu')+'</span><span>'+svc+'</span><span>💰 '+(o.price||0)+'€</span>'+(o.photos?.length>0?'<span>📷</span>':'')+'</div></div>'}).join('')}
-function getStatusLabel(s){const l={pending:'À faire',printing:'En cours',finished:'Terminée',delivered:'Livrée'};return l[s]||s}
-function renderClients(){const div=document.getElementById('clientsList');if(data.clients.length===0){div.innerHTML='<div class="empty-state"><div class="icon">👥</div>Aucun client</div>';return}div.innerHTML=data.clients.map(c=>'<div class="card" style="cursor:pointer" onclick="showClientOrders('+c.id+')"><div style="font-weight:700;font-size:1.05rem">'+(c.name||'Sans nom')+'</div><div style="font-size:.8rem;color:#888;margin-top:4px">'+(c.phone?'📞 '+c.phone:'')+' '+(c.email?'✉️ '+c.email:'')+'</div><div style="font-size:.75rem;color:#666;margin-top:4px">'+data.orders.filter(o=>o.clientId===c.id).length+' commande(s)</div></div>').join('')}
-function renderCatalog(){const div=document.getElementById('catalogList');if(data.models.length===0){div.innerHTML='<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>';return}div.innerHTML=data.models.map(m=>'<div class="card"><div style="font-weight:700">'+(m.name||'Sans nom')+'</div><div style="font-size:.8rem;color:#888;margin-top:4px">'+(m.category||'')+' • '+(m.type==='fdm'?'FDM':m.type==='resin'?'Résine':'FDM + Résine')+'</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ '+(m.time||0)+'h</span><span>⚖️ '+(m.weight||0)+'g</span><span style="color:var(--primary);font-weight:700">'+(m.price||0)+'€</span></div></div>').join('')}
-function renderStock(){const div=document.getElementById('stockList');if(data.stock.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📋</div>Stock vide</div>';return}div.innerHTML=data.stock.map(s=>{const qty=parseFloat(s.qty)||0,alert=parseFloat(s.alert)||0,isLow=qty<=alert;return'<div class="card" style="border-left:'+(isLow?'3px solid var(--warning)':'3px solid var(--success)')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">'+(s.name||'Sans nom')+'</div><div style="font-size:.75rem;color:#888">'+(s.type||'')+'</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:'+(isLow?'var(--warning)':'var(--success)')+'">'+qty+' '+(s.unit||'')+'</div><div style="font-size:.7rem;color:#666">Seuil: '+alert+'</div></div></div></div>'}).join('')}
-function renderMachines(){const div=document.getElementById('machinesList');if(!div)return;div.innerHTML=data.machines.map(m=>{const activeTimer=activeTimers.find(t=>t.machineId===m.id&&!t.finished);return'<div class="machine-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">'+(m.name||'Machine')+'</div><div style="font-size:.75rem;color:#888">'+(m.type==='fdm'?'FDM':'Résine')+'</div></div><div class="machine-status '+(m.status||'idle')+'">'+(m.status==='idle'?'Disponible':m.status==='busy'?'En impression':'Hors ligne')+'</div></div>'+(m.currentJob?'<div style="margin-top:6px;font-size:.8rem;color:var(--primary)">➤ '+m.currentJob+'</div>':'')+(activeTimer?'<div style="margin-top:4px;font-size:.75rem;color:var(--warning)">⏰ '+formatTime(activeTimer.endTime-Date.now())+'</div>':'')+'</div>'}).join('')}
+function renderAll() {
+  try { renderDashboard(); } catch(e) { log('renderDashboard error: ' + e.message, true); }
+  try { renderOrders(); } catch(e) { log('renderOrders error: ' + e.message, true); }
+  try { renderClients(); } catch(e) { log('renderClients error: ' + e.message, true); }
+  try { renderCatalog(); } catch(e) { log('renderCatalog error: ' + e.message, true); }
+  try { renderStock(); } catch(e) { log('renderStock error: ' + e.message, true); }
+  try { renderTimers(); } catch(e) { log('renderTimers error: ' + e.message, true); }
+  try { renderPlanning(); } catch(e) { log('renderPlanning error: ' + e.message, true); }
+  try { updateClientSelect(); } catch(e) { log('updateClientSelect error: ' + e.message, true); }
+  try { updateMachineSelects(); } catch(e) { log('updateMachineSelects error: ' + e.message, true); }
+}
+
+function renderDashboard() {
+  updateStats();
+  renderActiveTimers();
+  var alerts = [];
+  for (var i = 0; i < data.stock.length; i++) {
+    var s = data.stock[i];
+    if (parseFloat(s.qty) <= parseFloat(s.alert)) alerts.push(s);
+  }
+  var div = document.getElementById('stockAlerts');
+  if (alerts.length === 0) {
+    div.innerHTML = '<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < alerts.length; i++) {
+      var s = alerts[i];
+      html += '<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>' + s.name + '</strong> — ' + s.qty + ' ' + s.unit + ' restant(s)</div>';
+    }
+    div.innerHTML = html;
+  }
+  var today = new Date();
+  var todayEvents = [];
+  for (var i = 0; i < data.planningEvents.length; i++) {
+    var e = data.planningEvents[i];
+    var d = new Date(e.date);
+    if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
+      todayEvents.push(e);
+    }
+  }
+  var tdiv = document.getElementById('todayEvents');
+  if (todayEvents.length === 0) {
+    tdiv.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Rien de prévu</div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < todayEvents.length; i++) html += renderEventItem(todayEvents[i]);
+    tdiv.innerHTML = html;
+  }
+}
+
+function updateStats() {
+  var active = 0;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].status !== 'delivered') active++;
+  var finished = 0;
+  var n = new Date();
+  for (var i = 0; i < data.orders.length; i++) {
+    var o = data.orders[i];
+    var d = new Date(o.date);
+    if (o.status === 'finished' && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear()) finished++;
+  }
+  var revenue = 0;
+  for (var i = 0; i < data.orders.length; i++) {
+    var o = data.orders[i];
+    if (o.status === 'delivered') revenue += parseFloat(o.price) || 0;
+  }
+  document.getElementById('statOrders').textContent = active;
+  document.getElementById('statFinished').textContent = finished;
+  document.getElementById('statRevenue').textContent = revenue.toFixed(0) + '€';
+}
+
+function renderActiveTimers() {
+  var card = document.getElementById('activeTimersCard');
+  var list = document.getElementById('activeTimersList');
+  var active = [];
+  for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
+  if (active.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  var html = '';
+  for (var i = 0; i < active.length; i++) {
+    var t = active[i];
+    var remaining = Math.max(0, t.endTime - Date.now());
+    var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
+    html += '<div class="timer-card"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+  }
+  list.innerHTML = html;
+}
+
+function renderOrders() {
+  var searchInput = document.getElementById('orderSearch');
+  var search = '';
+  if (searchInput && searchInput.value) search = searchInput.value.toLowerCase();
+  var orders = [];
+  for (var i = 0; i < data.orders.length; i++) orders.push(data.orders[i]);
+  orders.sort(function(a, b) { return b.id - a.id; });
+  if (search) {
+    var filtered = [];
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      var name = (o.name || '').toLowerCase();
+      var clientName = (o.clientName || '').toLowerCase();
+      if (name.indexOf(search) !== -1 || clientName.indexOf(search) !== -1) filtered.push(o);
+    }
+    orders = filtered;
+  }
+  var div = document.getElementById('ordersList');
+  if (orders.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>'; return; }
+  var html = '';
+  for (var i = 0; i < orders.length; i++) {
+    var o = orders[i];
+    var svc = o.service === 'print' ? '🖨️ Impression' : o.service === 'modeling' ? '🎨 Modélisation' : o.service === 'design' ? '💡 Conception' : o.service;
+    var statusClass = o.status || 'pending';
+    var hasPhotos = o.photos && o.photos.length > 0 ? '<span>📷</span>' : '';
+    html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + (o.name || 'Sans nom') + '</span><span class="badge badge-' + statusClass + '">' + getStatusLabel(o.status) + '</span></div><div class="order-item-meta"><span>👤 ' + (o.clientName || 'Inconnu') + '</span><span>' + svc + '</span><span>💰 ' + (o.price || 0) + '€</span>' + hasPhotos + '</div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function getStatusLabel(s) {
+  var l = { pending: 'À faire', printing: 'En cours', finished: 'Terminée', delivered: 'Livrée' };
+  return l[s] || s;
+}
+
+function renderClients() {
+  var div = document.getElementById('clientsList');
+  if (data.clients.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; return; }
+  var html = '';
+  for (var i = 0; i < data.clients.length; i++) {
+    var c = data.clients[i];
+    var phone = c.phone ? '📞 ' + c.phone : '';
+    var email = c.email ? '✉️ ' + c.email : '';
+    var orderCount = 0;
+    for (var j = 0; j < data.orders.length; j++) if (data.orders[j].clientId === c.id) orderCount++;
+    html += '<div class="card" style="cursor:pointer" onclick="showClientOrders(' + c.id + ')"><div style="font-weight:700;font-size:1.05rem">' + (c.name || 'Sans nom') + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + phone + ' ' + email + '</div><div style="font-size:.75rem;color:#666;margin-top:4px">' + orderCount + ' commande(s)</div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function renderCatalog() {
+  var div = document.getElementById('catalogList');
+  if (data.models.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; return; }
+  var html = '';
+  for (var i = 0; i < data.models.length; i++) {
+    var m = data.models[i];
+    var typeLabel = m.type === 'fdm' ? 'FDM' : m.type === 'resin' ? 'Résine' : 'FDM + Résine';
+    html += '<div class="card"><div style="font-weight:700">' + (m.name || 'Sans nom') + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || '') + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function renderStock() {
+  var div = document.getElementById('stockList');
+  if (data.stock.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; return; }
+  var html = '';
+  for (var i = 0; i < data.stock.length; i++) {
+    var s = data.stock[i];
+    var qty = parseFloat(s.qty) || 0;
+    var alert = parseFloat(s.alert) || 0;
+    var isLow = qty <= alert;
+    var borderColor = isLow ? '3px solid var(--warning)' : '3px solid var(--success)';
+    var qtyColor = isLow ? 'var(--warning)' : 'var(--success)';
+    html += '<div class="card" style="border-left:' + borderColor + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">' + (s.name || 'Sans nom') + '</div><div style="font-size:.75rem;color:#888">' + (s.type || '') + '</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:' + qtyColor + '">' + qty + ' ' + (s.unit || '') + '</div><div style="font-size:.7rem;color:#666">Seuil: ' + alert + '</div></div></div></div>';
+  }
+  div.innerHTML = html;
+}
 
 // ==================== PLANNING ====================
-function renderPlanning(){const calDiv=document.getElementById('planningCalendar');if(!calDiv)return;const year=planningCurrentDate.getFullYear(),month=planningCurrentDate.getMonth();const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];const label=document.getElementById('planningMonthLabel');if(label)label.textContent=monthNames[month]+' '+year;const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate();const days=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];let html='';days.forEach(d=>html+='<div class="planning-day-header">'+d+'</div>');for(let i=0;i<firstDay;i++)html+='<div></div>';const today=new Date();for(let d=1;d<=daysInMonth;d++){const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();const dayEvents=data.planningEvents.filter(e=>{const ed=new Date(e.date);return ed.getDate()===d&&ed.getMonth()===month&&ed.getFullYear()===year});let dots='',labels='';dayEvents.slice(0,3).forEach(e=>{dots+='<span class="planning-event-dot event-type-'+e.type+'"></span>';if(dayEvents.length<=2)labels+='<div style="font-size:.6rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>'});html+='<div class="planning-day '+(isToday?'today':'')+'" onclick="selectPlanningDay('+d+')"><div class="planning-day-number">'+d+'</div><div>'+dots+'</div>'+labels+'</div>'}calDiv.innerHTML=html;renderPlanningEventsList()}
-function changePlanningMonth(delta){planningCurrentDate.setMonth(planningCurrentDate.getMonth()+delta);renderPlanning()}
-function selectPlanningDay(day){selectedPlanningDay=new Date(planningCurrentDate.getFullYear(),planningCurrentDate.getMonth(),day);document.getElementById('planDate').value=selectedPlanningDay.toISOString().split('T')[0];renderPlanningEventsList()}
-function renderPlanningEventsList(){const div=document.getElementById('planningEventsList');if(!div)return;const target=selectedPlanningDay||new Date();const events=data.planningEvents.filter(e=>{const d=new Date(e.date);return d.getDate()===target.getDate()&&d.getMonth()===target.getMonth()&&d.getFullYear()===target.getFullYear()}).sort((a,b)=>a.startTime.localeCompare(b.startTime));if(events.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📅</div>Aucun événement</div>';return}div.innerHTML=events.map(e=>renderEventItem(e)).join('')}
-function renderEventItem(e){const typeLabels={printing:'Impression',modeling:'Modélisation',design:'Conception',maintenance:'Maintenance',rdv:'RDV',logistics:'Logistique',other:'Divers'};const typeColors={printing:'var(--primary)',modeling:'var(--warning)',design:'#ff6b81',maintenance:'var(--secondary)',rdv:'#a855f7',logistics:'#22d3ee',other:'#888'};return'<div class="event-item" style="border-left-color:'+(typeColors[e.type]||'var(--primary)')+'" onclick="editPlanningEvent('+e.id+')"><div class="event-item-header"><span class="event-item-title">'+e.title+'</span><span style="font-size:.7rem;color:'+(typeColors[e.type]||'var(--primary)')+';font-weight:700">'+(typeLabels[e.type]||e.type)+'</span></div><div class="event-item-meta"><span>🕐 '+e.startTime+' — '+e.endTime+'</span>'+(e.machineName?'<span>🖨️ '+e.machineName+'</span>':'')+'<span>👤 '+(e.assignee==='florian'?'Florian':e.assignee==='elie'?'Élie':'Les deux')+'</span>'+(e.priority==='high'?'<span style="color:var(--secondary)">🔴 Haute</span>':e.priority==='medium'?'<span style="color:var(--warning)">🟡 Moyenne</span>':'<span style="color:var(--success)">🟢 Basse</span>')+'</div></div>'}
-function openPlanningModal(){if(!document.getElementById('planDate').value)document.getElementById('planDate').value=new Date().toISOString().split('T')[0];updateMachineSelects();document.getElementById('planningModal').classList.add('active')}
-function togglePlanningFields(){const type=document.getElementById('planType').value;const mg=document.getElementById('planMachineGroup');mg.style.display=(type==='printing'||type==='maintenance')?'block':'none'}
-function savePlanningEvent(){try{const title=document.getElementById('planTitle').value.trim(),type=document.getElementById('planType').value,date=document.getElementById('planDate').value,startTime=document.getElementById('planStartTime').value,endTime=document.getElementById('planEndTime').value,machineId=document.getElementById('planMachine').value,assignee=document.getElementById('planAssignee').value,priority=document.getElementById('planPriority').value,notes=document.getElementById('planNotes').value;if(!title||!date){showToast('Titre et date obligatoires','warning');return}const machine=data.machines.find(m=>m.id===parseInt(machineId));const event={id:Date.now(),title,type,date,startTime,endTime,machineId:machineId?parseInt(machineId):null,machineName:machine?machine.name:null,assignee,priority,notes};data.planningEvents.push(event);saveData();closeModal('planningModal');showToast('Événement ajouté','success');renderPlanning();document.getElementById('planTitle').value='';document.getElementById('planNotes').value=''}catch(err){showToast('Erreur','error')}}
-function editPlanningEvent(id){if(!confirm('Supprimer cet événement ?'))return;data.planningEvents=data.planningEvents.filter(e=>e.id!==id);saveData();renderPlanning();showToast('Supprimé','warning')}
+function renderPlanning() {
+  var calDiv = document.getElementById('planningCalendar');
+  if (!calDiv) return;
+  var year = planningCurrentDate.getFullYear();
+  var month = planningCurrentDate.getMonth();
+  var monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var label = document.getElementById('planningMonthLabel');
+  if (label) label.textContent = monthNames[month] + ' ' + year;
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var html = '';
+  for (var i = 0; i < days.length; i++) html += '<div class="planning-day-header">' + days[i] + '</div>';
+  for (var i = 0; i < firstDay; i++) html += '<div></div>';
+  var today = new Date();
+  for (var d = 1; d <= daysInMonth; d++) {
+    var isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    var dayEvents = [];
+    for (var i = 0; i < data.planningEvents.length; i++) {
+      var e = data.planningEvents[i];
+      var ed = new Date(e.date);
+      if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(e);
+    }
+    var dots = '';
+    var labels = '';
+    for (var i = 0; i < Math.min(dayEvents.length, 3); i++) {
+      dots += '<span class="planning-event-dot event-type-' + dayEvents[i].type + '"></span>';
+      if (dayEvents.length <= 2) labels += '<div style="font-size:.6rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + dayEvents[i].title + '</div>';
+    }
+    var todayClass = isToday ? 'today' : '';
+    html += '<div class="planning-day ' + todayClass + '" onclick="selectPlanningDay(' + d + ')"><div class="planning-day-number">' + d + '</div><div>' + dots + '</div>' + labels + '</div>';
+  }
+  calDiv.innerHTML = html;
+  renderPlanningEventsList();
+}
+function changePlanningMonth(delta) { planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta); renderPlanning(); }
+function selectPlanningDay(day) { selectedPlanningDay = new Date(planningCurrentDate.getFullYear(), planningCurrentDate.getMonth(), day); document.getElementById('planDate').value = selectedPlanningDay.toISOString().split('T')[0]; renderPlanningEventsList(); }
+function renderPlanningEventsList() {
+  var div = document.getElementById('planningEventsList');
+  if (!div) return;
+  var target = selectedPlanningDay || new Date();
+  var events = [];
+  for (var i = 0; i < data.planningEvents.length; i++) {
+    var e = data.planningEvents[i];
+    var d = new Date(e.date);
+    if (d.getDate() === target.getDate() && d.getMonth() === target.getMonth() && d.getFullYear() === target.getFullYear()) events.push(e);
+  }
+  events.sort(function(a, b) { return a.startTime.localeCompare(b.startTime); });
+  if (events.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun événement</div>'; return; }
+  var html = '';
+  for (var i = 0; i < events.length; i++) html += renderEventItem(events[i]);
+  div.innerHTML = html;
+}
+function renderEventItem(e) {
+  var typeLabels = { printing: 'Impression', modeling: 'Modélisation', design: 'Conception', maintenance: 'Maintenance', rdv: 'RDV', logistics: 'Logistique', other: 'Divers' };
+  var typeColors = { printing: 'var(--primary)', modeling: 'var(--warning)', design: '#ff6b81', maintenance: 'var(--secondary)', rdv: '#a855f7', logistics: '#22d3ee', other: '#888' };
+  var typeLabel = typeLabels[e.type] || e.type;
+  var typeColor = typeColors[e.type] || 'var(--primary)';
+  var machineSpan = e.machineName ? '<span>🖨️ ' + e.machineName + '</span>' : '';
+  var assigneeLabel = e.assignee === 'florian' ? 'Florian' : e.assignee === 'elie' ? 'Élie' : 'Les deux';
+  var priorityLabel = e.priority === 'high' ? '<span style="color:var(--secondary)">🔴 Haute</span>' : e.priority === 'medium' ? '<span style="color:var(--warning)">🟡 Moyenne</span>' : '<span style="color:var(--success)">🟢 Basse</span>';
+  return '<div class="event-item" style="border-left-color:' + typeColor + '" onclick="editPlanningEvent(' + e.id + ')"><div class="event-item-header"><span class="event-item-title">' + e.title + '</span><span style="font-size:.7rem;color:' + typeColor + ';font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span>' + machineSpan + '<span>👤 ' + assigneeLabel + '</span>' + priorityLabel + '</div></div>';
+}
+function openPlanningModal() {
+  if (!document.getElementById('planDate').value) document.getElementById('planDate').value = new Date().toISOString().split('T')[0];
+  updateMachineSelects();
+  document.getElementById('planningModal').classList.add('active');
+}
+function togglePlanningFields() {
+  var type = document.getElementById('planType').value;
+  var mg = document.getElementById('planMachineGroup');
+  mg.style.display = (type === 'printing' || type === 'maintenance') ? 'block' : 'none';
+}
+function savePlanningEvent() {
+  try {
+    var title = document.getElementById('planTitle').value.trim();
+    var type = document.getElementById('planType').value;
+    var date = document.getElementById('planDate').value;
+    var startTime = document.getElementById('planStartTime').value;
+    var endTime = document.getElementById('planEndTime').value;
+    var machineId = document.getElementById('planMachine').value;
+    var assignee = document.getElementById('planAssignee').value;
+    var priority = document.getElementById('planPriority').value;
+    var notes = document.getElementById('planNotes').value;
+    if (!title || !date) { showToast('Titre et date obligatoires', 'warning'); return; }
+    var machine = null;
+    for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === parseInt(machineId)) machine = data.machines[i];
+    var event = { id: Date.now(), title: title, type: type, date: date, startTime: startTime, endTime: endTime, machineId: machineId ? parseInt(machineId) : null, machineName: machine ? machine.name : null, assignee: assignee, priority: priority, notes: notes };
+    data.planningEvents.push(event);
+    saveData();
+    closeModal('planningModal');
+    showToast('Événement ajouté', 'success');
+    renderPlanning();
+    document.getElementById('planTitle').value = '';
+    document.getElementById('planNotes').value = '';
+  } catch(err) { log('savePlanningEvent error: ' + err.message, true); showToast('Erreur', 'error'); }
+}
+function editPlanningEvent(id) { if (!confirm('Supprimer cet événement ?')) return; var filtered = []; for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== id) filtered.push(data.planningEvents[i]); data.planningEvents = filtered; saveData(); renderPlanning(); showToast('Supprimé', 'warning'); }
 
 // ==================== TIMER ====================
-function updateMachineSelects(){['timerMachine','orderMachine','planMachine'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;sel.innerHTML=data.machines.map(m=>'<option value="'+m.id+'">'+m.name+'</option>').join('')})}
-function startPrintTimer(){const name=document.getElementById('timerName').value.trim(),machineId=parseInt(document.getElementById('timerMachine').value),hours=parseFloat(document.getElementById('timerHours').value)||0,minutes=parseFloat(document.getElementById('timerMinutes').value)||0;if(!name||!machineId){showToast('Remplis tous les champs','warning');return}const machine=data.machines.find(m=>m.id===machineId);if(!machine)return;const duration=(hours*60+minutes)*60*1000;const timer={id:Date.now(),name,machineId,machineName:machine.name,duration,endTime:Date.now()+duration,startTime:Date.now(),finished:false};activeTimers.push(timer);machine.status='busy';machine.currentJob=name;saveTimers();saveData();showToast('Timer démarré','success');document.getElementById('timerName').value='';if(config.notifScreen)requestWakeLock();renderAll();showSection('timer')}
-function renderTimers(){const as=document.getElementById('activeTimersSection'),fs=document.getElementById('finishedTimersSection'),al=document.getElementById('timerList'),fl=document.getElementById('finishedTimerList');const active=activeTimers.filter(t=>!t.finished),finished=finishedTimers.slice(-5).reverse();if(active.length===0)as.style.display='none';else{as.style.display='block';al.innerHTML=active.map(t=>{const remaining=Math.max(0,t.endTime-Date.now());const pct=Math.min(100,((t.duration-remaining)/t.duration)*100);return'<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">'+t.name+'</div><button class="btn btn-sm btn-danger" onclick="stopTimer('+t.id+')" style="width:auto;margin-top:0">Arrêter</button></div><div class="timer-info">🖨️ '+t.machineName+' • '+formatDuration(t.duration)+'</div><div class="timer-remaining" id="timer_'+t.id+'">'+formatTime(remaining)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>'}).join('')}if(finished.length===0)fs.style.display='none';else{fs.style.display='block';fl.innerHTML=finished.map(t=>'<div class="timer-card finished"><div class="timer-name">✅ '+t.name+'</div><div class="timer-info">🖨️ '+t.machineName+' • '+new Date(t.endTime).toLocaleTimeString('fr-FR')+'</div></div>').join('')}}
-function startTimerLoop(){setInterval(()=>{let changed=false;activeTimers.forEach(t=>{if(!t.finished&&Date.now()>=t.endTime){t.finished=true;finishedTimers.push(t);const machine=data.machines.find(m=>m.id===t.machineId);if(machine){machine.status='idle';machine.currentJob=null}showNotification('Impression terminée',t.name+' est prête !');if(config.notifSound)playSound();if(config.notifVibrate&&navigator.vibrate)navigator.vibrate([200,100,200,100,200]);changed=true}});activeTimers=activeTimers.filter(t=>!t.finished);if(changed){saveTimers();saveData();renderAll()}activeTimers.forEach(t=>{const el=document.getElementById('timer_'+t.id);if(el)el.textContent=formatTime(Math.max(0,t.endTime-Date.now()))});renderActiveTimers()},1000)}
-function stopTimer(timerId){const timer=activeTimers.find(t=>t.id===timerId);if(!timer)return;timer.finished=true;finishedTimers.push(timer);activeTimers=activeTimers.filter(t=>t.id!==timerId);const machine=data.machines.find(m=>m.id===timer.machineId);if(machine){machine.status='idle';machine.currentJob=null}saveTimers();saveData();renderAll();showToast('Timer arrêté','warning')}
-function formatTime(ms){if(ms<=0)return'00:00:00';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0')}
-function formatDuration(ms){const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'h'+(m>0?m+'min':''):m+'min'}
+function updateMachineSelects() {
+  var ids = ['timerMachine', 'orderMachine', 'planMachine'];
+  for (var i = 0; i < ids.length; i++) {
+    var sel = document.getElementById(ids[i]);
+    if (!sel) continue;
+    var html = '';
+    for (var j = 0; j < data.machines.length; j++) html += '<option value="' + data.machines[j].id + '">' + data.machines[j].name + '</option>';
+    sel.innerHTML = html;
+  }
+}
+function startPrintTimer() {
+  var name = document.getElementById('timerName').value.trim();
+  var machineId = parseInt(document.getElementById('timerMachine').value);
+  var hours = parseFloat(document.getElementById('timerHours').value) || 0;
+  var minutes = parseFloat(document.getElementById('timerMinutes').value) || 0;
+  if (!name || !machineId) { showToast('Remplis tous les champs', 'warning'); return; }
+  var machine = null;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === machineId) machine = data.machines[i];
+  if (!machine) return;
+  var duration = (hours * 60 + minutes) * 60 * 1000;
+  var timer = { id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false };
+  activeTimers.push(timer);
+  machine.status = 'busy';
+  machine.currentJob = name;
+  saveTimers();
+  saveData();
+  showToast('Timer démarré', 'success');
+  document.getElementById('timerName').value = '';
+  if (config.notifScreen) requestWakeLock();
+  renderAll();
+  showSection('timer');
+}
+function renderTimers() {
+  var as = document.getElementById('activeTimersSection');
+  var fs = document.getElementById('finishedTimersSection');
+  var al = document.getElementById('timerList');
+  var fl = document.getElementById('finishedTimerList');
+  var active = [];
+  for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
+  var finished = [];
+  for (var i = Math.max(0, finishedTimers.length - 5); i < finishedTimers.length; i++) finished.push(finishedTimers[i]);
+  finished.reverse();
+  if (active.length === 0) as.style.display = 'none';
+  else {
+    as.style.display = 'block';
+    var html = '';
+    for (var i = 0; i < active.length; i++) {
+      var t = active[i];
+      var remaining = Math.max(0, t.endTime - Date.now());
+      var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
+      html += '<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">' + t.name + '</div><button class="btn btn-sm btn-danger" onclick="stopTimer(' + t.id + ')" style="width:auto;margin-top:0">Arrêter</button></div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+    }
+    al.innerHTML = html;
+  }
+  if (finished.length === 0) fs.style.display = 'none';
+  else {
+    fs.style.display = 'block';
+    var html = '';
+    for (var i = 0; i < finished.length; i++) {
+      var t = finished[i];
+      html += '<div class="timer-card finished"><div class="timer-name">✅ ' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + new Date(t.endTime).toLocaleTimeString('fr-FR') + '</div></div>';
+    }
+    fl.innerHTML = html;
+  }
+}
+function startTimerLoop() {
+  setInterval(function() {
+    var changed = false;
+    for (var i = 0; i < activeTimers.length; i++) {
+      var t = activeTimers[i];
+      if (!t.finished && Date.now() >= t.endTime) {
+        t.finished = true;
+        finishedTimers.push(t);
+        for (var j = 0; j < data.machines.length; j++) {
+          if (data.machines[j].id === t.machineId) { data.machines[j].status = 'idle'; data.machines[j].currentJob = null; }
+        }
+        showNotification('Impression terminée', t.name + ' est prête !');
+        if (config.notifSound) playSound();
+        if (config.notifVibrate && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+        changed = true;
+      }
+    }
+    var filtered = [];
+    for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) filtered.push(activeTimers[i]);
+    activeTimers = filtered;
+    if (changed) { saveTimers(); saveData(); renderAll(); }
+    for (var i = 0; i < activeTimers.length; i++) {
+      var t = activeTimers[i];
+      var el = document.getElementById('timer_' + t.id);
+      if (el) el.textContent = formatTime(Math.max(0, t.endTime - Date.now()));
+    }
+    renderActiveTimers();
+  }, 1000);
+}
+function stopTimer(timerId) {
+  var timer = null;
+  for (var i = 0; i < activeTimers.length; i++) if (activeTimers[i].id === timerId) timer = activeTimers[i];
+  if (!timer) return;
+  timer.finished = true;
+  finishedTimers.push(timer);
+  var filtered = [];
+  for (var i = 0; i < activeTimers.length; i++) if (activeTimers[i].id !== timerId) filtered.push(activeTimers[i]);
+  activeTimers = filtered;
+  for (var i = 0; i < data.machines.length; i++) {
+    if (data.machines[i].id === timer.machineId) { data.machines[i].status = 'idle'; data.machines[i].currentJob = null; }
+  }
+  saveTimers(); saveData(); renderAll(); showToast('Timer arrêté', 'warning');
+}
+function formatTime(ms) {
+  if (ms <= 0) return '00:00:00';
+  var s = Math.floor(ms / 1000);
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+}
+function formatDuration(ms) {
+  var h = Math.floor(ms / 3600000);
+  var m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? h + 'h' + (m > 0 ? m + 'min' : '') : m + 'min';
+}
 
 // ==================== NOTIFICATIONS ====================
-function showNotification(title,text){const badge=document.getElementById('notifBadge');document.getElementById('notifTitle').textContent=title;document.getElementById('notifText').textContent=text;badge.classList.add('show');if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body:text,requireInteraction:true});setTimeout(()=>hideNotification(),10000)}
-function hideNotification(){document.getElementById('notifBadge').classList.remove('show')}
-function playSound(){try{const ctx=new(window.AudioContext||window.webkitAudioContext);[600,800,1000].forEach((freq,i)=>{setTimeout(()=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=freq;osc.type='sine';gain.gain.setValueAtTime(0.3,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.4);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.4)},i*150)})}catch(e){}}
+function showNotification(title, text) {
+  var badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifText').textContent = text;
+  badge.classList.add('show');
+  if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: text, requireInteraction: true });
+  setTimeout(function() { hideNotification(); }, 10000);
+}
+function hideNotification() { document.getElementById('notifBadge').classList.remove('show'); }
+function playSound() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [600, 800, 1000].forEach(function(freq, i) {
+      setTimeout(function() {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      }, i * 150);
+    });
+  } catch(e) {}
+}
 
 // ==================== MODALS ====================
-function openModal(id){const el=document.getElementById(id);if(el){el.classList.add('active');if(id==='newOrderModal'){updateClientSelect();updateMachineSelects()}}}
-function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('active')}
-function updateClientSelect(){const sel=document.getElementById('orderClient');if(sel)sel.innerHTML=data.clients.map(c=>'<option value="'+c.id+'">'+(c.name||'Sans nom')+'</option>').join('')}
-function toggleOrderFields(){const service=document.getElementById('orderService').value;document.getElementById('printTypeGroup').style.display=(service==='print')?'block':'none';document.getElementById('machineGroup').style.display=(service==='print')?'block':'none'}
+function openModal(id) {
+  log('openModal: ' + id);
+  var el = document.getElementById(id);
+  if (el) {
+    el.classList.add('active');
+    if (id === 'newOrderModal') { updateClientSelect(); updateMachineSelects(); }
+  }
+}
+function closeModal(id) {
+  log('closeModal: ' + id);
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('active');
+}
+function updateClientSelect() {
+  var sel = document.getElementById('orderClient');
+  if (!sel) return;
+  var html = '';
+  for (var i = 0; i < data.clients.length; i++) html += '<option value="' + data.clients[i].id + '">' + (data.clients[i].name || 'Sans nom') + '</option>';
+  sel.innerHTML = html;
+}
+function toggleOrderFields() {
+  var service = document.getElementById('orderService').value;
+  document.getElementById('printTypeGroup').style.display = (service === 'print') ? 'block' : 'none';
+  document.getElementById('machineGroup').style.display = (service === 'print') ? 'block' : 'none';
+}
+
+// ==================== TEST BUTTON ====================
+function testButton() {
+  log('Test button clicked');
+  var result = document.getElementById('testResult');
+  if (result) result.textContent = '✅ Bouton OK ! JS fonctionne parfaitement.';
+  showToast('Test réussi', 'success');
+}
 
 // ==================== SAVE FUNCTIONS ====================
-function saveOrder(){try{const clientId=parseInt(document.getElementById('orderClient').value),client=data.clients.find(c=>c.id===clientId),service=document.getElementById('orderService').value;const order={id:Date.now(),clientId,clientName:client?client.name:'Inconnu',name:document.getElementById('orderName').value||'Sans nom',service:service,type:service==='print'?document.getElementById('orderType').value:null,machineId:service==='print'?parseInt(document.getElementById('orderMachine').value):null,material:document.getElementById('orderMaterial').value||'',weight:document.getElementById('orderWeight').value||0,time:document.getElementById('orderTime').value||0,price:document.getElementById('orderPrice').value||0,priority:document.getElementById('orderPriority').value,notes:document.getElementById('orderNotes').value||'',status:'pending',date:new Date().toISOString(),photos:[]};data.orders.push(order);saveData();closeModal('newOrderModal');showToast('Commande créée','success');renderAll();document.getElementById('orderName').value='';document.getElementById('orderMaterial').value='';document.getElementById('orderWeight').value='';document.getElementById('orderTime').value='';document.getElementById('orderPrice').value='';document.getElementById('orderNotes').value=''}catch(err){showToast('Erreur','error')}}
-function saveClient(){try{const client={id:Date.now(),name:document.getElementById('clientName').value||'Sans nom',phone:document.getElementById('clientPhone').value||'',email:document.getElementById('clientEmail').value||'',address:document.getElementById('clientAddress').value||'',notes:document.getElementById('clientNotes').value||''};data.clients.push(client);saveData();closeModal('newClientModal');showToast('Client ajouté','success');renderAll();document.getElementById('clientName').value='';document.getElementById('clientPhone').value='';document.getElementById('clientEmail').value='';document.getElementById('clientAddress').value='';document.getElementById('clientNotes').value=''}catch(err){showToast('Erreur','error')}}
-function saveModel(){try{const model={id:Date.now(),name:document.getElementById('modelName').value||'Sans nom',category:document.getElementById('modelCategory').value,type:document.getElementById('modelType').value,time:document.getElementById('modelTime').value||0,weight:document.getElementById('modelWeight').value||0,price:document.getElementById('modelPrice').value||0,description:document.getElementById('modelDesc').value||''};data.models.push(model);saveData();closeModal('newModelModal');showToast('Modèle ajouté','success');renderAll();document.getElementById('modelName').value='';document.getElementById('modelTime').value='';document.getElementById('modelWeight').value='';document.getElementById('modelPrice').value='';document.getElementById('modelDesc').value=''}catch(err){showToast('Erreur','error')}}
-function saveStock(){try{const item={id:Date.now(),type:document.getElementById('stockType').value,name:document.getElementById('stockName').value||'Sans nom',qty:parseFloat(document.getElementById('stockQty').value)||0,unit:document.getElementById('stockUnit').value,alert:parseFloat(document.getElementById('stockAlert').value)||1,supplier:document.getElementById('stockSupplier').value||''};data.stock.push(item);saveData();closeModal('newStockModal');showToast('Stock ajouté','success');renderAll();document.getElementById('stockName').value='';document.getElementById('stockQty').value='';document.getElementById('stockSupplier').value=''}catch(err){showToast('Erreur','error')}}
+function saveOrder() {
+  try {
+    var clientId = parseInt(document.getElementById('orderClient').value);
+    var client = null;
+    for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
+    var service = document.getElementById('orderService').value;
+    var order = {
+      id: Date.now(),
+      clientId: clientId,
+      clientName: client ? client.name : 'Inconnu',
+      name: document.getElementById('orderName').value || 'Sans nom',
+      service: service,
+      type: service === 'print' ? document.getElementById('orderType').value : null,
+      machineId: service === 'print' ? parseInt(document.getElementById('orderMachine').value) : null,
+      material: document.getElementById('orderMaterial').value || '',
+      weight: document.getElementById('orderWeight').value || 0,
+      time: document.getElementById('orderTime').value || 0,
+      price: document.getElementById('orderPrice').value || 0,
+      priority: document.getElementById('orderPriority').value,
+      notes: document.getElementById('orderNotes').value || '',
+      status: 'pending',
+      date: new Date().toISOString(),
+      photos: []
+    };
+    data.orders.push(order);
+    saveData();
+    closeModal('newOrderModal');
+    showToast('Commande créée', 'success');
+    renderAll();
+    document.getElementById('orderName').value = '';
+    document.getElementById('orderMaterial').value = '';
+    document.getElementById('orderWeight').value = '';
+    document.getElementById('orderTime').value = '';
+    document.getElementById('orderPrice').value = '';
+    document.getElementById('orderNotes').value = '';
+  } catch(err) { log('saveOrder error: ' + err.message, true); showToast('Erreur', 'error'); }
+}
+function saveClient() {
+  try {
+    var client = { id: Date.now(), name: document.getElementById('clientName').value || 'Sans nom', phone: document.getElementById('clientPhone').value || '', email: document.getElementById('clientEmail').value || '', address: document.getElementById('clientAddress').value || '', notes: document.getElementById('clientNotes').value || '' };
+    data.clients.push(client);
+    saveData();
+    closeModal('newClientModal');
+    showToast('Client ajouté', 'success');
+    renderAll();
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientPhone').value = '';
+    document.getElementById('clientEmail').value = '';
+    document.getElementById('clientAddress').value = '';
+    document.getElementById('clientNotes').value = '';
+  } catch(err) { log('saveClient error: ' + err.message, true); showToast('Erreur', 'error'); }
+}
+function saveModel() {
+  try {
+    var model = { id: Date.now(), name: document.getElementById('modelName').value || 'Sans nom', category: document.getElementById('modelCategory').value, type: document.getElementById('modelType').value, time: document.getElementById('modelTime').value || 0, weight: document.getElementById('modelWeight').value || 0, price: document.getElementById('modelPrice').value || 0, description: document.getElementById('modelDesc').value || '' };
+    data.models.push(model);
+    saveData();
+    closeModal('newModelModal');
+    showToast('Modèle ajouté', 'success');
+    renderAll();
+    document.getElementById('modelName').value = '';
+    document.getElementById('modelTime').value = '';
+    document.getElementById('modelWeight').value = '';
+    document.getElementById('modelPrice').value = '';
+    document.getElementById('modelDesc').value = '';
+  } catch(err) { log('saveModel error: ' + err.message, true); showToast('Erreur', 'error'); }
+}
+function saveStock() {
+  try {
+    var item = { id: Date.now(), type: document.getElementById('stockType').value, name: document.getElementById('stockName').value || 'Sans nom', qty: parseFloat(document.getElementById('stockQty').value) || 0, unit: document.getElementById('stockUnit').value, alert: parseFloat(document.getElementById('stockAlert').value) || 1, supplier: document.getElementById('stockSupplier').value || '' };
+    data.stock.push(item);
+    saveData();
+    closeModal('newStockModal');
+    showToast('Stock ajouté', 'success');
+    renderAll();
+    document.getElementById('stockName').value = '';
+    document.getElementById('stockQty').value = '';
+    document.getElementById('stockSupplier').value = '';
+  } catch(err) { log('saveStock error: ' + err.message, true); showToast('Erreur', 'error'); }
+}
 
 // ==================== ORDER DETAIL & QUALITY ====================
-function openOrderDetail(id){currentOrderId=id;const order=data.orders.find(o=>o.id===id);if(!order)return;document.getElementById('detailTitle').textContent='#'+order.id+' — '+(order.name||'Sans nom');document.getElementById('detailStatus').value=order.status||'pending';const content=document.getElementById('orderDetailContent');const svc=order.service==='print'?'🖨️ Impression':order.service==='modeling'?'🎨 Modélisation':order.service==='design'?'💡 Conception':order.service;content.innerHTML='<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">'+(order.clientName||'Inconnu')+'</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>'+svc+'</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>'+(order.type==='fdm'?'FDM':order.type==='resin'?'Résine':'-')+'</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>'+(order.weight||0)+'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>'+(order.time||0)+'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">'+(order.price||0)+'€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>'+new Date(order.date).toLocaleDateString('fr-FR')+'</div></div></div>'+(order.notes?'<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">'+order.notes+'</div></div>':'');renderOrderPhotos(order);openModal('orderDetailModal')}
-function renderOrderPhotos(order){const div=document.getElementById('detailPhotos');if(!order.photos||order.photos.length===0){div.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>';return}div.innerHTML=order.photos.map((photo,idx)=>'<div class="photo-item"><img src="'+photo+'" alt="Photo"><button class="photo-delete" onclick="deletePhoto('+order.id+','+idx+')">×</button></div>').join('')}
-function updateOrderStatus(){const order=data.orders.find(o=>o.id===currentOrderId);if(!order)return;const oldStatus=order.status;order.status=document.getElementById('detailStatus').value;saveData();if(oldStatus!=='finished'&&order.status==='finished'&&order.service==='print')showQualityOverlay(order.id,order.name);showToast('Statut mis à jour','success');renderAll()}
-function showQualityOverlay(orderId,orderName){qualityOrderId=orderId;document.getElementById('qualityOrderName').textContent=orderName||'Commande';if(!data.qualityResults[orderId])data.qualityResults[orderId]=data.checklist.map(item=>({...item,checked:false}));const div=document.getElementById('qualityChecklist');div.innerHTML=data.qualityResults[orderId].map((item,idx)=>'<div class="checklist-item"><input type="checkbox" id="quality_'+idx+'" '+(item.checked?'checked':'')+' onchange="toggleQualityCheck('+idx+')"><label for="quality_'+idx+'">'+item.text+'</label></div>').join('');updateQualityProgress();document.getElementById('qualityOverlay').classList.add('active')}
-function toggleQualityCheck(idx){if(!data.qualityResults[qualityOrderId])return;data.qualityResults[qualityOrderId][idx].checked=!data.qualityResults[qualityOrderId][idx].checked;saveData();updateQualityProgress();const div=document.getElementById('qualityChecklist');div.innerHTML=data.qualityResults[qualityOrderId].map((item,i)=>'<div class="checklist-item"><input type="checkbox" id="quality_'+i+'" '+(item.checked?'checked':'')+' onchange="toggleQualityCheck('+i+')"><label for="quality_'+i+'">'+item.text+'</label></div>').join('')}
-function updateQualityProgress(){if(!data.qualityResults[qualityOrderId])return;const checked=data.qualityResults[qualityOrderId].filter(i=>i.checked).length,total=data.qualityResults[qualityOrderId].length,pct=Math.round((checked/total)*100);document.getElementById('qualityProgress').style.width=pct+'%';document.getElementById('qualityPercent').textContent=pct+'% complété';document.getElementById('qualityValidateBtn').disabled=pct<100}
-function validateQuality(){if(window.tempQualityPhoto&&qualityOrderId){const order=data.orders.find(o=>o.id===qualityOrderId);if(order){if(!order.photos)order.photos=[];order.photos.push(window.tempQualityPhoto);saveData()}window.tempQualityPhoto=null}document.getElementById('qualityOverlay').classList.remove('active');showToast('Qualité validée ! Commande clôturée','success')}
-function skipQuality(){window.tempQualityPhoto=null;document.getElementById('qualityOverlay').classList.remove('active');showToast('Clôture sans validation','warning')}
-function deleteCurrentOrder(){if(!confirm('Supprimer ?'))return;data.orders=data.orders.filter(o=>o.id!==currentOrderId);saveData();closeModal('orderDetailModal');showToast('Supprimé','warning');renderAll()}
-function deletePhoto(orderId,photoIdx){const order=data.orders.find(o=>o.id===orderId);if(order&&order.photos){order.photos.splice(photoIdx,1);saveData();renderOrderPhotos(order);showToast('Photo supprimée','warning')}}
-function showClientOrders(clientId){const client=data.clients.find(c=>c.id===clientId);if(!client)return;const clientOrders=data.orders.filter(o=>o.clientId===clientId);let html='<div style="margin-bottom:12px;font-weight:700">Commandes de '+(client.name||'Client')+'</div>';if(clientOrders.length===0)html+='<div style="color:#888">Aucune commande</div>';else html+=clientOrders.map(o=>'<div class="order-item" onclick="openOrderDetail('+o.id+');closeModal('orderDetailModal')"><div class="order-item-header"><span>'+(o.name||'Sans nom')+'</span><span class="badge badge-'+(o.status||'pending')+'">'+getStatusLabel(o.status)+'</span></div><div class="order-item-meta">'+(o.price||0)+'€ • '+new Date(o.date).toLocaleDateString('fr-FR')+'</div></div>').join('');document.getElementById('orderDetailContent').innerHTML=html;document.getElementById('detailTitle').textContent=client.name||'Client';document.getElementById('detailStatus').style.display='none';openModal('orderDetailModal')}
+function openOrderDetail(id) {
+  log('openOrderDetail: ' + id);
+  currentOrderId = id;
+  var order = null;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === id) order = data.orders[i];
+  if (!order) return;
+  document.getElementById('detailTitle').textContent = '#' + order.id + ' — ' + (order.name || 'Sans nom');
+  document.getElementById('detailStatus').value = order.status || 'pending';
+  var content = document.getElementById('orderDetailContent');
+  var svc = order.service === 'print' ? '🖨️ Impression' : order.service === 'modeling' ? '🎨 Modélisation' : order.service === 'design' ? '💡 Conception' : order.service;
+  var typeLabel = order.type === 'fdm' ? 'FDM' : order.type === 'resin' ? 'Résine' : '-';
+  var notesHtml = order.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + order.notes + '</div></div>' : '';
+  content.innerHTML = '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">' + (order.clientName || 'Inconnu') + '</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>' + svc + '</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>' + typeLabel + '</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>' + (order.weight || 0) + 'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>' + (order.time || 0) + 'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">' + (order.price || 0) + '€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>' + new Date(order.date).toLocaleDateString('fr-FR') + '</div></div></div>' + notesHtml;
+  renderOrderPhotos(order);
+  openModal('orderDetailModal');
+}
+function renderOrderPhotos(order) {
+  var div = document.getElementById('detailPhotos');
+  if (!order.photos || order.photos.length === 0) { div.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>'; return; }
+  var html = '';
+  for (var i = 0; i < order.photos.length; i++) html += '<div class="photo-item"><img src="' + order.photos[i] + '" alt="Photo"><button class="photo-delete" onclick="deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
+  div.innerHTML = html;
+}
+function updateOrderStatus() {
+  var order = null;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === currentOrderId) order = data.orders[i];
+  if (!order) return;
+  var oldStatus = order.status;
+  order.status = document.getElementById('detailStatus').value;
+  saveData();
+  if (oldStatus !== 'finished' && order.status === 'finished' && order.service === 'print') showQualityOverlay(order.id, order.name);
+  showToast('Statut mis à jour', 'success');
+  renderAll();
+}
+function showQualityOverlay(orderId, orderName) {
+  qualityOrderId = orderId;
+  document.getElementById('qualityOrderName').textContent = orderName || 'Commande';
+  if (!data.qualityResults[orderId]) data.qualityResults[orderId] = [];
+  if (data.qualityResults[orderId].length === 0) {
+    for (var i = 0; i < data.checklist.length; i++) data.qualityResults[orderId].push({ id: data.checklist[i].id, text: data.checklist[i].text, checked: false });
+  }
+  var div = document.getElementById('qualityChecklist');
+  var html = '';
+  for (var i = 0; i < data.qualityResults[orderId].length; i++) {
+    var item = data.qualityResults[orderId][i];
+    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
+  }
+  div.innerHTML = html;
+  updateQualityProgress();
+  document.getElementById('qualityOverlay').classList.add('active');
+}
+function toggleQualityCheck(idx) {
+  if (!data.qualityResults[qualityOrderId]) return;
+  data.qualityResults[qualityOrderId][idx].checked = !data.qualityResults[qualityOrderId][idx].checked;
+  saveData();
+  updateQualityProgress();
+  var div = document.getElementById('qualityChecklist');
+  var html = '';
+  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) {
+    var item = data.qualityResults[qualityOrderId][i];
+    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
+  }
+  div.innerHTML = html;
+}
+function updateQualityProgress() {
+  if (!data.qualityResults[qualityOrderId]) return;
+  var checked = 0;
+  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) if (data.qualityResults[qualityOrderId][i].checked) checked++;
+  var total = data.qualityResults[qualityOrderId].length;
+  var pct = Math.round((checked / total) * 100);
+  document.getElementById('qualityProgress').style.width = pct + '%';
+  document.getElementById('qualityPercent').textContent = pct + '% complété';
+  document.getElementById('qualityValidateBtn').disabled = pct < 100;
+}
+function validateQuality() {
+  if (window.tempQualityPhoto && qualityOrderId) {
+    var order = null;
+    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === qualityOrderId) order = data.orders[i];
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(window.tempQualityPhoto); saveData(); }
+    window.tempQualityPhoto = null;
+  }
+  document.getElementById('qualityOverlay').classList.remove('active');
+  showToast('Qualité validée ! Commande clôturée', 'success');
+}
+function skipQuality() {
+  window.tempQualityPhoto = null;
+  document.getElementById('qualityOverlay').classList.remove('active');
+  showToast('Clôture sans validation', 'warning');
+}
+function deleteCurrentOrder() { if (!confirm('Supprimer ?')) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal('orderDetailModal'); showToast('Supprimé', 'warning'); renderAll(); }
+function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast('Photo supprimée', 'warning'); } }
+function showClientOrders(clientId) {
+  var client = null;
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
+  if (!client) return;
+  var clientOrders = [];
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId === clientId) clientOrders.push(data.orders[i]);
+  var html = '<div style="margin-bottom:12px;font-weight:700">Commandes de ' + (client.name || 'Client') + '</div>';
+  if (clientOrders.length === 0) html += '<div style="color:#888">Aucune commande</div>';
+  else {
+    for (var i = 0; i < clientOrders.length; i++) {
+      var o = clientOrders[i];
+      html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ');closeModal('orderDetailModal')"><div class="order-item-header"><span>' + (o.name || 'Sans nom') + '</span><span class="badge badge-' + (o.status || 'pending') + '">' + getStatusLabel(o.status) + '</span></div><div class="order-item-meta">' + (o.price || 0) + '€ • ' + new Date(o.date).toLocaleDateString('fr-FR') + '</div></div>';
+    }
+  }
+  document.getElementById('orderDetailContent').innerHTML = html;
+  document.getElementById('detailTitle').textContent = client.name || 'Client';
+  document.getElementById('detailStatus').style.display = 'none';
+  openModal('orderDetailModal');
+}
 
 // ==================== CAMERA ====================
-function openCamera(){photoOrderId=currentOrderId;document.getElementById('cameraInput').click()}
-function handleCameraFile(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const photoData=e.target.result;const order=data.orders.find(o=>o.id===photoOrderId);if(order){if(!order.photos)order.photos=[];order.photos.push(photoData);saveData();renderOrderPhotos(order);showToast('Photo ajoutée','success')}};reader.readAsDataURL(file);input.value=''}
-function openQualityCamera(){document.getElementById('qualityCameraInput').click()}
-function handleQualityCameraFile(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{window.tempQualityPhoto=e.target.result;const preview=document.getElementById('qualityPhotoPreview');if(preview){preview.innerHTML='<div class="photo-item"><img src="'+window.tempQualityPhoto+'" alt="Photo qualité"></div>';preview.style.display='grid'}showToast('Photo qualité prise','success')};reader.readAsDataURL(file);input.value=''}
+function openCamera() { photoOrderId = currentOrderId; document.getElementById('cameraInput').click(); }
+function handleCameraFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var photoData = e.target.result;
+    var order = null;
+    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast('Photo ajoutée', 'success'); }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+function openQualityCamera() { document.getElementById('qualityCameraInput').click(); }
+function handleQualityCameraFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window.tempQualityPhoto = e.target.result;
+    var preview = document.getElementById('qualityPhotoPreview');
+    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualité"></div>'; preview.style.display = 'grid'; }
+    showToast('Photo qualité prise', 'success');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
 
 // ==================== CALCULATOR ====================
-function calculateCost(){const service=document.getElementById('calcService').value,type=document.getElementById('calcType').value,weight=parseFloat(document.getElementById('calcWeight').value)||0,time=parseFloat(document.getElementById('calcTime').value)||0,complexity=parseFloat(document.getElementById('calcComplexity').value)||1,qty=parseInt(document.getElementById('calcQty').value)||1;let materialCost=0,hourlyRate=0,serviceMultiplier=1;if(service==='print'){if(type==='fdm'){materialCost=(weight/1000)*25;hourlyRate=2}else{materialCost=(weight/1000)*60;hourlyRate=3}}else if(service==='modeling'){hourlyRate=35;serviceMultiplier=1.2}else if(service==='design'){hourlyRate=45;serviceMultiplier=1.3}const total=(materialCost+(time*hourlyRate))*complexity*qty*serviceMultiplier;document.getElementById('calcTotal').textContent=total.toFixed(2)+'€'}
+function calculateCost() {
+  var service = document.getElementById('calcService').value;
+  var type = document.getElementById('calcType').value;
+  var weight = parseFloat(document.getElementById('calcWeight').value) || 0;
+  var time = parseFloat(document.getElementById('calcTime').value) || 0;
+  var complexity = parseFloat(document.getElementById('calcComplexity').value) || 1;
+  var qty = parseInt(document.getElementById('calcQty').value) || 1;
+  var materialCost = 0, hourlyRate = 0, serviceMultiplier = 1;
+  if (service === 'print') { if (type === 'fdm') { materialCost = (weight / 1000) * 25; hourlyRate = 2; } else { materialCost = (weight / 1000) * 60; hourlyRate = 3; } }
+  else if (service === 'modeling') { hourlyRate = 35; serviceMultiplier = 1.2; }
+  else if (service === 'design') { hourlyRate = 45; serviceMultiplier = 1.3; }
+  var total = (materialCost + (time * hourlyRate)) * complexity * qty * serviceMultiplier;
+  document.getElementById('calcTotal').textContent = total.toFixed(2) + '€';
+}
 
-// ==================== EXPORT / IMPORT ====================
-function exportData(){const blob=new Blob([JSON.stringify({data,timers:{active:activeTimers,finished:finishedTimers},exportDate:new Date().toISOString()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TLI_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showToast('Export réussi','success')}
-function importData(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const imported=JSON.parse(e.target.result);if(imported.data)data=imported.data;if(imported.timers){activeTimers=imported.timers.active||[];finishedTimers=imported.timers.finished||[]}saveData();saveTimers();renderAll();showToast('Import réussi','success')}catch(err){showToast('Erreur import','error')}};reader.readAsText(file);input.value=''}
-function resetAllData(){if(!confirm('Tout supprimer ?'))return;if(!confirm('Vraiment ?'))return;data={orders:[],clients:[],models:[],stock:[],machines:[{id:1,name:'Elegoo Saturn 4 Ultra',type:'resin',status:'idle',currentJob:null},{id:2,name:'Bambulab P2S #1',type:'fdm',status:'idle',currentJob:null},{id:3,name:'Bambulab P2S #2',type:'fdm',status:'idle',currentJob:null},{id:4,name:'Bambulab H2C',type:'fdm',status:'idle',currentJob:null}],checklist:[{id:1,text:'Adhésion plateau OK',checked:false},{id:2,text:'Pas de warping / déformation',checked:false},{id:3,text:'Finition surface correcte',checked:false},{id:4,text:'Supports retirés proprement',checked:false},{id:5,text:'Post-traitement résine (lavage+UV)',checked:false},{id:6,text:'Dimensions conformes',checked:false},{id:7,text:'Emballage adapté',checked:false},{id:8,text:'Photo finale prise',checked:false}],planningEvents:[],qualityResults:{}};activeTimers=[];finishedTimers=[];saveData();saveTimers();renderAll();showToast('Réinitialisé','warning')}
+// ==================== EXPORT / IMPORT / RESET ====================
+function exportData() {
+  var blob = new Blob([JSON.stringify({ data: data, timers: { active: activeTimers, finished: finishedTimers }, exportDate: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'TLI_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Export réussi', 'success');
+}
+function importData(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var imported = JSON.parse(e.target.result);
+      if (imported.data) data = imported.data;
+      if (imported.timers) { activeTimers = imported.timers.active || []; finishedTimers = imported.timers.finished || []; }
+      saveData(); saveTimers(); renderAll(); showToast('Import réussi', 'success');
+    } catch(err) { showToast('Erreur import', 'error'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+function resetAllData() {
+  if (!confirm('Tout supprimer ?')) return;
+  if (!confirm('Vraiment ?')) return;
+  data = JSON.parse(JSON.stringify(defaultData));
+  activeTimers = [];
+  finishedTimers = [];
+  saveData(); saveTimers(); renderAll(); showToast('Réinitialisé', 'warning');
+}
+function clearCache() {
+  localStorage.removeItem('tli6_data');
+  localStorage.removeItem('tli6_timers');
+  localStorage.removeItem('tli6_apiUrl');
+  data = JSON.parse(JSON.stringify(defaultData));
+  activeTimers = [];
+  finishedTimers = [];
+  renderAll();
+  showToast('Cache vidé', 'success');
+}
 
 // ==================== UTILS ====================
-function showToast(msg,type){const toast=document.getElementById('toast');toast.textContent=msg;toast.className='toast'+(type?' '+type:'');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2500)}
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast' + (type ? ' ' + type : '');
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
 
 // ==================== BOOT ====================
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
