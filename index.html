@@ -95,18 +95,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
 .checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
 .checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
-/* DEBUG PANEL */
-#debugPanel{background:#ff0066;color:#fff;padding:10px;font-size:.75rem;position:fixed;top:0;left:0;right:0;z-index:9999;max-height:150px;overflow-y:auto;display:none;font-family:monospace}
-#debugPanel.show{display:block}
-#debugPanel div{border-bottom:1px solid rgba(255,255,255,0.2);padding:2px 0}
-#debugPanel .err{color:#ffcc00}
-#debugToggle{position:fixed;bottom:70px;right:10px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1rem;z-index:9998;cursor:pointer;opacity:.7}
 @media(min-width:768px){.app-header{padding:18px 40px}.section{padding:20px 40px;max-width:800px;margin:0 auto}.nav-tabs{padding:12px 40px;justify-content:center}}
 </style>
 </head>
 <body>
-<div id="debugPanel"></div>
-<button id="debugToggle" onclick="toggleDebug()">🐛</button>
 
 <header class="app-header"><h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1><button class="sync-btn" id="syncBtn" onclick="syncWithGoogle()"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button></header>
 
@@ -124,7 +116,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 
 <section id="dashboard" class="section active">
 <div class="stats-grid"><div class="stat-box"><div class="stat-value" id="statOrders">0</div><div class="stat-label">En cours</div></div><div class="stat-box"><div class="stat-value" id="statFinished">0</div><div class="stat-label">Terminées</div></div><div class="stat-box"><div class="stat-value" id="statRevenue">0€</div><div class="stat-label">CA estimé</div></div><div class="stat-box"><div class="stat-value" id="statMachines">4</div><div class="stat-label">Machines</div></div></div>
-<div class="card"><div class="card-title">🧪 TEST</div><button class="btn btn-primary" onclick="testButton()">Clique ici pour tester</button><div id="testResult" style="margin-top:10px;color:var(--success);font-weight:700;text-align:center;"></div></div>
+<div class="card"><div class="card-title">🧪 DIAGNOSTIC</div><button class="btn btn-primary" onclick="testButton()">1. Tester JS (alert)</button><button class="btn btn-secondary" onclick="testLocalStorage()" style="margin-top:8px">2. Tester LocalStorage</button><button class="btn btn-secondary" onclick="testModal()" style="margin-top:8px">3. Tester Modal</button><div id="testResult" style="margin-top:10px;color:var(--success);font-weight:700;text-align:center;"></div></div>
 <div class="card"><div class="card-title">⚡ Actions rapides</div><button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button><button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button><button class="btn btn-secondary" onclick="showSection('timer')" style="margin-top:8px">⏰ Lancer timer</button></div>
 <div class="card" id="activeTimersCard" style="display:none"><div class="card-title">🔥 Impressions en cours</div><div id="activeTimersList"></div></div>
 <div class="card"><div class="card-title">🔔 Alertes stock</div><div id="stockAlerts"></div></div>
@@ -254,198 +246,127 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== DEBUG ====================
-var debugVisible = false;
-function toggleDebug() {
-  debugVisible = !debugVisible;
-  document.getElementById('debugPanel').className = debugVisible ? 'show' : '';
-}
-function log(msg, isErr) {
-  try {
-    var panel = document.getElementById('debugPanel');
-    var div = document.createElement('div');
-    div.textContent = (new Date().toLocaleTimeString()) + ' | ' + msg;
-    if (isErr) div.className = 'err';
-    panel.appendChild(div);
-    console.log(msg);
-  } catch(e) {}
-}
-window.onerror = function(msg, url, line) {
-  log('JS ERROR: ' + msg + ' (ligne ' + line + ')', true);
-  showToast('Erreur JS - voir debug', 'error');
-};
+/* ==================== ALERT DE TEST AU DEMARRAGE ==================== */
+try { alert('TLI v7 JS loaded - OK'); } catch(e) {}
 
-// ==================== CONFIG & STATE ====================
-var config = {
-  apiUrl: localStorage.getItem('tli6_apiUrl') || '',
-  notifSound: localStorage.getItem('tli6_notifSound') !== 'false',
-  notifVibrate: localStorage.getItem('tli6_notifVibrate') !== 'false',
-  notifScreen: localStorage.getItem('tli6_notifScreen') !== 'false'
-};
-
-var defaultData = {
+/* ==================== CONFIG & STATE ==================== */
+var data = {
   orders: [],
-  clients: [{ id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: '' }],
+  clients: [{id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: ''}],
   models: [],
   stock: [],
   machines: [
-    { id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null },
-    { id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null },
-    { id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null },
-    { id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null }
+    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
+    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
   ],
   checklist: [
-    { id: 1, text: 'Adhésion plateau OK', checked: false },
-    { id: 2, text: 'Pas de warping / déformation', checked: false },
-    { id: 3, text: 'Finition surface correcte', checked: false },
-    { id: 4, text: 'Supports retirés proprement', checked: false },
-    { id: 5, text: 'Post-traitement résine (lavage+UV)', checked: false },
-    { id: 6, text: 'Dimensions conformes', checked: false },
-    { id: 7, text: 'Emballage adapté', checked: false },
-    { id: 8, text: 'Photo finale prise', checked: false }
+    {id: 1, text: 'Adhesion plateau OK', checked: false},
+    {id: 2, text: 'Pas de warping / deformation', checked: false},
+    {id: 3, text: 'Finition surface correcte', checked: false},
+    {id: 4, text: 'Supports retires proprement', checked: false},
+    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
+    {id: 6, text: 'Dimensions conformes', checked: false},
+    {id: 7, text: 'Emballage adapte', checked: false},
+    {id: 8, text: 'Photo finale prise', checked: false}
   ],
   planningEvents: [],
   qualityResults: {}
 };
 
-var data = JSON.parse(JSON.stringify(defaultData));
 var activeTimers = [];
 var finishedTimers = [];
 var currentOrderId = null;
 var photoOrderId = null;
-var isOnline = navigator.onLine;
-var wakeLock = null;
 var planningCurrentDate = new Date();
 var selectedPlanningDay = null;
 var qualityOrderId = null;
+var config = {};
 
-// ==================== INIT ====================
+/* ==================== INIT ==================== */
 function init() {
-  log('TLI v6 init start');
   try {
+    alert('init() called');
     loadData();
-    log('Data loaded');
+    alert('loadData OK');
     loadConfig();
-    log('Config loaded');
+    alert('loadConfig OK');
     loadTimers();
-    log('Timers loaded');
-    setupEvents();
-    log('Events setup');
+    alert('loadTimers OK');
     renderAll();
-    log('Render done');
+    alert('renderAll OK');
     startTimerLoop();
-    log('Timer loop started');
+    alert('startTimerLoop OK');
     calculateCost();
-    log('TLI v6 ready');
+    alert('TLI v7 READY');
   } catch(err) {
-    log('Init error: ' + err.message, true);
-    showToast('Erreur démarrage: ' + err.message, 'error');
+    alert('ERROR in init: ' + err.message);
   }
 }
 
-function setupEvents() {
-  window.addEventListener('online', function() { isOnline = true; showToast('Connexion rétablie', 'success'); });
-  window.addEventListener('offline', function() { isOnline = false; showToast('Hors-ligne', 'warning'); });
-  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
-}
+window.onload = init;
 
+/* ==================== DATA PERSISTENCE ==================== */
 function loadData() {
-  var saved = localStorage.getItem('tli6_data');
+  var saved = localStorage.getItem('tli7_data');
   if (saved) {
     try {
       var p = JSON.parse(saved);
-      if (p && typeof p === 'object') {
-        if (Array.isArray(p.orders)) data.orders = p.orders;
-        if (Array.isArray(p.clients)) data.clients = p.clients;
-        if (Array.isArray(p.models)) data.models = p.models;
-        if (Array.isArray(p.stock)) data.stock = p.stock;
-        if (Array.isArray(p.machines)) data.machines = p.machines;
-        if (Array.isArray(p.checklist)) data.checklist = p.checklist;
-        if (Array.isArray(p.planningEvents)) data.planningEvents = p.planningEvents;
-        if (p.qualityResults && typeof p.qualityResults === 'object') data.qualityResults = p.qualityResults;
-      }
-    } catch(e) {
-      log('Load data error: ' + e.message, true);
-    }
+      if (p.orders) data.orders = p.orders;
+      if (p.clients) data.clients = p.clients;
+      if (p.models) data.models = p.models;
+      if (p.stock) data.stock = p.stock;
+      if (p.machines) data.machines = p.machines;
+      if (p.checklist) data.checklist = p.checklist;
+      if (p.planningEvents) data.planningEvents = p.planningEvents;
+      if (p.qualityResults) data.qualityResults = p.qualityResults;
+    } catch(e) {}
   }
 }
-function saveData() { localStorage.setItem('tli6_data', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('tli7_data', JSON.stringify(data)); }
 
 function loadConfig() {
   var el = document.getElementById('apiUrl');
-  if (el) el.value = config.apiUrl;
+  if (el) el.value = localStorage.getItem('tli7_apiUrl') || '';
   var ns = document.getElementById('notifSound');
   var nv = document.getElementById('notifVibrate');
   var nsc = document.getElementById('notifScreen');
-  if (ns) ns.checked = config.notifSound;
-  if (nv) nv.checked = config.notifVibrate;
-  if (nsc) nsc.checked = config.notifScreen;
+  if (ns) ns.checked = localStorage.getItem('tli7_notifSound') !== 'false';
+  if (nv) nv.checked = localStorage.getItem('tli7_notifVibrate') !== 'false';
+  if (nsc) nsc.checked = localStorage.getItem('tli7_notifScreen') !== 'false';
 }
 function saveConfig() {
   var el = document.getElementById('apiUrl');
   config.apiUrl = el ? (el.value || '').trim() : '';
-  localStorage.setItem('tli6_apiUrl', config.apiUrl);
-  showToast('Config sauvegardée', 'success');
+  localStorage.setItem('tli7_apiUrl', config.apiUrl);
+  showToast('Config sauvegardee', 'success');
 }
 function loadTimers() {
-  var saved = localStorage.getItem('tli6_timers');
+  var saved = localStorage.getItem('tli7_timers');
   if (saved) {
     try {
       var p = JSON.parse(saved);
-      if (p && Array.isArray(p.active)) activeTimers = p.active;
-      if (p && Array.isArray(p.finished)) finishedTimers = p.finished;
+      if (p.active) activeTimers = p.active;
+      if (p.finished) finishedTimers = p.finished;
     } catch(e) {}
   }
 }
-function saveTimers() { localStorage.setItem('tli6_timers', JSON.stringify({ active: activeTimers, finished: finishedTimers })); }
+function saveTimers() { localStorage.setItem('tli7_timers', JSON.stringify({active: activeTimers, finished: finishedTimers})); }
 
-// ==================== WAKE LOCK ====================
-function requestWakeLock() {
+/* ==================== DIAGNOSTIC BUTTONS ==================== */
+function testButton() { alert('TEST OK - Le bouton fonctionne !'); showToast('Test reussi', 'success'); }
+function testLocalStorage() {
   try {
-    if ('wakeLock' in navigator) {
-      navigator.wakeLock.request('screen').then(function(wl) { wakeLock = wl; showToast('Écran allumé', 'success'); });
-    } else {
-      showToast('Non supporté', 'warning');
-    }
-  } catch(e) { showToast('Impossible', 'error'); }
+    localStorage.setItem('tli7_test', 'ca_marche');
+    var val = localStorage.getItem('tli7_test');
+    alert('LocalStorage OK: ' + val);
+  } catch(e) { alert('LocalStorage ERROR: ' + e.message); }
 }
+function testModal() { openModal('newClientModal'); }
 
-// ==================== SYNC ====================
-function syncWithGoogle() {
-  if (!isOnline) { showToast('Hors-ligne', 'warning'); return; }
-  if (!config.apiUrl) { showToast('URL API non configurée', 'warning'); return; }
-  var btn = document.getElementById('syncBtn');
-  var icon = document.getElementById('syncIcon');
-  var text = document.getElementById('syncText');
-  btn.style.color = 'var(--primary)';
-  icon.textContent = '⏳'; text.textContent = 'Sync...';
-  fetch(config.apiUrl, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'syncAll', orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents })
-  }).then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(res) {
-    if (!res.success) throw new Error(res.error || 'Sync failed');
-    icon.textContent = '✅'; text.textContent = 'OK';
-    showToast('Synchronisé', 'success');
-    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
-  }).catch(function(e) {
-    icon.textContent = '❌'; text.textContent = 'Erreur';
-    showToast('Sync: ' + e.message, 'error');
-    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
-  });
-}
-function testConnection() {
-  if (!config.apiUrl) { showToast('URL API non configurée', 'warning'); return; }
-  fetch(config.apiUrl + '?action=getAll').then(function(r) {
-    showToast(r.ok ? 'Connexion OK' : 'Erreur ' + r.status, r.ok ? 'success' : 'error');
-  }).catch(function() { showToast('Connexion impossible', 'error'); });
-}
-
-// ==================== NAV ====================
+/* ==================== NAV ==================== */
 function showSection(id) {
-  log('showSection: ' + id);
   var sections = document.querySelectorAll('.section');
   for (var i = 0; i < sections.length; i++) sections[i].classList.remove('active');
   var tabs = document.querySelectorAll('.nav-tab');
@@ -457,17 +378,17 @@ function showSection(id) {
   renderAll();
 }
 
-// ==================== RENDER ALL ====================
+/* ==================== RENDER ALL ==================== */
 function renderAll() {
-  try { renderDashboard(); } catch(e) { log('renderDashboard error: ' + e.message, true); }
-  try { renderOrders(); } catch(e) { log('renderOrders error: ' + e.message, true); }
-  try { renderClients(); } catch(e) { log('renderClients error: ' + e.message, true); }
-  try { renderCatalog(); } catch(e) { log('renderCatalog error: ' + e.message, true); }
-  try { renderStock(); } catch(e) { log('renderStock error: ' + e.message, true); }
-  try { renderTimers(); } catch(e) { log('renderTimers error: ' + e.message, true); }
-  try { renderPlanning(); } catch(e) { log('renderPlanning error: ' + e.message, true); }
-  try { updateClientSelect(); } catch(e) { log('updateClientSelect error: ' + e.message, true); }
-  try { updateMachineSelects(); } catch(e) { log('updateMachineSelects error: ' + e.message, true); }
+  try { renderDashboard(); } catch(e) {}
+  try { renderOrders(); } catch(e) {}
+  try { renderClients(); } catch(e) {}
+  try { renderCatalog(); } catch(e) {}
+  try { renderStock(); } catch(e) {}
+  try { renderTimers(); } catch(e) {}
+  try { renderPlanning(); } catch(e) {}
+  try { updateClientSelect(); } catch(e) {}
+  try { updateMachineSelects(); } catch(e) {}
 }
 
 function renderDashboard() {
@@ -475,8 +396,7 @@ function renderDashboard() {
   renderActiveTimers();
   var alerts = [];
   for (var i = 0; i < data.stock.length; i++) {
-    var s = data.stock[i];
-    if (parseFloat(s.qty) <= parseFloat(s.alert)) alerts.push(s);
+    if (parseFloat(data.stock[i].qty) <= parseFloat(data.stock[i].alert)) alerts.push(data.stock[i]);
   }
   var div = document.getElementById('stockAlerts');
   if (alerts.length === 0) {
@@ -484,23 +404,19 @@ function renderDashboard() {
   } else {
     var html = '';
     for (var i = 0; i < alerts.length; i++) {
-      var s = alerts[i];
-      html += '<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>' + s.name + '</strong> — ' + s.qty + ' ' + s.unit + ' restant(s)</div>';
+      html += '<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>' + alerts[i].name + '</strong> — ' + alerts[i].qty + ' ' + alerts[i].unit + ' restant(s)</div>';
     }
     div.innerHTML = html;
   }
   var today = new Date();
   var todayEvents = [];
   for (var i = 0; i < data.planningEvents.length; i++) {
-    var e = data.planningEvents[i];
-    var d = new Date(e.date);
-    if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
-      todayEvents.push(e);
-    }
+    var d = new Date(data.planningEvents[i].date);
+    if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) todayEvents.push(data.planningEvents[i]);
   }
   var tdiv = document.getElementById('todayEvents');
   if (todayEvents.length === 0) {
-    tdiv.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Rien de prévu</div>';
+    tdiv.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Rien de prevu</div>';
   } else {
     var html = '';
     for (var i = 0; i < todayEvents.length; i++) html += renderEventItem(todayEvents[i]);
@@ -514,15 +430,11 @@ function updateStats() {
   var finished = 0;
   var n = new Date();
   for (var i = 0; i < data.orders.length; i++) {
-    var o = data.orders[i];
-    var d = new Date(o.date);
-    if (o.status === 'finished' && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear()) finished++;
+    var d = new Date(data.orders[i].date);
+    if (data.orders[i].status === 'finished' && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear()) finished++;
   }
   var revenue = 0;
-  for (var i = 0; i < data.orders.length; i++) {
-    var o = data.orders[i];
-    if (o.status === 'delivered') revenue += parseFloat(o.price) || 0;
-  }
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].status === 'delivered') revenue += parseFloat(data.orders[i].price) || 0;
   document.getElementById('statOrders').textContent = active;
   document.getElementById('statFinished').textContent = finished;
   document.getElementById('statRevenue').textContent = revenue.toFixed(0) + '€';
@@ -555,10 +467,9 @@ function renderOrders() {
   if (search) {
     var filtered = [];
     for (var i = 0; i < orders.length; i++) {
-      var o = orders[i];
-      var name = (o.name || '').toLowerCase();
-      var clientName = (o.clientName || '').toLowerCase();
-      if (name.indexOf(search) !== -1 || clientName.indexOf(search) !== -1) filtered.push(o);
+      var name = (orders[i].name || '').toLowerCase();
+      var clientName = (orders[i].clientName || '').toLowerCase();
+      if (name.indexOf(search) !== -1 || clientName.indexOf(search) !== -1) filtered.push(orders[i]);
     }
     orders = filtered;
   }
@@ -569,15 +480,18 @@ function renderOrders() {
     var o = orders[i];
     var svc = o.service === 'print' ? '🖨️ Impression' : o.service === 'modeling' ? '🎨 Modélisation' : o.service === 'design' ? '💡 Conception' : o.service;
     var statusClass = o.status || 'pending';
-    var hasPhotos = o.photos && o.photos.length > 0 ? '<span>📷</span>' : '';
+    var hasPhotos = (o.photos && o.photos.length > 0) ? '<span>📷</span>' : '';
     html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + (o.name || 'Sans nom') + '</span><span class="badge badge-' + statusClass + '">' + getStatusLabel(o.status) + '</span></div><div class="order-item-meta"><span>👤 ' + (o.clientName || 'Inconnu') + '</span><span>' + svc + '</span><span>💰 ' + (o.price || 0) + '€</span>' + hasPhotos + '</div></div>';
   }
   div.innerHTML = html;
 }
 
 function getStatusLabel(s) {
-  var l = { pending: 'À faire', printing: 'En cours', finished: 'Terminée', delivered: 'Livrée' };
-  return l[s] || s;
+  if (s === 'pending') return 'A faire';
+  if (s === 'printing') return 'En cours';
+  if (s === 'finished') return 'Terminee';
+  if (s === 'delivered') return 'Livree';
+  return s;
 }
 
 function renderClients() {
@@ -601,7 +515,7 @@ function renderCatalog() {
   var html = '';
   for (var i = 0; i < data.models.length; i++) {
     var m = data.models[i];
-    var typeLabel = m.type === 'fdm' ? 'FDM' : m.type === 'resin' ? 'Résine' : 'FDM + Résine';
+    var typeLabel = m.type === 'fdm' ? 'FDM' : m.type === 'resin' ? 'Resine' : 'FDM + Resine';
     html += '<div class="card"><div style="font-weight:700">' + (m.name || 'Sans nom') + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || '') + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div></div>';
   }
   div.innerHTML = html;
@@ -623,13 +537,13 @@ function renderStock() {
   div.innerHTML = html;
 }
 
-// ==================== PLANNING ====================
+/* ==================== PLANNING ==================== */
 function renderPlanning() {
   var calDiv = document.getElementById('planningCalendar');
   if (!calDiv) return;
   var year = planningCurrentDate.getFullYear();
   var month = planningCurrentDate.getMonth();
-  var monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var monthNames = ['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
   var label = document.getElementById('planningMonthLabel');
   if (label) label.textContent = monthNames[month] + ' ' + year;
   var firstDay = new Date(year, month, 1).getDay();
@@ -643,9 +557,8 @@ function renderPlanning() {
     var isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
     var dayEvents = [];
     for (var i = 0; i < data.planningEvents.length; i++) {
-      var e = data.planningEvents[i];
-      var ed = new Date(e.date);
-      if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(e);
+      var ed = new Date(data.planningEvents[i].date);
+      if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(data.planningEvents[i]);
     }
     var dots = '';
     var labels = '';
@@ -667,23 +580,22 @@ function renderPlanningEventsList() {
   var target = selectedPlanningDay || new Date();
   var events = [];
   for (var i = 0; i < data.planningEvents.length; i++) {
-    var e = data.planningEvents[i];
-    var d = new Date(e.date);
-    if (d.getDate() === target.getDate() && d.getMonth() === target.getMonth() && d.getFullYear() === target.getFullYear()) events.push(e);
+    var d = new Date(data.planningEvents[i].date);
+    if (d.getDate() === target.getDate() && d.getMonth() === target.getMonth() && d.getFullYear() === target.getFullYear()) events.push(data.planningEvents[i]);
   }
   events.sort(function(a, b) { return a.startTime.localeCompare(b.startTime); });
-  if (events.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun événement</div>'; return; }
+  if (events.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun evenement</div>'; return; }
   var html = '';
   for (var i = 0; i < events.length; i++) html += renderEventItem(events[i]);
   div.innerHTML = html;
 }
 function renderEventItem(e) {
-  var typeLabels = { printing: 'Impression', modeling: 'Modélisation', design: 'Conception', maintenance: 'Maintenance', rdv: 'RDV', logistics: 'Logistique', other: 'Divers' };
-  var typeColors = { printing: 'var(--primary)', modeling: 'var(--warning)', design: '#ff6b81', maintenance: 'var(--secondary)', rdv: '#a855f7', logistics: '#22d3ee', other: '#888' };
+  var typeLabels = {printing: 'Impression', modeling: 'Modelisation', design: 'Conception', maintenance: 'Maintenance', rdv: 'RDV', logistics: 'Logistique', other: 'Divers'};
+  var typeColors = {printing: 'var(--primary)', modeling: 'var(--warning)', design: '#ff6b81', maintenance: 'var(--secondary)', rdv: '#a855f7', logistics: '#22d3ee', other: '#888'};
   var typeLabel = typeLabels[e.type] || e.type;
   var typeColor = typeColors[e.type] || 'var(--primary)';
   var machineSpan = e.machineName ? '<span>🖨️ ' + e.machineName + '</span>' : '';
-  var assigneeLabel = e.assignee === 'florian' ? 'Florian' : e.assignee === 'elie' ? 'Élie' : 'Les deux';
+  var assigneeLabel = e.assignee === 'florian' ? 'Florian' : e.assignee === 'elie' ? 'Elie' : 'Les deux';
   var priorityLabel = e.priority === 'high' ? '<span style="color:var(--secondary)">🔴 Haute</span>' : e.priority === 'medium' ? '<span style="color:var(--warning)">🟡 Moyenne</span>' : '<span style="color:var(--success)">🟢 Basse</span>';
   return '<div class="event-item" style="border-left-color:' + typeColor + '" onclick="editPlanningEvent(' + e.id + ')"><div class="event-item-header"><span class="event-item-title">' + e.title + '</span><span style="font-size:.7rem;color:' + typeColor + ';font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span>' + machineSpan + '<span>👤 ' + assigneeLabel + '</span>' + priorityLabel + '</div></div>';
 }
@@ -711,19 +623,19 @@ function savePlanningEvent() {
     if (!title || !date) { showToast('Titre et date obligatoires', 'warning'); return; }
     var machine = null;
     for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === parseInt(machineId)) machine = data.machines[i];
-    var event = { id: Date.now(), title: title, type: type, date: date, startTime: startTime, endTime: endTime, machineId: machineId ? parseInt(machineId) : null, machineName: machine ? machine.name : null, assignee: assignee, priority: priority, notes: notes };
+    var event = {id: Date.now(), title: title, type: type, date: date, startTime: startTime, endTime: endTime, machineId: machineId ? parseInt(machineId) : null, machineName: machine ? machine.name : null, assignee: assignee, priority: priority, notes: notes};
     data.planningEvents.push(event);
     saveData();
     closeModal('planningModal');
-    showToast('Événement ajouté', 'success');
+    showToast('Evenement ajoute', 'success');
     renderPlanning();
     document.getElementById('planTitle').value = '';
     document.getElementById('planNotes').value = '';
-  } catch(err) { log('savePlanningEvent error: ' + err.message, true); showToast('Erreur', 'error'); }
+  } catch(err) { alert('savePlanningEvent error: ' + err.message); showToast('Erreur', 'error'); }
 }
-function editPlanningEvent(id) { if (!confirm('Supprimer cet événement ?')) return; var filtered = []; for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== id) filtered.push(data.planningEvents[i]); data.planningEvents = filtered; saveData(); renderPlanning(); showToast('Supprimé', 'warning'); }
+function editPlanningEvent(id) { if (!confirm('Supprimer cet evenement ?')) return; var filtered = []; for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== id) filtered.push(data.planningEvents[i]); data.planningEvents = filtered; saveData(); renderPlanning(); showToast('Supprime', 'warning'); }
 
-// ==================== TIMER ====================
+/* ==================== TIMER ==================== */
 function updateMachineSelects() {
   var ids = ['timerMachine', 'orderMachine', 'planMachine'];
   for (var i = 0; i < ids.length; i++) {
@@ -744,15 +656,14 @@ function startPrintTimer() {
   for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === machineId) machine = data.machines[i];
   if (!machine) return;
   var duration = (hours * 60 + minutes) * 60 * 1000;
-  var timer = { id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false };
+  var timer = {id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false};
   activeTimers.push(timer);
   machine.status = 'busy';
   machine.currentJob = name;
   saveTimers();
   saveData();
-  showToast('Timer démarré', 'success');
+  showToast('Timer demarre', 'success');
   document.getElementById('timerName').value = '';
-  if (config.notifScreen) requestWakeLock();
   renderAll();
   showSection('timer');
 }
@@ -774,7 +685,7 @@ function renderTimers() {
       var t = active[i];
       var remaining = Math.max(0, t.endTime - Date.now());
       var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
-      html += '<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">' + t.name + '</div><button class="btn btn-sm btn-danger" onclick="stopTimer(' + t.id + ')" style="width:auto;margin-top:0">Arrêter</button></div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+      html += '<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">' + t.name + '</div><button class="btn btn-sm btn-danger" onclick="stopTimer(' + t.id + ')" style="width:auto;margin-top:0">Arreter</button></div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
     }
     al.innerHTML = html;
   }
@@ -800,9 +711,6 @@ function startTimerLoop() {
         for (var j = 0; j < data.machines.length; j++) {
           if (data.machines[j].id === t.machineId) { data.machines[j].status = 'idle'; data.machines[j].currentJob = null; }
         }
-        showNotification('Impression terminée', t.name + ' est prête !');
-        if (config.notifSound) playSound();
-        if (config.notifVibrate && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
         changed = true;
       }
     }
@@ -830,7 +738,7 @@ function stopTimer(timerId) {
   for (var i = 0; i < data.machines.length; i++) {
     if (data.machines[i].id === timer.machineId) { data.machines[i].status = 'idle'; data.machines[i].currentJob = null; }
   }
-  saveTimers(); saveData(); renderAll(); showToast('Timer arrêté', 'warning');
+  saveTimers(); saveData(); renderAll(); showToast('Timer arrete', 'warning');
 }
 function formatTime(ms) {
   if (ms <= 0) return '00:00:00';
@@ -846,40 +754,8 @@ function formatDuration(ms) {
   return h > 0 ? h + 'h' + (m > 0 ? m + 'min' : '') : m + 'min';
 }
 
-// ==================== NOTIFICATIONS ====================
-function showNotification(title, text) {
-  var badge = document.getElementById('notifBadge');
-  if (!badge) return;
-  document.getElementById('notifTitle').textContent = title;
-  document.getElementById('notifText').textContent = text;
-  badge.classList.add('show');
-  if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: text, requireInteraction: true });
-  setTimeout(function() { hideNotification(); }, 10000);
-}
-function hideNotification() { document.getElementById('notifBadge').classList.remove('show'); }
-function playSound() {
-  try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [600, 800, 1000].forEach(function(freq, i) {
-      setTimeout(function() {
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = freq;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
-      }, i * 150);
-    });
-  } catch(e) {}
-}
-
-// ==================== MODALS ====================
+/* ==================== MODALS ==================== */
 function openModal(id) {
-  log('openModal: ' + id);
   var el = document.getElementById(id);
   if (el) {
     el.classList.add('active');
@@ -887,7 +763,6 @@ function openModal(id) {
   }
 }
 function closeModal(id) {
-  log('closeModal: ' + id);
   var el = document.getElementById(id);
   if (el) el.classList.remove('active');
 }
@@ -904,15 +779,7 @@ function toggleOrderFields() {
   document.getElementById('machineGroup').style.display = (service === 'print') ? 'block' : 'none';
 }
 
-// ==================== TEST BUTTON ====================
-function testButton() {
-  log('Test button clicked');
-  var result = document.getElementById('testResult');
-  if (result) result.textContent = '✅ Bouton OK ! JS fonctionne parfaitement.';
-  showToast('Test réussi', 'success');
-}
-
-// ==================== SAVE FUNCTIONS ====================
+/* ==================== SAVE FUNCTIONS ==================== */
 function saveOrder() {
   try {
     var clientId = parseInt(document.getElementById('orderClient').value);
@@ -920,9 +787,7 @@ function saveOrder() {
     for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
     var service = document.getElementById('orderService').value;
     var order = {
-      id: Date.now(),
-      clientId: clientId,
-      clientName: client ? client.name : 'Inconnu',
+      id: Date.now(), clientId: clientId, clientName: client ? client.name : 'Inconnu',
       name: document.getElementById('orderName').value || 'Sans nom',
       service: service,
       type: service === 'print' ? document.getElementById('orderType').value : null,
@@ -933,14 +798,12 @@ function saveOrder() {
       price: document.getElementById('orderPrice').value || 0,
       priority: document.getElementById('orderPriority').value,
       notes: document.getElementById('orderNotes').value || '',
-      status: 'pending',
-      date: new Date().toISOString(),
-      photos: []
+      status: 'pending', date: new Date().toISOString(), photos: []
     };
     data.orders.push(order);
     saveData();
     closeModal('newOrderModal');
-    showToast('Commande créée', 'success');
+    showToast('Commande creee', 'success');
     renderAll();
     document.getElementById('orderName').value = '';
     document.getElementById('orderMaterial').value = '';
@@ -948,55 +811,54 @@ function saveOrder() {
     document.getElementById('orderTime').value = '';
     document.getElementById('orderPrice').value = '';
     document.getElementById('orderNotes').value = '';
-  } catch(err) { log('saveOrder error: ' + err.message, true); showToast('Erreur', 'error'); }
+  } catch(err) { alert('saveOrder error: ' + err.message); showToast('Erreur', 'error'); }
 }
 function saveClient() {
   try {
-    var client = { id: Date.now(), name: document.getElementById('clientName').value || 'Sans nom', phone: document.getElementById('clientPhone').value || '', email: document.getElementById('clientEmail').value || '', address: document.getElementById('clientAddress').value || '', notes: document.getElementById('clientNotes').value || '' };
+    var client = {id: Date.now(), name: document.getElementById('clientName').value || 'Sans nom', phone: document.getElementById('clientPhone').value || '', email: document.getElementById('clientEmail').value || '', address: document.getElementById('clientAddress').value || '', notes: document.getElementById('clientNotes').value || ''};
     data.clients.push(client);
     saveData();
     closeModal('newClientModal');
-    showToast('Client ajouté', 'success');
+    showToast('Client ajoute', 'success');
     renderAll();
     document.getElementById('clientName').value = '';
     document.getElementById('clientPhone').value = '';
     document.getElementById('clientEmail').value = '';
     document.getElementById('clientAddress').value = '';
     document.getElementById('clientNotes').value = '';
-  } catch(err) { log('saveClient error: ' + err.message, true); showToast('Erreur', 'error'); }
+  } catch(err) { alert('saveClient error: ' + err.message); showToast('Erreur', 'error'); }
 }
 function saveModel() {
   try {
-    var model = { id: Date.now(), name: document.getElementById('modelName').value || 'Sans nom', category: document.getElementById('modelCategory').value, type: document.getElementById('modelType').value, time: document.getElementById('modelTime').value || 0, weight: document.getElementById('modelWeight').value || 0, price: document.getElementById('modelPrice').value || 0, description: document.getElementById('modelDesc').value || '' };
+    var model = {id: Date.now(), name: document.getElementById('modelName').value || 'Sans nom', category: document.getElementById('modelCategory').value, type: document.getElementById('modelType').value, time: document.getElementById('modelTime').value || 0, weight: document.getElementById('modelWeight').value || 0, price: document.getElementById('modelPrice').value || 0, description: document.getElementById('modelDesc').value || ''};
     data.models.push(model);
     saveData();
     closeModal('newModelModal');
-    showToast('Modèle ajouté', 'success');
+    showToast('Modele ajoute', 'success');
     renderAll();
     document.getElementById('modelName').value = '';
     document.getElementById('modelTime').value = '';
     document.getElementById('modelWeight').value = '';
     document.getElementById('modelPrice').value = '';
     document.getElementById('modelDesc').value = '';
-  } catch(err) { log('saveModel error: ' + err.message, true); showToast('Erreur', 'error'); }
+  } catch(err) { alert('saveModel error: ' + err.message); showToast('Erreur', 'error'); }
 }
 function saveStock() {
   try {
-    var item = { id: Date.now(), type: document.getElementById('stockType').value, name: document.getElementById('stockName').value || 'Sans nom', qty: parseFloat(document.getElementById('stockQty').value) || 0, unit: document.getElementById('stockUnit').value, alert: parseFloat(document.getElementById('stockAlert').value) || 1, supplier: document.getElementById('stockSupplier').value || '' };
+    var item = {id: Date.now(), type: document.getElementById('stockType').value, name: document.getElementById('stockName').value || 'Sans nom', qty: parseFloat(document.getElementById('stockQty').value) || 0, unit: document.getElementById('stockUnit').value, alert: parseFloat(document.getElementById('stockAlert').value) || 1, supplier: document.getElementById('stockSupplier').value || ''};
     data.stock.push(item);
     saveData();
     closeModal('newStockModal');
-    showToast('Stock ajouté', 'success');
+    showToast('Stock ajoute', 'success');
     renderAll();
     document.getElementById('stockName').value = '';
     document.getElementById('stockQty').value = '';
     document.getElementById('stockSupplier').value = '';
-  } catch(err) { log('saveStock error: ' + err.message, true); showToast('Erreur', 'error'); }
+  } catch(err) { alert('saveStock error: ' + err.message); showToast('Erreur', 'error'); }
 }
 
-// ==================== ORDER DETAIL & QUALITY ====================
+/* ==================== ORDER DETAIL & QUALITY ==================== */
 function openOrderDetail(id) {
-  log('openOrderDetail: ' + id);
   currentOrderId = id;
   var order = null;
   for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === id) order = data.orders[i];
@@ -1004,8 +866,8 @@ function openOrderDetail(id) {
   document.getElementById('detailTitle').textContent = '#' + order.id + ' — ' + (order.name || 'Sans nom');
   document.getElementById('detailStatus').value = order.status || 'pending';
   var content = document.getElementById('orderDetailContent');
-  var svc = order.service === 'print' ? '🖨️ Impression' : order.service === 'modeling' ? '🎨 Modélisation' : order.service === 'design' ? '💡 Conception' : order.service;
-  var typeLabel = order.type === 'fdm' ? 'FDM' : order.type === 'resin' ? 'Résine' : '-';
+  var svc = order.service === 'print' ? '🖨️ Impression' : order.service === 'modeling' ? '🎨 Modelisation' : order.service === 'design' ? '💡 Conception' : order.service;
+  var typeLabel = order.type === 'fdm' ? 'FDM' : order.type === 'resin' ? 'Resine' : '-';
   var notesHtml = order.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + order.notes + '</div></div>' : '';
   content.innerHTML = '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">' + (order.clientName || 'Inconnu') + '</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>' + svc + '</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>' + typeLabel + '</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>' + (order.weight || 0) + 'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>' + (order.time || 0) + 'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">' + (order.price || 0) + '€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>' + new Date(order.date).toLocaleDateString('fr-FR') + '</div></div></div>' + notesHtml;
   renderOrderPhotos(order);
@@ -1026,7 +888,7 @@ function updateOrderStatus() {
   order.status = document.getElementById('detailStatus').value;
   saveData();
   if (oldStatus !== 'finished' && order.status === 'finished' && order.service === 'print') showQualityOverlay(order.id, order.name);
-  showToast('Statut mis à jour', 'success');
+  showToast('Statut mis a jour', 'success');
   renderAll();
 }
 function showQualityOverlay(orderId, orderName) {
@@ -1034,7 +896,7 @@ function showQualityOverlay(orderId, orderName) {
   document.getElementById('qualityOrderName').textContent = orderName || 'Commande';
   if (!data.qualityResults[orderId]) data.qualityResults[orderId] = [];
   if (data.qualityResults[orderId].length === 0) {
-    for (var i = 0; i < data.checklist.length; i++) data.qualityResults[orderId].push({ id: data.checklist[i].id, text: data.checklist[i].text, checked: false });
+    for (var i = 0; i < data.checklist.length; i++) data.qualityResults[orderId].push({id: data.checklist[i].id, text: data.checklist[i].text, checked: false});
   }
   var div = document.getElementById('qualityChecklist');
   var html = '';
@@ -1066,7 +928,7 @@ function updateQualityProgress() {
   var total = data.qualityResults[qualityOrderId].length;
   var pct = Math.round((checked / total) * 100);
   document.getElementById('qualityProgress').style.width = pct + '%';
-  document.getElementById('qualityPercent').textContent = pct + '% complété';
+  document.getElementById('qualityPercent').textContent = pct + '% complete';
   document.getElementById('qualityValidateBtn').disabled = pct < 100;
 }
 function validateQuality() {
@@ -1077,15 +939,15 @@ function validateQuality() {
     window.tempQualityPhoto = null;
   }
   document.getElementById('qualityOverlay').classList.remove('active');
-  showToast('Qualité validée ! Commande clôturée', 'success');
+  showToast('Qualite validee ! Commande cloturee', 'success');
 }
 function skipQuality() {
   window.tempQualityPhoto = null;
   document.getElementById('qualityOverlay').classList.remove('active');
-  showToast('Clôture sans validation', 'warning');
+  showToast('Cloture sans validation', 'warning');
 }
-function deleteCurrentOrder() { if (!confirm('Supprimer ?')) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal('orderDetailModal'); showToast('Supprimé', 'warning'); renderAll(); }
-function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast('Photo supprimée', 'warning'); } }
+function deleteCurrentOrder() { if (!confirm('Supprimer ?')) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal('orderDetailModal'); showToast('Supprime', 'warning'); renderAll(); }
+function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast('Photo supprimee', 'warning'); } }
 function showClientOrders(clientId) {
   var client = null;
   for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
@@ -1106,7 +968,7 @@ function showClientOrders(clientId) {
   openModal('orderDetailModal');
 }
 
-// ==================== CAMERA ====================
+/* ==================== CAMERA ==================== */
 function openCamera() { photoOrderId = currentOrderId; document.getElementById('cameraInput').click(); }
 function handleCameraFile(input) {
   var file = input.files[0];
@@ -1116,7 +978,7 @@ function handleCameraFile(input) {
     var photoData = e.target.result;
     var order = null;
     for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
-    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast('Photo ajoutée', 'success'); }
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast('Photo ajoutee', 'success'); }
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -1129,14 +991,14 @@ function handleQualityCameraFile(input) {
   reader.onload = function(e) {
     window.tempQualityPhoto = e.target.result;
     var preview = document.getElementById('qualityPhotoPreview');
-    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualité"></div>'; preview.style.display = 'grid'; }
-    showToast('Photo qualité prise', 'success');
+    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualite"></div>'; preview.style.display = 'grid'; }
+    showToast('Photo qualite prise', 'success');
   };
   reader.readAsDataURL(file);
   input.value = '';
 }
 
-// ==================== CALCULATOR ====================
+/* ==================== CALCULATOR ==================== */
 function calculateCost() {
   var service = document.getElementById('calcService').value;
   var type = document.getElementById('calcType').value;
@@ -1152,16 +1014,16 @@ function calculateCost() {
   document.getElementById('calcTotal').textContent = total.toFixed(2) + '€';
 }
 
-// ==================== EXPORT / IMPORT / RESET ====================
+/* ==================== EXPORT / IMPORT / RESET ==================== */
 function exportData() {
-  var blob = new Blob([JSON.stringify({ data: data, timers: { active: activeTimers, finished: finishedTimers }, exportDate: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: 'application/json'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
   a.download = 'TLI_backup_' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('Export réussi', 'success');
+  showToast('Export reussi', 'success');
 }
 function importData(input) {
   var file = input.files[0];
@@ -1172,7 +1034,7 @@ function importData(input) {
       var imported = JSON.parse(e.target.result);
       if (imported.data) data = imported.data;
       if (imported.timers) { activeTimers = imported.timers.active || []; finishedTimers = imported.timers.finished || []; }
-      saveData(); saveTimers(); renderAll(); showToast('Import réussi', 'success');
+      saveData(); saveTimers(); renderAll(); showToast('Import reussi', 'success');
     } catch(err) { showToast('Erreur import', 'error'); }
   };
   reader.readAsText(file);
@@ -1181,23 +1043,95 @@ function importData(input) {
 function resetAllData() {
   if (!confirm('Tout supprimer ?')) return;
   if (!confirm('Vraiment ?')) return;
-  data = JSON.parse(JSON.stringify(defaultData));
+  data = {orders: [], clients: [], models: [], stock: [], machines: [
+    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
+    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
+  ], checklist: [
+    {id: 1, text: 'Adhesion plateau OK', checked: false},
+    {id: 2, text: 'Pas de warping / deformation', checked: false},
+    {id: 3, text: 'Finition surface correcte', checked: false},
+    {id: 4, text: 'Supports retires proprement', checked: false},
+    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
+    {id: 6, text: 'Dimensions conformes', checked: false},
+    {id: 7, text: 'Emballage adapte', checked: false},
+    {id: 8, text: 'Photo finale prise', checked: false}
+  ], planningEvents: [], qualityResults: {}};
   activeTimers = [];
   finishedTimers = [];
-  saveData(); saveTimers(); renderAll(); showToast('Réinitialisé', 'warning');
+  saveData(); saveTimers(); renderAll(); showToast('Reinitialise', 'warning');
 }
 function clearCache() {
-  localStorage.removeItem('tli6_data');
-  localStorage.removeItem('tli6_timers');
-  localStorage.removeItem('tli6_apiUrl');
-  data = JSON.parse(JSON.stringify(defaultData));
+  localStorage.removeItem('tli7_data');
+  localStorage.removeItem('tli7_timers');
+  localStorage.removeItem('tli7_apiUrl');
+  localStorage.removeItem('tli7_test');
+  data = {orders: [], clients: [{id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: ''}], models: [], stock: [], machines: [
+    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
+    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
+    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
+  ], checklist: [
+    {id: 1, text: 'Adhesion plateau OK', checked: false},
+    {id: 2, text: 'Pas de warping / deformation', checked: false},
+    {id: 3, text: 'Finition surface correcte', checked: false},
+    {id: 4, text: 'Supports retires proprement', checked: false},
+    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
+    {id: 6, text: 'Dimensions conformes', checked: false},
+    {id: 7, text: 'Emballage adapte', checked: false},
+    {id: 8, text: 'Photo finale prise', checked: false}
+  ], planningEvents: [], qualityResults: {}};
   activeTimers = [];
   finishedTimers = [];
   renderAll();
-  showToast('Cache vidé', 'success');
+  showToast('Cache vide', 'success');
 }
 
-// ==================== UTILS ====================
+/* ==================== SYNC & WAKE LOCK ==================== */
+function syncWithGoogle() {
+  if (!navigator.onLine) { showToast('Hors-ligne', 'warning'); return; }
+  var apiUrl = localStorage.getItem('tli7_apiUrl') || '';
+  if (!apiUrl) { showToast('URL API non configuree', 'warning'); return; }
+  var btn = document.getElementById('syncBtn');
+  var icon = document.getElementById('syncIcon');
+  var text = document.getElementById('syncText');
+  btn.style.color = 'var(--primary)';
+  icon.textContent = '⏳'; text.textContent = 'Sync...';
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action: 'syncAll', orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents})
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(res) {
+    if (!res.success) throw new Error(res.error || 'Sync failed');
+    icon.textContent = '✅'; text.textContent = 'OK';
+    showToast('Synchronise', 'success');
+    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
+  }).catch(function(e) {
+    icon.textContent = '❌'; text.textContent = 'Erreur';
+    showToast('Sync: ' + e.message, 'error');
+    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
+  });
+}
+function testConnection() {
+  var apiUrl = localStorage.getItem('tli7_apiUrl') || '';
+  if (!apiUrl) { showToast('URL API non configuree', 'warning'); return; }
+  fetch(apiUrl + '?action=getAll').then(function(r) {
+    showToast(r.ok ? 'Connexion OK' : 'Erreur ' + r.status, r.ok ? 'success' : 'error');
+  }).catch(function() { showToast('Connexion impossible', 'error'); });
+}
+function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      navigator.wakeLock.request('screen').then(function(wl) { showToast('Ecran allume', 'success'); });
+    } else { showToast('Non supporte', 'warning'); }
+  } catch(e) { showToast('Impossible', 'error'); }
+}
+
+/* ==================== UTILS ==================== */
 function showToast(msg, type) {
   var toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -1205,9 +1139,6 @@ function showToast(msg, type) {
   toast.classList.add('show');
   setTimeout(function() { toast.classList.remove('show'); }, 2500);
 }
-
-// ==================== BOOT ====================
-document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
