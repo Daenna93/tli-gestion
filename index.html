@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
 <title>TLI v12 - Technical Layer Innovation</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVExJIC0gVGVjaG5pY2FsIExheWVyIElubm92YXRpb24iLCJzaG9ydF9uYW1lIjoiVExJIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxYTFhMmUiLCJ0aGVtZV9jb2xvciI6IiMxYTFhMmUifQ==">
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -101,34 +100,35 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .client-name{font-weight:700;font-size:1.05rem}
 .client-info{font-size:.8rem;color:#888;margin-top:4px}
 .client-orders{font-size:.75rem;color:#666;margin-top:4px}
+.client-order-row{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer}
 </style>
 </head>
 <body>
 
 <header class="app-header">
   <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
-  <button class="sync-btn" onclick="syncWithGoogle()"><span>🔄</span><span>Sync</span></button>
+  <button class="sync-btn" id="btnSync"><span>🔄</span><span>Sync</span></button>
 </header>
 
 <nav class="nav-tabs">
-  <div class="nav-tab active" onclick="showSection('dashboard', this)">📊 Tableau</div>
-  <div class="nav-tab" onclick="showSection('orders', this)">📦 Commandes</div>
-  <div class="nav-tab" onclick="showSection('clients', this)">👥 Clients</div>
-  <div class="nav-tab" onclick="showSection('catalog', this)">🎨 Catalogue</div>
-  <div class="nav-tab" onclick="showSection('stock', this)">📋 Stock</div>
-  <div class="nav-tab" onclick="showSection('planning', this)">📅 Planning</div>
-  <div class="nav-tab" onclick="showSection('timer', this)">⏰ Timer</div>
-  <div class="nav-tab" onclick="showSection('calculator', this)">🧮 Devis</div>
-  <div class="nav-tab" onclick="showSection('settings', this)">⚙️ Config</div>
+  <div class="nav-tab active" data-section="dashboard">📊 Tableau</div>
+  <div class="nav-tab" data-section="orders">📦 Commandes</div>
+  <div class="nav-tab" data-section="clients">👥 Clients</div>
+  <div class="nav-tab" data-section="catalog">🎨 Catalogue</div>
+  <div class="nav-tab" data-section="stock">📋 Stock</div>
+  <div class="nav-tab" data-section="planning">📅 Planning</div>
+  <div class="nav-tab" data-section="timer">⏰ Timer</div>
+  <div class="nav-tab" data-section="calculator">🧮 Devis</div>
+  <div class="nav-tab" data-section="settings">⚙️ Config</div>
 </nav>
 
 <section id="dashboard" class="section active">
   <div class="card"><div class="card-title">📊 Stats</div><div id="statsDisplay">Chargement...</div></div>
   <div class="card">
     <div class="card-title">⚡ Actions rapides</div>
-    <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
-    <button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button>
-    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[6])" style="margin-top:8px">⏰ Lancer timer</button>
+    <button class="btn btn-primary" id="btnNewOrderDash">+ Nouvelle commande</button>
+    <button class="btn btn-secondary" id="btnNewClientDash" style="margin-top:8px">+ Nouveau client</button>
+    <button class="btn btn-secondary" id="btnTimerDash" style="margin-top:8px">⏰ Lancer timer</button>
   </div>
   <div class="card" id="activeTimersCard" style="display:none">
     <div class="card-title">🔥 Impressions en cours</div>
@@ -138,29 +138,29 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 </section>
 
 <section id="orders" class="section">
-  <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
+  <button class="btn btn-primary" id="btnNewOrder">+ Nouvelle commande</button>
   <div class="order-tabs" style="margin-top:12px">
-    <div class="order-tab active" onclick="filterOrders('all', this)">Toutes</div>
-    <div class="order-tab" onclick="filterOrders('pending', this)">A faire</div>
-    <div class="order-tab" onclick="filterOrders('printing', this)">En cours</div>
-    <div class="order-tab" onclick="filterOrders('finished', this)">Terminees</div>
-    <div class="order-tab" onclick="filterOrders('delivered', this)">Livrees</div>
+    <div class="order-tab active" data-filter="all">Toutes</div>
+    <div class="order-tab" data-filter="pending">A faire</div>
+    <div class="order-tab" data-filter="printing">En cours</div>
+    <div class="order-tab" data-filter="finished">Terminees</div>
+    <div class="order-tab" data-filter="delivered">Livrees</div>
   </div>
   <div id="ordersList"></div>
 </section>
 
 <section id="clients" class="section">
-  <button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button>
+  <button class="btn btn-primary" id="btnNewClient">+ Nouveau client</button>
   <div id="clientsList" style="margin-top:12px"></div>
 </section>
 
 <section id="catalog" class="section">
-  <button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modele</button>
+  <button class="btn btn-primary" id="btnNewModel">+ Ajouter modele</button>
   <div id="catalogList" style="margin-top:12px"></div>
 </section>
 
 <section id="stock" class="section">
-  <button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button>
+  <button class="btn btn-primary" id="btnNewStock">+ Ajouter stock</button>
   <div id="stockList" style="margin-top:12px"></div>
 </section>
 
@@ -168,9 +168,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="card">
     <div class="card-title">📅 Calendrier</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(-1)" style="width:auto">◀</button>
+      <button class="btn btn-sm btn-secondary" id="btnPlanPrev" style="width:auto">◀</button>
       <div id="planningMonthLabel" style="font-weight:700"></div>
-      <button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(1)" style="width:auto">▶</button>
+      <button class="btn btn-sm btn-secondary" id="btnPlanNext" style="width:auto">▶</button>
     </div>
     <div class="planning-calendar" id="planningCalendar"></div>
   </div>
@@ -178,7 +178,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="card-title">📋 Evenements</div>
     <div id="planningEventsList"></div>
   </div>
-  <button class="btn btn-primary" onclick="openModal('planningModal')">+ Ajouter evenement</button>
+  <button class="btn btn-primary" id="btnNewEvent">+ Ajouter evenement</button>
 </section>
 
 <section id="timer" class="section">
@@ -188,7 +188,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="timerMachine"></select></div>
     <div class="form-group"><label class="form-label">Duree (h)</label><input type="number" class="form-input" id="timerHours" value="4" min="0.5" step="0.5"></div>
     <div class="form-group"><label class="form-label">Duree (min)</label><input type="number" class="form-input" id="timerMinutes" value="0" min="0" max="59"></div>
-    <button class="btn btn-primary" onclick="startPrintTimer()">🚀 Demarrer</button>
+    <button class="btn btn-primary" id="btnStartTimer">🚀 Demarrer</button>
   </div>
   <div class="card" id="activeTimersSection" style="display:none">
     <div class="card-title">🔥 En cours</div>
@@ -203,12 +203,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <section id="calculator" class="section">
   <div class="card">
     <div class="card-title">🧮 Calculateur de devis</div>
-    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="calcService" onchange="calculateCost()"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
-    <div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType" onchange="calculateCost()"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
-    <div class="form-group"><label class="form-label">Poids (g)</label><input type="number" class="form-input" id="calcWeight" value="50" oninput="calculateCost()"></div>
-    <div class="form-group"><label class="form-label">Temps (h)</label><input type="number" class="form-input" id="calcTime" value="4" oninput="calculateCost()"></div>
-    <div class="form-group"><label class="form-label">Complexite</label><select class="form-select" id="calcComplexity" onchange="calculateCost()"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
-    <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="calcQty" value="1" min="1" oninput="calculateCost()"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="calcService"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
+    <div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
+    <div class="form-group"><label class="form-label">Poids (g)</label><input type="number" class="form-input" id="calcWeight" value="50"></div>
+    <div class="form-group"><label class="form-label">Temps (h)</label><input type="number" class="form-input" id="calcTime" value="4"></div>
+    <div class="form-group"><label class="form-label">Complexite</label><select class="form-select" id="calcComplexity"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
+    <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="calcQty" value="1" min="1"></div>
     <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px">
       <div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estime</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div>
     </div>
@@ -219,8 +219,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="card">
     <div class="card-title">🔗 Synchronisation</div>
     <div class="form-group"><label class="form-label">URL API Apps Script</label><input type="text" class="form-input" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
-    <button class="btn btn-primary" onclick="saveConfig()">💾 Sauvegarder</button>
-    <button class="btn btn-secondary" onclick="testConnection()" style="margin-top:8px">🧪 Tester</button>
+    <button class="btn btn-primary" id="btnSaveConfig">💾 Sauvegarder</button>
+    <button class="btn btn-secondary" id="btnTestConn" style="margin-top:8px">🧪 Tester</button>
   </div>
   <div class="card">
     <div class="card-title">🔔 Notifications</div>
@@ -229,22 +229,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
   <div class="card">
     <div class="card-title">📤 Export / Import</div>
-    <button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button>
-    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:8px">📥 Importer JSON</button>
-    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)">
+    <button class="btn btn-secondary" id="btnExport">📤 Exporter JSON</button>
+    <button class="btn btn-secondary" id="btnImportTrigger" style="margin-top:8px">📥 Importer JSON</button>
+    <input type="file" id="importFile" style="display:none" accept=".json">
   </div>
   <div class="card">
     <div class="card-title">⚠️ Danger Zone</div>
-    <button class="btn btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
+    <button class="btn btn-danger" id="btnClearAll">🗑️ Tout effacer</button>
   </div>
 </section>
 
 <div class="modal-overlay" id="newOrderModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('newOrderModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" data-close="newOrderModal">×</button></div>
     <div class="form-group"><label class="form-label">Client</label><select class="form-select" id="orderClient"></select></div>
     <div class="form-group"><label class="form-label">Nom du projet</label><input type="text" class="form-input" id="orderName" placeholder="ex: Support telephone"></div>
-    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="orderService" onchange="toggleOrderFields()"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="orderService"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
     <div class="form-group" id="printTypeGroup"><label class="form-label">Technologie</label><select class="form-select" id="orderType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
     <div class="form-group" id="machineGroup"><label class="form-label">Machine</label><select class="form-select" id="orderMachine"></select></div>
     <div class="form-group"><label class="form-label">Materiau</label><input type="text" class="form-input" id="orderMaterial" placeholder="ex: PLA, Resine..."></div>
@@ -253,17 +253,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Prix (€)</label><input type="number" class="form-input" id="orderPrice" placeholder="15.00" step="0.01"></div>
     <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="orderPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="orderNotes" placeholder="Details..."></textarea></div>
-    <button class="btn btn-primary" onclick="saveOrder()">Creer</button>
+    <button class="btn btn-primary" id="btnSaveOrder">Creer</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="orderDetailModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title" id="detailTitle">Detail</div><button class="modal-close" onclick="closeModal('orderDetailModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title" id="detailTitle">Detail</div><button class="modal-close" data-close="orderDetailModal">×</button></div>
     <div id="orderDetailContent"></div>
     <div class="form-group" style="margin-top:14px">
       <label class="form-label">Statut</label>
-      <select class="form-select" id="detailStatus" onchange="updateOrderStatus()">
+      <select class="form-select" id="detailStatus">
         <option value="pending">A faire</option>
         <option value="printing">En cours</option>
         <option value="finished">Terminee</option>
@@ -273,35 +273,35 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group">
       <label class="form-label">Photos</label>
       <div class="photo-grid" id="detailPhotos"></div>
-      <button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Ajouter une photo</button>
+      <button class="btn btn-secondary" id="btnAddPhoto" style="margin-top:8px">📷 Ajouter une photo</button>
     </div>
-    <button class="btn btn-danger" onclick="deleteCurrentOrder()">🗑️ Supprimer</button>
+    <button class="btn btn-danger" id="btnDeleteOrder">🗑️ Supprimer</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="newClientModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('newClientModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" data-close="newClientModal">×</button></div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="clientName" placeholder="Nom"></div>
     <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" id="clientPhone" placeholder="06 12 34 56 78"></div>
     <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="email@exemple.com"></div>
     <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
-    <button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
+    <button class="btn btn-primary" id="btnSaveClient">Ajouter</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="clientDetailModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Client</div><button class="modal-close" onclick="closeModal('clientDetailModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Client</div><button class="modal-close" data-close="clientDetailModal">×</button></div>
     <div id="clientDetailContent"></div>
-    <button class="btn btn-danger" onclick="deleteCurrentClient()">🗑️ Supprimer</button>
+    <button class="btn btn-danger" id="btnDeleteClient">🗑️ Supprimer</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="newModelModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">Nouveau modele</div><button class="modal-close" onclick="closeModal('newModelModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">Nouveau modele</div><button class="modal-close" data-close="newModelModal">×</button></div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="modelName" placeholder="ex: Porte-cles"></div>
     <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="modelCategory"><option value="prototype">Prototype</option><option value="decoration">Decoration</option><option value="functional">Fonctionnel</option><option value="jewelry">Bijouterie</option><option value="other">Autre</option></select></div>
     <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="modelType"><option value="fdm">FDM</option><option value="resin">Resine</option><option value="both">Les deux</option></select></div>
@@ -309,26 +309,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Poids moyen (g)</label><input type="number" class="form-input" id="modelWeight" placeholder="30"></div>
     <div class="form-group"><label class="form-label">Prix base (€)</label><input type="number" class="form-input" id="modelPrice" placeholder="10.00" step="0.01"></div>
     <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="modelDesc" placeholder="Description..."></textarea></div>
-    <button class="btn btn-primary" onclick="saveModel()">Ajouter</button>
+    <button class="btn btn-primary" id="btnSaveModel">Ajouter</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="newStockModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" onclick="closeModal('newStockModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" data-close="newStockModal">×</button></div>
     <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="stockType"><option value="filament">Filament</option><option value="resin">Resine</option><option value="part">Piece detachee</option><option value="tool">Outil</option><option value="other">Autre</option></select></div>
     <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="stockName" placeholder="ex: PLA Blanc 1.75mm"></div>
     <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="stockQty" placeholder="1"></div>
     <div class="form-group"><label class="form-label">Unite</label><select class="form-select" id="stockUnit"><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="pcs">pieces</option><option value="m">metres</option></select></div>
     <div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="stockAlert" value="1"></div>
     <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="stockSupplier" placeholder="Amazon, 3DJake..."></div>
-    <button class="btn btn-primary" onclick="saveStock()">Ajouter</button>
+    <button class="btn btn-primary" id="btnSaveStock">Ajouter</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="planningModal">
   <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">📅 Ajouter evenement</div><button class="modal-close" onclick="closeModal('planningModal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">📅 Ajouter evenement</div><button class="modal-close" data-close="planningModal">×</button></div>
     <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="planTitle" placeholder="ex: Impression support Jean"></div>
     <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="planType"><option value="printing">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option><option value="maintenance">Maintenance</option><option value="rdv">RDV client</option><option value="logistics">Logistique</option><option value="other">Divers</option></select></div>
     <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="planDate"></div>
@@ -339,7 +339,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Assigne a</label><select class="form-select" id="planAssignee"><option value="florian">Florian</option><option value="elie">Elie</option><option value="both">Les deux</option></select></div>
     <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="planPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="planNotes" placeholder="Details..."></textarea></div>
-    <button class="btn btn-primary" onclick="savePlanningEvent()">Ajouter</button>
+    <button class="btn btn-primary" id="btnSaveEvent">Ajouter</button>
   </div>
 </div>
 
@@ -352,26 +352,27 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group" style="margin:14px 0">
       <label class="form-label">📷 Photo de la piece finie</label>
       <div class="photo-grid" id="qualityPhotoPreview" style="display:none;margin-bottom:8px"></div>
-      <button class="btn btn-secondary" onclick="openQualityCamera()" style="margin-top:0">📷 Prendre une photo</button>
+      <button class="btn btn-secondary" id="btnQualityCam" style="margin-top:0">📷 Prendre une photo</button>
     </div>
-    <button class="btn btn-primary" id="qualityValidateBtn" onclick="validateQuality()" disabled>Valider la cloture</button>
-    <button class="btn btn-secondary" onclick="skipQuality()" style="margin-top:8px">Passer</button>
+    <button class="btn btn-primary" id="qualityValidateBtn" disabled>Valider la cloture</button>
+    <button class="btn btn-secondary" id="btnSkipQuality" style="margin-top:8px">Passer</button>
   </div>
 </div>
 
-<div class="photo-overlay" id="photoOverlay" onclick="closePhotoOverlay()">
-  <button class="photo-overlay-close" onclick="closePhotoOverlay()">×</button>
+<div class="photo-overlay" id="photoOverlay">
+  <button class="photo-overlay-close" id="btnClosePhoto">×</button>
   <img id="photoOverlayImg" src="" alt="Photo">
 </div>
 
-<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCameraFile(this)">
-<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleQualityCameraFile(this)">
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none">
 <div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
 // TLI v12 - Technical Layer Innovation
 // Application de gestion pour impression 3D (PWA)
+// Tous les event listeners sont attaches en JS pur (pas de onclick inline)
 // ============================================================
 
 var data = {
@@ -418,6 +419,7 @@ function init() {
     renderAll();
     calculateCost();
     updateMachineSelects();
+    attachStaticListeners();
   } catch(e) { console.error("init error:", e); }
 }
 
@@ -453,6 +455,100 @@ function loadTimers() {
       if (parsed.finished) finishedTimers = parsed.finished;
     }
   } catch(e) { console.error("loadTimers error:", e); }
+}
+
+// ============================================================
+// EVENT LISTENERS STATIQUES (attaches une seule fois au demarrage)
+// ============================================================
+function attachStaticListeners() {
+  // Navigation
+  document.querySelectorAll('.nav-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      showSection(this.dataset.section, this);
+    });
+  });
+
+  // Boutons dashboard
+  document.getElementById('btnNewOrderDash').addEventListener('click', function() { openModal('newOrderModal'); });
+  document.getElementById('btnNewClientDash').addEventListener('click', function() { openModal('newClientModal'); });
+  document.getElementById('btnTimerDash').addEventListener('click', function() {
+    showSection('timer', document.querySelector('.nav-tab[data-section="timer"]'));
+  });
+  document.getElementById('btnSync').addEventListener('click', syncWithGoogle);
+
+  // Boutons principaux
+  document.getElementById('btnNewOrder').addEventListener('click', function() { openModal('newOrderModal'); });
+  document.getElementById('btnNewClient').addEventListener('click', function() { openModal('newClientModal'); });
+  document.getElementById('btnNewModel').addEventListener('click', function() { openModal('newModelModal'); });
+  document.getElementById('btnNewStock').addEventListener('click', function() { openModal('newStockModal'); });
+  document.getElementById('btnNewEvent').addEventListener('click', function() { openModal('planningModal'); });
+
+  // Filtres commandes
+  document.querySelectorAll('.order-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      filterOrders(this.dataset.filter, this);
+    });
+  });
+
+  // Planning navigation
+  document.getElementById('btnPlanPrev').addEventListener('click', function() { changePlanningMonth(-1); });
+  document.getElementById('btnPlanNext').addEventListener('click', function() { changePlanningMonth(1); });
+
+  // Timer
+  document.getElementById('btnStartTimer').addEventListener('click', startPrintTimer);
+
+  // Calculateur
+  ['calcService','calcType','calcWeight','calcTime','calcComplexity','calcQty'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', calculateCost);
+  });
+
+  // Settings
+  document.getElementById('btnSaveConfig').addEventListener('click', saveConfig);
+  document.getElementById('btnTestConn').addEventListener('click', testConnection);
+  document.getElementById('btnExport').addEventListener('click', exportData);
+  document.getElementById('btnImportTrigger').addEventListener('click', function() {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function() { importData(this); });
+  document.getElementById('btnClearAll').addEventListener('click', clearAll);
+
+  // Modals - fermeture via data-close
+  document.querySelectorAll('.modal-close').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var modalId = this.dataset.close;
+      if (modalId) closeModal(modalId);
+    });
+  });
+
+  // Sauvegardes modals
+  document.getElementById('btnSaveOrder').addEventListener('click', saveOrder);
+  document.getElementById('btnSaveClient').addEventListener('click', saveClient);
+  document.getElementById('btnSaveModel').addEventListener('click', saveModel);
+  document.getElementById('btnSaveStock').addEventListener('click', saveStock);
+  document.getElementById('btnSaveEvent').addEventListener('click', savePlanningEvent);
+
+  // Detail modals
+  document.getElementById('detailStatus').addEventListener('change', updateOrderStatus);
+  document.getElementById('btnAddPhoto').addEventListener('click', openCamera);
+  document.getElementById('btnDeleteOrder').addEventListener('click', deleteCurrentOrder);
+  document.getElementById('btnDeleteClient').addEventListener('click', deleteCurrentClient);
+
+  // Photo overlay
+  document.getElementById('photoOverlay').addEventListener('click', closePhotoOverlay);
+  document.getElementById('btnClosePhoto').addEventListener('click', closePhotoOverlay);
+
+  // Quality
+  document.getElementById('btnQualityCam').addEventListener('click', openQualityCamera);
+  document.getElementById('qualityValidateBtn').addEventListener('click', validateQuality);
+  document.getElementById('btnSkipQuality').addEventListener('click', skipQuality);
+
+  // Camera inputs
+  document.getElementById('cameraInput').addEventListener('change', function() { handleCameraFile(this); });
+  document.getElementById('qualityCameraInput').addEventListener('change', function() { handleQualityCameraFile(this); });
+
+  // Order service toggle
+  document.getElementById('orderService').addEventListener('change', toggleOrderFields);
 }
 
 // ============================================================
@@ -555,7 +651,6 @@ function saveOrder() {
     showToast("Commande creee !");
     renderStats();
     renderOrders();
-    // Reset form
     document.getElementById("orderName").value = "";
     document.getElementById("orderMaterial").value = "";
     document.getElementById("orderWeight").value = "";
@@ -684,15 +779,28 @@ function openOrderDetail(id) {
 
 function renderOrderPhotos(order) {
   var div = document.getElementById("detailPhotos");
+  div.innerHTML = "";
   if (!order.photos || order.photos.length === 0) { 
     div.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>'; 
     return; 
   }
-  var html = "";
   for (var i = 0; i < order.photos.length; i++) {
-    html += '<div class="photo-item" onclick="openPhotoOverlay('' + escapeJs(order.photos[i]) + '')"><img src="' + escapeHtml(order.photos[i]) + '" alt="Photo"><button class="photo-delete" onclick="event.stopPropagation();deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
+    var item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = '<img src="' + escapeHtml(order.photos[i]) + '" alt="Photo">' +
+      '<button class="photo-delete">×</button>';
+    (function(photoSrc, idx) {
+      item.querySelector('img').addEventListener('click', function(e) {
+        e.stopPropagation();
+        openPhotoOverlay(photoSrc);
+      });
+      item.querySelector('.photo-delete').addEventListener('click', function(e) {
+        e.stopPropagation();
+        deletePhoto(order.id, idx);
+      });
+    })(order.photos[i], i);
+    div.appendChild(item);
   }
-  div.innerHTML = html;
 }
 
 function openPhotoOverlay(src) {
@@ -741,12 +849,19 @@ function showQualityOverlay(orderId, orderName) {
 function renderQualityChecklist() {
   var div = document.getElementById("qualityChecklist");
   if (!div || !qualityOrderId || !data.qualityResults[qualityOrderId]) return;
-  var html = "";
+  div.innerHTML = "";
   for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) {
     var item = data.qualityResults[qualityOrderId][i];
-    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + escapeHtml(item.text) + '</label></div>';
+    var row = document.createElement('div');
+    row.className = 'checklist-item';
+    row.innerHTML = '<input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + '><label for="quality_' + i + '">' + escapeHtml(item.text) + '</label>';
+    (function(idx) {
+      row.querySelector('input').addEventListener('change', function() {
+        toggleQualityCheck(idx);
+      });
+    })(i);
+    div.appendChild(row);
   }
-  div.innerHTML = html;
 }
 
 function toggleQualityCheck(idx) {
@@ -830,20 +945,35 @@ function openClientDetail(id) {
   var email = client.email ? '<div style="margin-bottom:8px"><span style="color:#888">✉️ </span>' + escapeHtml(client.email) + '</div>' : "";
   var address = client.address ? '<div style="margin-bottom:8px"><span style="color:#888">📍 </span>' + escapeHtml(client.address) + '</div>' : "";
   var notes = client.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + escapeHtml(client.notes) + '</div></div>' : "";
+
   var clientOrders = [];
   for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId === id) clientOrders.push(data.orders[i]);
-  var ordersHtml = '<div style="margin-top:14px"><div style="font-size:.9rem;font-weight:700;margin-bottom:8px">Commandes (' + clientOrders.length + ')</div>';
-  if (clientOrders.length === 0) ordersHtml += '<div style="color:#888;font-size:.85rem">Aucune commande</div>';
-  else {
+
+  var ordersSection = document.createElement('div');
+  ordersSection.style.marginTop = '14px';
+  ordersSection.innerHTML = '<div style="font-size:.9rem;font-weight:700;margin-bottom:8px">Commandes (' + clientOrders.length + ')</div>';
+
+  if (clientOrders.length === 0) {
+    ordersSection.innerHTML += '<div style="color:#888;font-size:.85rem">Aucune commande</div>';
+  } else {
     for (var i = 0; i < clientOrders.length; i++) {
       var o = clientOrders[i];
       var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
-      // CORRECTION: guillemets echappes pour closeModal et openOrderDetail
-      ordersHtml += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer" onclick="closeModal(&quot;clientDetailModal&quot;);openOrderDetail(' + o.id + ')"><div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:.9rem">' + escapeHtml(o.name) + '</span><span style="font-size:.7rem;color:var(--warning)">' + statusLabel + '</span></div><div style="font-size:.8rem;color:#888">' + o.price + '€ • ' + new Date(o.date).toLocaleDateString("fr-FR") + '</div></div>';
+      var row = document.createElement('div');
+      row.className = 'client-order-row';
+      row.innerHTML = '<div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:.9rem">' + escapeHtml(o.name) + '</span><span style="font-size:.7rem;color:var(--warning)">' + statusLabel + '</span></div><div style="font-size:.8rem;color:#888">' + o.price + '€ • ' + new Date(o.date).toLocaleDateString("fr-FR") + '</div>';
+      (function(oid) {
+        row.addEventListener('click', function() {
+          closeModal("clientDetailModal");
+          openOrderDetail(oid);
+        });
+      })(o.id);
+      ordersSection.appendChild(row);
     }
   }
-  ordersHtml += '</div>';
-  content.innerHTML = phone + email + address + notes + ordersHtml;
+
+  content.innerHTML = phone + email + address + notes;
+  content.appendChild(ordersSection);
   openModal("clientDetailModal");
 }
 
@@ -962,6 +1092,7 @@ function filterOrders(filter, tabEl) {
 
 function renderOrders() {
   var div = document.getElementById("ordersList");
+  div.innerHTML = "";
   var orders = [];
   for (var i = 0; i < data.orders.length; i++) {
     if (currentOrderFilter === "all" || data.orders[i].status === currentOrderFilter) orders.push(data.orders[i]);
@@ -972,37 +1103,47 @@ function renderOrders() {
     div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>' + msg + '</div>';
     return;
   }
-  var html = "";
   for (var i = 0; i < orders.length; i++) {
     var o = orders[i];
     var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
     var statusClass = o.status || "pending";
     var hasPhotos = (o.photos && o.photos.length > 0) ? '<span>📷</span>' : "";
-    html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + escapeHtml(o.name) + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + escapeHtml(o.clientName) + '</span><span>💰 ' + o.price + '€</span>' + hasPhotos + '</div></div>';
+    var item = document.createElement('div');
+    item.className = 'order-item';
+    item.innerHTML = '<div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + escapeHtml(o.name) + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + escapeHtml(o.clientName) + '</span><span>💰 ' + o.price + '€</span>' + hasPhotos + '</div>';
+    (function(oid) {
+      item.addEventListener('click', function() { openOrderDetail(oid); });
+    })(o.id);
+    div.appendChild(item);
   }
-  div.innerHTML = html;
 }
 
 function renderClients() {
   var div = document.getElementById("clientsList");
+  div.innerHTML = "";
   if (data.clients.length === 0) { 
     div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; 
     return; 
   }
-  var html = "";
   for (var i = 0; i < data.clients.length; i++) {
     var c = data.clients[i];
     var phone = c.phone ? '📞 ' + escapeHtml(c.phone) : "";
     var email = c.email ? '✉️ ' + escapeHtml(c.email) : "";
     var orderCount = 0;
     for (var j = 0; j < data.orders.length; j++) if (data.orders[j].clientId === c.id) orderCount++;
-    html += '<div class="client-card" onclick="openClientDetail(' + c.id + ')"><div class="client-name">' + escapeHtml(c.name || "Sans nom") + '</div><div class="client-info">' + phone + ' ' + email + '</div><div class="client-orders">' + orderCount + ' commande(s)</div></div>';
+    var item = document.createElement('div');
+    item.className = 'client-card';
+    item.innerHTML = '<div class="client-name">' + escapeHtml(c.name || "Sans nom") + '</div><div class="client-info">' + phone + ' ' + email + '</div><div class="client-orders">' + orderCount + ' commande(s)</div>';
+    (function(cid) {
+      item.addEventListener('click', function() { openClientDetail(cid); });
+    })(c.id);
+    div.appendChild(item);
   }
-  div.innerHTML = html;
 }
 
 function renderCatalog() {
   var div = document.getElementById("catalogList");
+  div.innerHTML = "";
   if (data.models.length === 0) { 
     div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; 
     return; 
@@ -1018,6 +1159,7 @@ function renderCatalog() {
 
 function renderStock() {
   var div = document.getElementById("stockList");
+  div.innerHTML = "";
   if (data.stock.length === 0) { 
     div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; 
     return; 
@@ -1074,19 +1216,21 @@ function changePlanningMonth(delta) {
 function renderPlanningEvents() {
   var div = document.getElementById("planningEventsList");
   if (!div) return;
+  div.innerHTML = "";
   var events = data.planningEvents;
   if (events.length === 0) { 
     div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun evenement</div>'; 
     return; 
   }
-  var html = "";
   for (var i = 0; i < events.length; i++) {
     var e = events[i];
     var typeLabels = {printing: "Impression", modeling: "Modelisation", design: "Conception", maintenance: "Maintenance", rdv: "RDV", logistics: "Logistique", other: "Divers"};
     var typeLabel = typeLabels[e.type] || e.type;
-    html += '<div class="event-item"><div class="event-item-header"><span class="event-item-title">' + escapeHtml(e.title) + '</span><span style="font-size:.7rem;color:var(--primary);font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span><span>👤 ' + (e.assignee === "florian" ? "Florian" : e.assignee === "elie" ? "Elie" : "Les deux") + '</span></div></div>';
+    var item = document.createElement('div');
+    item.className = 'event-item';
+    item.innerHTML = '<div class="event-item-header"><span class="event-item-title">' + escapeHtml(e.title) + '</span><span style="font-size:.7rem;color:var(--primary);font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span><span>👤 ' + (e.assignee === "florian" ? "Florian" : e.assignee === "elie" ? "Elie" : "Les deux") + '</span></div>';
+    div.appendChild(item);
   }
-  div.innerHTML = html;
 }
 
 // ============================================================
@@ -1117,7 +1261,7 @@ function startPrintTimer() {
   showToast("Timer demarre !");
   document.getElementById("timerName").value = "";
   renderTimers();
-  showSection("timer", document.querySelectorAll(".nav-tab")[6]);
+  showSection("timer", document.querySelector('.nav-tab[data-section="timer"]'));
 }
 
 function renderTimers() {
@@ -1133,36 +1277,43 @@ function renderTimers() {
   if (active.length === 0) as.style.display = "none";
   else {
     as.style.display = "block";
-    var html = "";
+    al.innerHTML = "";
     for (var i = 0; i < active.length; i++) {
       var t = active[i];
       var remaining = Math.max(0, t.endTime - Date.now());
       var pct = t.duration > 0 ? Math.min(100, ((t.duration - remaining) / t.duration) * 100) : 100;
-      html += '<div class="timer-card" id="timerCard_' + t.id + '"><div class="timer-name">' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" id="timerBar_' + t.id + '" style="width:' + pct + '%"></div></div></div>';
+      var card = document.createElement('div');
+      card.className = 'timer-card';
+      card.id = 'timerCard_' + t.id;
+      card.innerHTML = '<div class="timer-name">' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" id="timerBar_' + t.id + '" style="width:' + pct + '%"></div></div>';
+      al.appendChild(card);
     }
-    al.innerHTML = html;
   }
   if (finished.length === 0) fs.style.display = "none";
   else {
     fs.style.display = "block";
-    var html = "";
+    fl.innerHTML = "";
     for (var i = 0; i < finished.length; i++) {
       var t = finished[i];
-      html += '<div class="timer-card finished"><div class="timer-name">✅ ' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + ' • ' + new Date(t.endTime).toLocaleTimeString("fr-FR") + '</div></div>';
+      var card = document.createElement('div');
+      card.className = 'timer-card finished';
+      card.innerHTML = '<div class="timer-name">✅ ' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + ' • ' + new Date(t.endTime).toLocaleTimeString("fr-FR") + '</div>';
+      fl.appendChild(card);
     }
-    fl.innerHTML = html;
   }
   var card = document.getElementById("activeTimersCard");
   if (card) card.style.display = active.length > 0 ? "block" : "none";
   var list = document.getElementById("activeTimersList");
   if (list && active.length > 0) {
-    var html = "";
+    list.innerHTML = "";
     for (var i = 0; i < active.length; i++) {
       var t = active[i];
       var remaining = Math.max(0, t.endTime - Date.now());
-      html += '<div class="timer-card"><div class="timer-name">' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining">' + formatTime(remaining) + '</div></div>';
+      var card = document.createElement('div');
+      card.className = 'timer-card';
+      card.innerHTML = '<div class="timer-name">' + escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + escapeHtml(t.machineName) + '</div><div class="timer-remaining">' + formatTime(remaining) + '</div>';
+      list.appendChild(card);
     }
-    list.innerHTML = html;
   }
 }
 
@@ -1344,12 +1495,6 @@ function escapeHtml(text) {
   var div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
-}
-
-function escapeJs(str) {
-  if (!str) return "";
-  return str.replace(/\/g, "\\").replace(/'/g, "\'").replace(/"/g, '\"').replace(/
-/g, "\n").replace(//g, "\r");
 }
 
 // ============================================================
