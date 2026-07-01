@@ -143,6 +143,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TLI">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -2380,6 +2383,141 @@ if ('serviceWorker' in navigator) {
       .catch(function(err) { console.log('SW failed:', err); });
   });
 }
+</script>
+
+<script>
+// ============================================================
+// FIREBASE REALTIME SYNC - TLI v14
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyB2jCioCr3WpNvtKNNqlFhXtKJmpgjTj9A",
+  authDomain: "tli-gestion.firebaseapp.com",
+  databaseURL: "https://tli-gestion-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tli-gestion",
+  storageBucket: "tli-gestion.firebasestorage.app",
+  messagingSenderId: "540516964273",
+  appId: "1:540516964273:web:04713d8c584b7c23230f90",
+  measurementId: "G-4STXLSXY3N"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+const dataRef = db.ref('tli-data');
+const usersRef = db.ref('tli-users');
+const timersRef = db.ref('tli-timers');
+
+var currentUserId = null;
+var isOnline = false;
+var syncInProgress = false;
+
+function initFirebase() {
+  auth.signInAnonymously().then(function(cred) {
+    currentUserId = cred.user.uid;
+    var userRef = usersRef.child(currentUserId);
+    userRef.set({ online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP, device: navigator.userAgent.substring(0, 50) });
+    userRef.onDisconnect().remove();
+    startRealtimeSync();
+    startTimerSync();
+    updateSyncStatus("synced");
+  }).catch(function(err) {
+    console.error("Auth error:", err);
+    updateSyncStatus("error");
+  });
+}
+
+function startRealtimeSync() {
+  dataRef.on('value', function(snapshot) {
+    if (syncInProgress) return;
+    var remoteData = snapshot.val();
+    if (!remoteData) { pushToFirebase(); return; }
+
+    var localTime = parseInt(localStorage.getItem("tli14_lastSync") || "0");
+    var remoteTime = remoteData.lastUpdated || 0;
+
+    if (remoteTime > localTime) {
+      syncInProgress = true;
+      if (remoteData.orders) data.orders = remoteData.orders;
+      if (remoteData.clients) data.clients = remoteData.clients;
+      if (remoteData.models) data.models = remoteData.models;
+      if (remoteData.stock) data.stock = remoteData.stock;
+      if (remoteData.planningEvents) data.planningEvents = remoteData.planningEvents;
+      if (remoteData.machines) data.machines = remoteData.machines;
+      if (remoteData.qualityResults) data.qualityResults = remoteData.qualityResults;
+      localStorage.setItem("tli14_data", JSON.stringify(data));
+      localStorage.setItem("tli14_lastSync", remoteTime.toString());
+      renderAll();
+      syncInProgress = false;
+    }
+    updateSyncStatus("synced");
+  });
+
+  db.ref('.info/connected').on('value', function(snapshot) {
+    isOnline = snapshot.val() === true;
+    updateSyncStatus(isOnline ? "synced" : "offline");
+  });
+}
+
+function startTimerSync() {
+  timersRef.on('value', function(snapshot) {
+    if (syncInProgress) return;
+    var timers = snapshot.val();
+    if (!timers) return;
+    var localTime = parseInt(localStorage.getItem("tli14_timersSync") || "0");
+    var remoteTime = timers.lastUpdated || 0;
+    if (remoteTime > localTime) {
+      activeTimers = timers.active || [];
+      finishedTimers = timers.finished || [];
+      saveTimersLocal();
+      renderTimers();
+    }
+  });
+}
+
+function pushToFirebase() {
+  if (!currentUserId || !isOnline) return;
+  syncInProgress = true;
+  var now = Date.now();
+  dataRef.set({
+    orders: data.orders, clients: data.clients, models: data.models,
+    stock: data.stock, planningEvents: data.planningEvents,
+    machines: data.machines, qualityResults: data.qualityResults,
+    lastUpdated: now, updatedBy: currentUserId
+  }).then(function() {
+    localStorage.setItem("tli14_lastSync", now.toString());
+    syncInProgress = false;
+    updateSyncStatus("synced");
+  }).catch(function(err) {
+    syncInProgress = false;
+    updateSyncStatus("error");
+  });
+}
+
+function pushTimersToFirebase() {
+  if (!currentUserId || !isOnline) return;
+  timersRef.set({ active: activeTimers, finished: finishedTimers, lastUpdated: Date.now() });
+}
+
+function updateSyncStatus(status) {
+  var btn = document.getElementById('btnSync');
+  if (!btn) return;
+  var span = btn.querySelector('span:last-child');
+  if (!span) return;
+  if (status === "synced") { btn.style.borderColor = "var(--success)"; btn.style.background = "rgba(0,255,136,0.1)"; span.textContent = "Sync OK"; }
+  else if (status === "offline") { btn.style.borderColor = "var(--danger)"; btn.style.background = "rgba(255,51,51,0.1)"; span.textContent = "Hors-ligne"; }
+  else if (status === "error") { btn.style.borderColor = "var(--secondary)"; span.textContent = "Erreur"; }
+  else { btn.style.borderColor = "var(--warning)"; span.textContent = "Connexion..."; }
+}
+
+// Hooks de sauvegarde
+var _origSaveData = saveData;
+saveData = function() { _origSaveData(); pushToFirebase(); };
+
+var _origSaveTimers = saveTimers;
+saveTimers = function() { _origSaveTimers(); pushTimersToFirebase(); };
+
+// Remplacer init
+var _origInit = init;
+init = function() { _origInit(); initFirebase(); };
 </script>
 </body>
 </html>
