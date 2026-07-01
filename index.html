@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<title>TLI v8 - Test Progressif</title>
+<title>TLI v9 - Progressif</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -25,10 +25,53 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
 .btn-secondary{background:var(--glass);border:1px solid var(--glass-border);color:var(--light)}
+.btn-danger{background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff}
+.btn-sm{padding:8px 14px;font-size:.8rem;width:auto}
+.form-group{margin-bottom:14px}
+.form-label{display:block;margin-bottom:5px;font-size:.8rem;color:#aaa}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
+.form-textarea{min-height:70px;resize:vertical}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.badge-pending{background:rgba(255,170,0,0.2);color:var(--warning)}
+.badge-printing{background:rgba(0,212,255,0.2);color:var(--primary)}
+.badge-finished{background:rgba(0,255,136,0.2);color:var(--success)}
+.badge-delivered{background:rgba(123,44,191,0.2);color:#c77dff}
+.order-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
+.order-item:hover{border-color:var(--primary)}
+.order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-item-title{font-weight:700;font-size:.95rem}
+.order-item-meta{font-size:.8rem;color:#888;display:flex;gap:12px;flex-wrap:wrap}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal-content{background:var(--dark);border:1px solid var(--glass-border);border-radius:20px;padding:22px;width:100%;max-height:90vh;overflow-y:auto;max-width:480px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:1.1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--light);font-size:1.5rem;cursor:pointer}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);border:1px solid var(--primary);color:var(--light);padding:12px 20px;border-radius:12px;font-size:.9rem;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty-state{text-align:center;padding:30px 20px;color:#666}
 .empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
+.timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
+.timer-card.finished{border-color:var(--success);background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,255,136,0.05))}
+.timer-name{font-weight:700;margin-bottom:4px}
+.timer-info{font-size:.8rem;color:#888}
+.timer-remaining{font-size:1.5rem;font-weight:700;color:var(--primary);margin-top:6px}
+.progress-bar{height:6px;background:var(--darker);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .5s}
+.planning-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.planning-day-header{text-align:center;font-size:.7rem;color:#888;padding:6px 2px}
+.planning-day{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:5px;min-height:55px;cursor:pointer;transition:all .2s;position:relative}
+.planning-day:hover{border-color:var(--primary)}.planning-day.today{border-color:var(--primary);background:rgba(0,212,255,0.1)}
+.planning-day-number{font-size:.75rem;font-weight:700;margin-bottom:3px}
+.planning-day.today .planning-day-number{color:var(--primary)}
+.planning-event-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
+.event-type-printing{background:var(--primary)}.event-type-modeling{background:var(--warning)}.event-type-design{background:#ff6b81}
+.event-type-maintenance{background:var(--secondary)}.event-type-rdv{background:#a855f7}.event-type-logistics{background:#22d3ee}.event-type-other{background:#888}
+.event-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--primary)}
+.event-item:hover{border-color:var(--primary)}
+.event-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.event-item-title{font-weight:700;font-size:.9rem}
+.event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -40,184 +83,350 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <nav class="nav-tabs">
   <div class="nav-tab active" onclick="showSection('dashboard', this)">📊 Tableau</div>
   <div class="nav-tab" onclick="showSection('orders', this)">📦 Commandes</div>
-  <div class="nav-tab" onclick="showSection('clients', this)">👥 Clients</div>
+  <div class="nav-tab" onclick="showSection('planning', this)">📅 Planning</div>
+  <div class="nav-tab" onclick="showSection('timer', this)">⏰ Timer</div>
+  <div class="nav-tab" onclick="showSection('calculator', this)">🧮 Devis</div>
   <div class="nav-tab" onclick="showSection('settings', this)">⚙️ Config</div>
 </nav>
 
+<!-- DASHBOARD -->
 <section id="dashboard" class="section active">
-  <div class="card">
-    <div class="card-title">🧪 Tests de base</div>
-    <button class="btn btn-primary" onclick="testAlert()">1. Test Alert</button>
-    <button class="btn btn-secondary" onclick="testToast()" style="margin-top:8px">2. Test Toast</button>
-    <button class="btn btn-secondary" onclick="testLocalStorage()" style="margin-top:8px">3. Test LocalStorage</button>
-    <button class="btn btn-secondary" onclick="testNav()" style="margin-top:8px">4. Test Navigation</button>
-  </div>
-  <div class="card">
-    <div class="card-title">⚡ Actions</div>
-    <button class="btn btn-primary" onclick="createOrder()">+ Nouvelle commande</button>
-    <button class="btn btn-secondary" onclick="createClient()" style="margin-top:8px">+ Nouveau client</button>
-  </div>
   <div class="card">
     <div class="card-title">📊 Stats</div>
     <div id="statsDisplay">Chargement...</div>
   </div>
+  <div class="card">
+    <div class="card-title">⚡ Actions rapides</div>
+    <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
+    <button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button>
+    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[3])" style="margin-top:8px">⏰ Lancer timer</button>
+  </div>
+  <div class="card" id="activeTimersCard" style="display:none">
+    <div class="card-title">🔥 Impressions en cours</div>
+    <div id="activeTimersList"></div>
+  </div>
 </section>
 
+<!-- ORDERS -->
 <section id="orders" class="section">
+  <div id="ordersList"><div class="empty-state"><div class="icon">📦</div>Aucune commande</div></div>
+</section>
+
+<!-- PLANNING -->
+<section id="planning" class="section">
   <div class="card">
-    <div class="card-title">📦 Commandes</div>
-    <div id="ordersList"><div class="empty-state"><div class="icon">📦</div>Aucune commande</div></div>
+    <div class="card-title">📅 Calendrier</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(-1)" style="width:auto">◀</button>
+      <div id="planningMonthLabel" style="font-weight:700"></div>
+      <button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(1)" style="width:auto">▶</button>
+    </div>
+    <div class="planning-calendar" id="planningCalendar"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Evenements</div>
+    <div id="planningEventsList"></div>
+  </div>
+  <button class="btn btn-primary" onclick="openModal('planningModal')">+ Ajouter evenement</button>
+</section>
+
+<!-- TIMER -->
+<section id="timer" class="section">
+  <div class="card">
+    <div class="card-title">⏰ Nouveau timer</div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="timerName" placeholder="ex: Support telephone"></div>
+    <div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="timerMachine"></select></div>
+    <div class="form-group"><label class="form-label">Duree (h)</label><input type="number" class="form-input" id="timerHours" value="4" min="0.5" step="0.5"></div>
+    <div class="form-group"><label class="form-label">Duree (min)</label><input type="number" class="form-input" id="timerMinutes" value="0" min="0" max="59"></div>
+    <button class="btn btn-primary" onclick="startPrintTimer()">🚀 Demarrer</button>
+  </div>
+  <div class="card" id="activeTimersSection" style="display:none">
+    <div class="card-title">🔥 En cours</div>
+    <div id="timerList"></div>
+  </div>
+  <div class="card" id="finishedTimersSection" style="display:none">
+    <div class="card-title">✅ Terminees</div>
+    <div id="finishedTimerList"></div>
   </div>
 </section>
 
-<section id="clients" class="section">
+<!-- CALCULATOR -->
+<section id="calculator" class="section">
   <div class="card">
-    <div class="card-title">👥 Clients</div>
-    <div id="clientsList"><div class="empty-state"><div class="icon">👥</div>Aucun client</div></div>
+    <div class="card-title">🧮 Calculateur de devis</div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="calcService" onchange="calculateCost()"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
+    <div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType" onchange="calculateCost()"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
+    <div class="form-group"><label class="form-label">Poids (g)</label><input type="number" class="form-input" id="calcWeight" value="50" oninput="calculateCost()"></div>
+    <div class="form-group"><label class="form-label">Temps (h)</label><input type="number" class="form-input" id="calcTime" value="4" oninput="calculateCost()"></div>
+    <div class="form-group"><label class="form-label">Complexite</label><select class="form-select" id="calcComplexity" onchange="calculateCost()"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
+    <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="calcQty" value="1" min="1" oninput="calculateCost()"></div>
+    <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px">
+      <div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estime</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div>
+    </div>
   </div>
 </section>
 
+<!-- SETTINGS -->
 <section id="settings" class="section">
   <div class="card">
     <div class="card-title">⚙️ Parametres</div>
     <button class="btn btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
+    <button class="btn btn-secondary" onclick="exportData()" style="margin-top:8px">📤 Exporter JSON</button>
   </div>
 </section>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="newOrderModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('newOrderModal')">×</button></div>
+    <div class="form-group"><label class="form-label">Client</label><select class="form-select" id="orderClient"></select></div>
+    <div class="form-group"><label class="form-label">Nom du projet</label><input type="text" class="form-input" id="orderName" placeholder="ex: Support telephone"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="orderService" onchange="toggleOrderFields()"><option value="print">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option></select></div>
+    <div class="form-group" id="printTypeGroup"><label class="form-label">Technologie</label><select class="form-select" id="orderType"><option value="fdm">FDM</option><option value="resin">Resine</option></select></div>
+    <div class="form-group" id="machineGroup"><label class="form-label">Machine</label><select class="form-select" id="orderMachine"></select></div>
+    <div class="form-group"><label class="form-label">Materiau</label><input type="text" class="form-input" id="orderMaterial" placeholder="ex: PLA, Resine..."></div>
+    <div class="form-group"><label class="form-label">Poids (g)</label><input type="number" class="form-input" id="orderWeight" placeholder="50"></div>
+    <div class="form-group"><label class="form-label">Temps (h)</label><input type="number" class="form-input" id="orderTime" placeholder="4"></div>
+    <div class="form-group"><label class="form-label">Prix (€)</label><input type="number" class="form-input" id="orderPrice" placeholder="15.00" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="orderPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="orderNotes" placeholder="Details..."></textarea></div>
+    <button class="btn btn-primary" onclick="saveOrder()">Creer</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newClientModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('newClientModal')">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="clientName" placeholder="Nom"></div>
+    <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" id="clientPhone" placeholder="06 12 34 56 78"></div>
+    <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="email@exemple.com"></div>
+    <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
+    <button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="planningModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">📅 Ajouter evenement</div><button class="modal-close" onclick="closeModal('planningModal')">×</button></div>
+    <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="planTitle" placeholder="ex: Impression support Jean"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="planType"><option value="printing">Impression 3D</option><option value="modeling">Modelisation 3D</option><option value="design">Conception</option><option value="maintenance">Maintenance</option><option value="rdv">RDV client</option><option value="logistics">Logistique</option><option value="other">Divers</option></select></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="planDate"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label class="form-label">Debut</label><input type="time" class="form-input" id="planStartTime" value="09:00"></div>
+      <div class="form-group"><label class="form-label">Fin</label><input type="time" class="form-input" id="planEndTime" value="12:00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Assigne a</label><select class="form-select" id="planAssignee"><option value="florian">Florian</option><option value="elie">Elie</option><option value="both">Les deux</option></select></div>
+    <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="planPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="planNotes" placeholder="Details..."></textarea></div>
+    <button class="btn btn-primary" onclick="savePlanningEvent()">Ajouter</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== PARTIE 1 : TESTS DE BASE (comme TLI_TEST) ====================
-function testAlert() {
-  alert("ALERT OK - JavaScript fonctionne !");
-}
-
-function testToast() {
-  showToast("Toast OK - Tout marche !");
-}
-
-function testLocalStorage() {
-  try {
-    localStorage.setItem("tli8_test", "ca_marche");
-    var val = localStorage.getItem("tli8_test");
-    alert("LocalStorage OK: " + val);
-  } catch(e) {
-    alert("LocalStorage ERROR: " + e.message);
-  }
-}
-
-function testNav() {
-  showSection("orders", document.querySelectorAll(".nav-tab")[1]);
-  showToast("Navigation OK");
-}
-
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(function() { t.classList.remove("show"); }, 2500);
-}
-
-// ==================== PARTIE 2 : NAVIGATION ====================
-function showSection(id, tabEl) {
-  var sections = document.querySelectorAll(".section");
-  for (var i = 0; i < sections.length; i++) {
-    sections[i].classList.remove("active");
-  }
-  var tabs = document.querySelectorAll(".nav-tab");
-  for (var i = 0; i < tabs.length; i++) {
-    tabs[i].classList.remove("active");
-  }
-  document.getElementById(id).classList.add("active");
-  if (tabEl) tabEl.classList.add("active");
-
-  // Refresh content
-  if (id === "orders") renderOrders();
-  if (id === "clients") renderClients();
-  if (id === "dashboard") renderStats();
-}
-
-// ==================== PARTIE 3 : DONNEES ====================
+// ==================== DATA ====================
 var data = {
   orders: [],
-  clients: [{id: 1, name: "Client Test", phone: "", email: ""}]
+  clients: [{id: 1, name: "Client Test", phone: "", email: ""}],
+  planningEvents: [],
+  machines: [
+    {id: 1, name: "Elegoo Saturn 4 Ultra", type: "resin"},
+    {id: 2, name: "Bambulab P2S #1", type: "fdm"},
+    {id: 3, name: "Bambulab P2S #2", type: "fdm"},
+    {id: 4, name: "Bambulab H2C", type: "fdm"}
+  ]
 };
+
+var activeTimers = [];
+var finishedTimers = [];
+var planningCurrentDate = new Date();
+
+// ==================== INIT ====================
+function init() {
+  try {
+    loadData();
+    renderAll();
+    calculateCost();
+    updateMachineSelects();
+  } catch(e) {
+    console.log("init error: " + e.message);
+  }
+}
 
 function loadData() {
   try {
-    var saved = localStorage.getItem("tli8_data");
+    var saved = localStorage.getItem("tli9_data");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.orders) data.orders = parsed.orders;
       if (parsed.clients) data.clients = parsed.clients;
+      if (parsed.planningEvents) data.planningEvents = parsed.planningEvents;
     }
-  } catch(e) {
-    console.log("loadData error: " + e.message);
-  }
+  } catch(e) {}
 }
 
 function saveData() {
   try {
-    localStorage.setItem("tli8_data", JSON.stringify(data));
-  } catch(e) {
-    console.log("saveData error: " + e.message);
+    localStorage.setItem("tli9_data", JSON.stringify(data));
+  } catch(e) {}
+}
+
+function saveTimers() {
+  try {
+    localStorage.setItem("tli9_timers", JSON.stringify({active: activeTimers, finished: finishedTimers}));
+  } catch(e) {}
+}
+
+function loadTimers() {
+  try {
+    var saved = localStorage.getItem("tli9_timers");
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed.active) activeTimers = parsed.active;
+      if (parsed.finished) finishedTimers = parsed.finished;
+    }
+  } catch(e) {}
+}
+
+// ==================== NAV ====================
+function showSection(id, tabEl) {
+  var sections = document.querySelectorAll(".section");
+  for (var i = 0; i < sections.length; i++) sections[i].classList.remove("active");
+  var tabs = document.querySelectorAll(".nav-tab");
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+  document.getElementById(id).classList.add("active");
+  if (tabEl) tabEl.classList.add("active");
+  if (id === "orders") renderOrders();
+  if (id === "planning") renderPlanning();
+  if (id === "timer") renderTimers();
+  if (id === "dashboard") renderStats();
+}
+
+// ==================== MODALS ====================
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.classList.add("active");
+    if (id === "newOrderModal") { updateClientSelect(); updateMachineSelects(); }
+    if (id === "planningModal") {
+      if (!document.getElementById("planDate").value) document.getElementById("planDate").value = new Date().toISOString().split("T")[0];
+    }
   }
 }
 
-// ==================== PARTIE 4 : ACTIONS ====================
-function createOrder() {
-  var name = prompt("Nom du projet ?");
-  if (!name) return;
-  var clientName = prompt("Nom du client ?");
-  if (!clientName) return;
-  var price = prompt("Prix (€) ?");
-  var order = {
-    id: Date.now(),
-    name: name,
-    clientName: clientName || "Inconnu",
-    price: price || "0",
-    status: "pending",
-    date: new Date().toISOString()
-  };
-  data.orders.push(order);
-  saveData();
-  showToast("Commande creee !");
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove("active");
+}
+
+function updateClientSelect() {
+  var sel = document.getElementById("orderClient");
+  if (!sel) return;
+  var html = "";
+  for (var i = 0; i < data.clients.length; i++) html += '<option value="' + data.clients[i].id + '">' + data.clients[i].name + '</option>';
+  sel.innerHTML = html;
+}
+
+function updateMachineSelects() {
+  var ids = ["timerMachine", "orderMachine"];
+  for (var i = 0; i < ids.length; i++) {
+    var sel = document.getElementById(ids[i]);
+    if (!sel) continue;
+    var html = "";
+    for (var j = 0; j < data.machines.length; j++) html += '<option value="' + data.machines[j].id + '">' + data.machines[j].name + '</option>';
+    sel.innerHTML = html;
+  }
+}
+
+function toggleOrderFields() {
+  var service = document.getElementById("orderService").value;
+  document.getElementById("printTypeGroup").style.display = (service === "print") ? "block" : "none";
+  document.getElementById("machineGroup").style.display = (service === "print") ? "block" : "none";
+}
+
+// ==================== SAVE FUNCTIONS ====================
+function saveOrder() {
+  try {
+    var clientId = parseInt(document.getElementById("orderClient").value);
+    var client = null;
+    for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
+    var service = document.getElementById("orderService").value;
+    var order = {
+      id: Date.now(), clientId: clientId, clientName: client ? client.name : "Inconnu",
+      name: document.getElementById("orderName").value || "Sans nom",
+      service: service,
+      type: service === "print" ? document.getElementById("orderType").value : null,
+      machineId: service === "print" ? parseInt(document.getElementById("orderMachine").value) : null,
+      material: document.getElementById("orderMaterial").value || "",
+      weight: document.getElementById("orderWeight").value || 0,
+      time: document.getElementById("orderTime").value || 0,
+      price: document.getElementById("orderPrice").value || 0,
+      priority: document.getElementById("orderPriority").value,
+      notes: document.getElementById("orderNotes").value || "",
+      status: "pending", date: new Date().toISOString()
+    };
+    data.orders.push(order);
+    saveData();
+    closeModal("newOrderModal");
+    showToast("Commande creee !");
+    renderStats();
+    renderOrders();
+    document.getElementById("orderName").value = "";
+    document.getElementById("orderMaterial").value = "";
+    document.getElementById("orderWeight").value = "";
+    document.getElementById("orderTime").value = "";
+    document.getElementById("orderPrice").value = "";
+    document.getElementById("orderNotes").value = "";
+  } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+function saveClient() {
+  try {
+    var client = {id: Date.now(), name: document.getElementById("clientName").value || "Sans nom", phone: document.getElementById("clientPhone").value || "", email: document.getElementById("clientEmail").value || "", address: document.getElementById("clientAddress").value || "", notes: document.getElementById("clientNotes").value || ""};
+    data.clients.push(client);
+    saveData();
+    closeModal("newClientModal");
+    showToast("Client ajoute !");
+    renderStats();
+  } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+function savePlanningEvent() {
+  try {
+    var title = document.getElementById("planTitle").value.trim();
+    var date = document.getElementById("planDate").value;
+    if (!title || !date) { showToast("Titre et date obligatoires", "warning"); return; }
+    var event = {
+      id: Date.now(), title: title, type: document.getElementById("planType").value,
+      date: date, startTime: document.getElementById("planStartTime").value,
+      endTime: document.getElementById("planEndTime").value,
+      assignee: document.getElementById("planAssignee").value,
+      priority: document.getElementById("planPriority").value,
+      notes: document.getElementById("planNotes").value || ""
+    };
+    data.planningEvents.push(event);
+    saveData();
+    closeModal("planningModal");
+    showToast("Evenement ajoute !");
+    renderPlanning();
+    document.getElementById("planTitle").value = "";
+    document.getElementById("planNotes").value = "";
+  } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+// ==================== RENDER ====================
+function renderAll() {
   renderStats();
   renderOrders();
+  renderPlanning();
+  renderTimers();
 }
 
-function createClient() {
-  var name = prompt("Nom du client ?");
-  if (!name) return;
-  var client = {
-    id: Date.now(),
-    name: name,
-    phone: "",
-    email: ""
-  };
-  data.clients.push(client);
-  saveData();
-  showToast("Client ajoute !");
-  renderClients();
-}
-
-function clearAll() {
-  if (!confirm("Tout supprimer ?")) return;
-  data.orders = [];
-  data.clients = [{id: 1, name: "Client Test", phone: "", email: ""}];
-  saveData();
-  showToast("Tout efface");
-  renderStats();
-  renderOrders();
-  renderClients();
-}
-
-// ==================== PARTIE 5 : RENDER ====================
 function renderStats() {
   var active = 0;
-  for (var i = 0; i < data.orders.length; i++) {
-    if (data.orders[i].status !== "delivered") active++;
-  }
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].status !== "delivered") active++;
   var html = "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;'>";
   html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>" + active + "</div><div style='font-size:.75rem;color:#888;'>En cours</div></div>";
   html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>" + data.orders.length + "</div><div style='font-size:.75rem;color:#888;'>Total</div></div>";
@@ -229,45 +438,222 @@ function renderStats() {
 
 function renderOrders() {
   var div = document.getElementById("ordersList");
-  if (data.orders.length === 0) {
-    div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>';
-    return;
-  }
+  if (data.orders.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>'; return; }
   var html = "";
   for (var i = data.orders.length - 1; i >= 0; i--) {
     var o = data.orders[i];
     var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
-    html += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.95rem;">#' + o.id + ' — ' + o.name + '</span><span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;background:rgba(255,170,0,0.2);color:var(--warning);">' + statusLabel + '</span></div>';
-    html += '<div style="font-size:.8rem;color:#888;"><span>👤 ' + o.clientName + '</span> <span>💰 ' + o.price + '€</span></div>';
-    html += '</div>';
+    var statusClass = o.status || "pending";
+    html += '<div class="order-item"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + o.name + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + o.clientName + '</span><span>💰 ' + o.price + '€</span></div></div>';
   }
   div.innerHTML = html;
 }
 
-function renderClients() {
-  var div = document.getElementById("clientsList");
-  if (data.clients.length === 0) {
-    div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>';
-    return;
-  }
+// ==================== PLANNING ====================
+function renderPlanning() {
+  var calDiv = document.getElementById("planningCalendar");
+  if (!calDiv) return;
+  var year = planningCurrentDate.getFullYear();
+  var month = planningCurrentDate.getMonth();
+  var monthNames = ["Janvier","Fevrier","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Decembre"];
+  var label = document.getElementById("planningMonthLabel");
+  if (label) label.textContent = monthNames[month] + " " + year;
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var days = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
   var html = "";
-  for (var i = 0; i < data.clients.length; i++) {
-    var c = data.clients[i];
-    html += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;">';
-    html += '<div style="font-weight:700;font-size:1.05rem;">' + c.name + '</div>';
-    if (c.phone) html += '<div style="font-size:.8rem;color:#888;margin-top:4px;">📞 ' + c.phone + '</div>';
-    html += '</div>';
+  for (var i = 0; i < days.length; i++) html += '<div class="planning-day-header">' + days[i] + '</div>';
+  for (var i = 0; i < firstDay; i++) html += '<div></div>';
+  var today = new Date();
+  for (var d = 1; d <= daysInMonth; d++) {
+    var isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    var dayEvents = [];
+    for (var i = 0; i < data.planningEvents.length; i++) {
+      var ed = new Date(data.planningEvents[i].date);
+      if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(data.planningEvents[i]);
+    }
+    var dots = "";
+    for (var i = 0; i < Math.min(dayEvents.length, 3); i++) dots += '<span class="planning-event-dot event-type-' + dayEvents[i].type + '"></span>';
+    var todayClass = isToday ? "today" : "";
+    html += '<div class="planning-day ' + todayClass + '"><div class="planning-day-number">' + d + '</div><div>' + dots + '</div></div>';
+  }
+  calDiv.innerHTML = html;
+  renderPlanningEvents();
+}
+
+function changePlanningMonth(delta) {
+  planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta);
+  renderPlanning();
+}
+
+function renderPlanningEvents() {
+  var div = document.getElementById("planningEventsList");
+  if (!div) return;
+  var events = data.planningEvents;
+  if (events.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun evenement</div>'; return; }
+  var html = "";
+  for (var i = 0; i < events.length; i++) {
+    var e = events[i];
+    var typeLabels = {printing: "Impression", modeling: "Modelisation", design: "Conception", maintenance: "Maintenance", rdv: "RDV", logistics: "Logistique", other: "Divers"};
+    var typeLabel = typeLabels[e.type] || e.type;
+    html += '<div class="event-item"><div class="event-item-header"><span class="event-item-title">' + e.title + '</span><span style="font-size:.7rem;color:var(--primary);font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span><span>👤 ' + (e.assignee === "florian" ? "Florian" : e.assignee === "elie" ? "Elie" : "Les deux") + '</span></div></div>';
   }
   div.innerHTML = html;
+}
+
+// ==================== TIMER ====================
+function startPrintTimer() {
+  var name = document.getElementById("timerName").value.trim();
+  var machineId = parseInt(document.getElementById("timerMachine").value);
+  var hours = parseFloat(document.getElementById("timerHours").value) || 0;
+  var minutes = parseFloat(document.getElementById("timerMinutes").value) || 0;
+  if (!name || !machineId) { showToast("Remplis tous les champs", "warning"); return; }
+  var machine = null;
+  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === machineId) machine = data.machines[i];
+  if (!machine) return;
+  var duration = (hours * 60 + minutes) * 60 * 1000;
+  var timer = {id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false};
+  activeTimers.push(timer);
+  saveTimers();
+  showToast("Timer demarre !");
+  document.getElementById("timerName").value = "";
+  renderTimers();
+  showSection("timer", document.querySelectorAll(".nav-tab")[3]);
+}
+
+function renderTimers() {
+  var as = document.getElementById("activeTimersSection");
+  var fs = document.getElementById("finishedTimersSection");
+  var al = document.getElementById("timerList");
+  var fl = document.getElementById("finishedTimerList");
+  var active = [];
+  for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
+  var finished = [];
+  for (var i = Math.max(0, finishedTimers.length - 5); i < finishedTimers.length; i++) finished.push(finishedTimers[i]);
+  finished.reverse();
+  if (active.length === 0) as.style.display = "none";
+  else {
+    as.style.display = "block";
+    var html = "";
+    for (var i = 0; i < active.length; i++) {
+      var t = active[i];
+      var remaining = Math.max(0, t.endTime - Date.now());
+      var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
+      html += '<div class="timer-card"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+    }
+    al.innerHTML = html;
+  }
+  if (finished.length === 0) fs.style.display = "none";
+  else {
+    fs.style.display = "block";
+    var html = "";
+    for (var i = 0; i < finished.length; i++) {
+      var t = finished[i];
+      html += '<div class="timer-card finished"><div class="timer-name">✅ ' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + new Date(t.endTime).toLocaleTimeString("fr-FR") + '</div></div>';
+    }
+    fl.innerHTML = html;
+  }
+  var card = document.getElementById("activeTimersCard");
+  if (card) card.style.display = active.length > 0 ? "block" : "none";
+  var list = document.getElementById("activeTimersList");
+  if (list && active.length > 0) {
+    var html = "";
+    for (var i = 0; i < active.length; i++) {
+      var t = active[i];
+      var remaining = Math.max(0, t.endTime - Date.now());
+      html += '<div class="timer-card"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + '</div><div class="timer-remaining">' + formatTime(remaining) + '</div></div>';
+    }
+    list.innerHTML = html;
+  }
+}
+
+function startTimerLoop() {
+  setInterval(function() {
+    var changed = false;
+    for (var i = 0; i < activeTimers.length; i++) {
+      var t = activeTimers[i];
+      if (!t.finished && Date.now() >= t.endTime) {
+        t.finished = true;
+        finishedTimers.push(t);
+        changed = true;
+        showToast("Impression terminee: " + t.name, "success");
+      }
+    }
+    var filtered = [];
+    for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) filtered.push(activeTimers[i]);
+    activeTimers = filtered;
+    if (changed) { saveTimers(); renderTimers(); renderStats(); }
+    for (var i = 0; i < activeTimers.length; i++) {
+      var t = activeTimers[i];
+      var el = document.getElementById("timer_" + t.id);
+      if (el) el.textContent = formatTime(Math.max(0, t.endTime - Date.now()));
+    }
+  }, 1000);
+}
+
+function formatTime(ms) {
+  if (ms <= 0) return "00:00:00";
+  var s = Math.floor(ms / 1000);
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  return h.toString().padStart(2, "0") + ":" + m.toString().padStart(2, "0") + ":" + sec.toString().padStart(2, "0");
+}
+
+// ==================== CALCULATOR ====================
+function calculateCost() {
+  var service = document.getElementById("calcService").value;
+  var type = document.getElementById("calcType").value;
+  var weight = parseFloat(document.getElementById("calcWeight").value) || 0;
+  var time = parseFloat(document.getElementById("calcTime").value) || 0;
+  var complexity = parseFloat(document.getElementById("calcComplexity").value) || 1;
+  var qty = parseInt(document.getElementById("calcQty").value) || 1;
+  var materialCost = 0, hourlyRate = 0, serviceMultiplier = 1;
+  if (service === "print") { if (type === "fdm") { materialCost = (weight / 1000) * 25; hourlyRate = 2; } else { materialCost = (weight / 1000) * 60; hourlyRate = 3; } }
+  else if (service === "modeling") { hourlyRate = 35; serviceMultiplier = 1.2; }
+  else if (service === "design") { hourlyRate = 45; serviceMultiplier = 1.3; }
+  var total = (materialCost + (time * hourlyRate)) * complexity * qty * serviceMultiplier;
+  document.getElementById("calcTotal").textContent = total.toFixed(2) + "€";
+}
+
+// ==================== EXPORT / RESET ====================
+function exportData() {
+  var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: "application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "TLI_backup_" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Export reussi !");
+}
+
+function clearAll() {
+  if (!confirm("Tout supprimer ?")) return;
+  data.orders = [];
+  data.clients = [{id: 1, name: "Client Test", phone: "", email: ""}];
+  data.planningEvents = [];
+  activeTimers = [];
+  finishedTimers = [];
+  saveData();
+  saveTimers();
+  showToast("Tout efface");
+  renderAll();
+}
+
+// ==================== UTILS ====================
+function showToast(msg, type) {
+  var toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.className = "toast" + (type ? " " + type : "");
+  toast.classList.add("show");
+  setTimeout(function() { toast.classList.remove("show"); }, 2500);
 }
 
 // ==================== BOOT ====================
-alert("TLI v8 JS loaded - OK");
-loadData();
-renderStats();
-alert("TLI v8 READY - Tout est charge !");
+init();
+loadTimers();
+startTimerLoop();
 </script>
-
 </body>
 </html>
