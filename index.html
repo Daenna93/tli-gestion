@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<title>TLI v9 - Progressif</title>
+<title>TLI v10 - Complet</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -12,6 +12,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .app-header{background:linear-gradient(135deg,var(--dark) 0%,var(--accent) 100%);padding:18px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;justify-content:space-between;align-items:center}
 .app-header h1{font-size:1.1rem;font-weight:800}
 .app-header .white{color:#fff}.app-header .blue{color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.4)}
+.sync-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--light);padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
 .nav-tabs{display:flex;gap:8px;padding:12px 10px;overflow-x:auto;background:var(--dark);position:sticky;top:58px;z-index:99;border-bottom:1px solid var(--glass-border);scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{flex-shrink:0;padding:8px 16px;border-radius:25px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap;font-family:inherit}
@@ -49,6 +50,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .modal-close{background:none;border:none;color:var(--light);font-size:1.5rem;cursor:pointer}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);border:1px solid var(--primary);color:var(--light);padding:12px 20px;border-radius:12px;font-size:.9rem;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-success{border-color:var(--success)}.toast-error{border-color:var(--secondary)}.toast-warning{border-color:var(--warning)}
 .empty-state{text-align:center;padding:30px 20px;color:#666}
 .empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
 .timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
@@ -72,17 +74,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .event-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .event-item-title{font-weight:700;font-size:.9rem}
 .event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative}
+.photo-item img{width:100%;height:100%;object-fit:cover}
+.photo-delete{position:absolute;top:4px;right:4px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
+.checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
+.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.quality-overlay.active{display:flex}
+.quality-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 0 30px rgba(0,212,255,0.3)}
+.quality-header{text-align:center;margin-bottom:18px}
+.quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
+.quality-header p{color:#888;font-size:.85rem;margin-top:6px}
 </style>
 </head>
 <body>
 
 <header class="app-header">
   <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+  <button class="sync-btn" onclick="syncWithGoogle()"><span>🔄</span><span>Sync</span></button>
 </header>
 
 <nav class="nav-tabs">
   <div class="nav-tab active" onclick="showSection('dashboard', this)">📊 Tableau</div>
   <div class="nav-tab" onclick="showSection('orders', this)">📦 Commandes</div>
+  <div class="nav-tab" onclick="showSection('catalog', this)">🎨 Catalogue</div>
+  <div class="nav-tab" onclick="showSection('stock', this)">📋 Stock</div>
   <div class="nav-tab" onclick="showSection('planning', this)">📅 Planning</div>
   <div class="nav-tab" onclick="showSection('timer', this)">⏰ Timer</div>
   <div class="nav-tab" onclick="showSection('calculator', this)">🧮 Devis</div>
@@ -99,17 +117,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="card-title">⚡ Actions rapides</div>
     <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
     <button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button>
-    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[3])" style="margin-top:8px">⏰ Lancer timer</button>
+    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[5])" style="margin-top:8px">⏰ Lancer timer</button>
   </div>
   <div class="card" id="activeTimersCard" style="display:none">
     <div class="card-title">🔥 Impressions en cours</div>
     <div id="activeTimersList"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔔 Alertes stock</div>
+    <div id="stockAlerts"></div>
   </div>
 </section>
 
 <!-- ORDERS -->
 <section id="orders" class="section">
   <div id="ordersList"><div class="empty-state"><div class="icon">📦</div>Aucune commande</div></div>
+</section>
+
+<!-- CATALOG -->
+<section id="catalog" class="section">
+  <button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modele</button>
+  <div id="catalogList" style="margin-top:12px"></div>
+</section>
+
+<!-- STOCK -->
+<section id="stock" class="section">
+  <button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button>
+  <div id="stockList" style="margin-top:12px"></div>
 </section>
 
 <!-- PLANNING -->
@@ -169,9 +203,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <!-- SETTINGS -->
 <section id="settings" class="section">
   <div class="card">
-    <div class="card-title">⚙️ Parametres</div>
+    <div class="card-title">🔗 Synchronisation</div>
+    <div class="form-group"><label class="form-label">URL API Apps Script</label><input type="text" class="form-input" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Sauvegarder</button>
+    <button class="btn btn-secondary" onclick="testConnection()" style="margin-top:8px">🧪 Tester</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🔔 Notifications</div>
+    <div class="checklist-item"><input type="checkbox" id="notifSound" checked><label for="notifSound">Son timer termine</label></div>
+    <div class="checklist-item"><input type="checkbox" id="notifVibrate" checked><label for="notifVibrate">Vibration</label></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📤 Export / Import</div>
+    <button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:8px">📥 Importer JSON</button>
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)">
+  </div>
+  <div class="card">
+    <div class="card-title">⚠️ Danger Zone</div>
     <button class="btn btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
-    <button class="btn btn-secondary" onclick="exportData()" style="margin-top:8px">📤 Exporter JSON</button>
   </div>
 </section>
 
@@ -194,6 +244,28 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title" id="detailTitle">Detail</div><button class="modal-close" onclick="closeModal('orderDetailModal')">×</button></div>
+    <div id="orderDetailContent"></div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Statut</label>
+      <select class="form-select" id="detailStatus" onchange="updateOrderStatus()">
+        <option value="pending">A faire</option>
+        <option value="printing">En cours</option>
+        <option value="finished">Terminee</option>
+        <option value="delivered">Livree / Payee</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Photos</label>
+      <div class="photo-grid" id="detailPhotos"></div>
+      <button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Photo</button>
+    </div>
+    <button class="btn btn-danger" onclick="deleteCurrentOrder()">🗑️ Supprimer</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="newClientModal">
   <div class="modal-content">
     <div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('newClientModal')">×</button></div>
@@ -203,6 +275,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
     <button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newModelModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Nouveau modele</div><button class="modal-close" onclick="closeModal('newModelModal')">×</button></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="modelName" placeholder="ex: Porte-cles"></div>
+    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="modelCategory"><option value="prototype">Prototype</option><option value="decoration">Decoration</option><option value="functional">Fonctionnel</option><option value="jewelry">Bijouterie</option><option value="other">Autre</option></select></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="modelType"><option value="fdm">FDM</option><option value="resin">Resine</option><option value="both">Les deux</option></select></div>
+    <div class="form-group"><label class="form-label">Temps moyen (h)</label><input type="number" class="form-input" id="modelTime" placeholder="3"></div>
+    <div class="form-group"><label class="form-label">Poids moyen (g)</label><input type="number" class="form-input" id="modelWeight" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">Prix base (€)</label><input type="number" class="form-input" id="modelPrice" placeholder="10.00" step="0.01"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="modelDesc" placeholder="Description..."></textarea></div>
+    <button class="btn btn-primary" onclick="saveModel()">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newStockModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" onclick="closeModal('newStockModal')">×</button></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="stockType"><option value="filament">Filament</option><option value="resin">Resine</option><option value="part">Piece detachee</option><option value="tool">Outil</option><option value="other">Autre</option></select></div>
+    <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="stockName" placeholder="ex: PLA Blanc 1.75mm"></div>
+    <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-input" id="stockQty" placeholder="1"></div>
+    <div class="form-group"><label class="form-label">Unite</label><select class="form-select" id="stockUnit"><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="pcs">pieces</option><option value="m">metres</option></select></div>
+    <div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="stockAlert" value="1"></div>
+    <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="stockSupplier" placeholder="Amazon, 3DJake..."></div>
+    <button class="btn btn-primary" onclick="saveStock()">Ajouter</button>
   </div>
 </div>
 
@@ -223,6 +322,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<!-- QUALITY OVERLAY -->
+<div class="quality-overlay" id="qualityOverlay">
+  <div class="quality-content">
+    <div class="quality-header"><h3>✅ Validation qualite</h3><p id="qualityOrderName">Commande terminee</p></div>
+    <div id="qualityChecklist"></div>
+    <div class="progress-bar" style="margin:14px 0"><div class="progress-fill" id="qualityProgress" style="width:0%"></div></div>
+    <div style="text-align:center;font-size:.8rem;color:#888;margin-bottom:14px" id="qualityPercent">0% complete</div>
+    <div class="form-group" style="margin:14px 0">
+      <label class="form-label">📷 Photo de la piece finie</label>
+      <div class="photo-grid" id="qualityPhotoPreview" style="display:none;margin-bottom:8px"></div>
+      <button class="btn btn-secondary" onclick="openQualityCamera()" style="margin-top:0">📷 Prendre une photo</button>
+    </div>
+    <button class="btn btn-primary" id="qualityValidateBtn" onclick="validateQuality()" disabled>Valider la cloture</button>
+    <button class="btn btn-secondary" onclick="skipQuality()" style="margin-top:8px">Passer</button>
+  </div>
+</div>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCameraFile(this)">
+<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleQualityCameraFile(this)">
 <div class="toast" id="toast"></div>
 
 <script>
@@ -230,17 +348,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 var data = {
   orders: [],
   clients: [{id: 1, name: "Client Test", phone: "", email: ""}],
+  models: [],
+  stock: [],
   planningEvents: [],
   machines: [
     {id: 1, name: "Elegoo Saturn 4 Ultra", type: "resin"},
     {id: 2, name: "Bambulab P2S #1", type: "fdm"},
     {id: 3, name: "Bambulab P2S #2", type: "fdm"},
     {id: 4, name: "Bambulab H2C", type: "fdm"}
-  ]
+  ],
+  checklist: [
+    {id: 1, text: "Adhesion plateau OK", checked: false},
+    {id: 2, text: "Pas de warping / deformation", checked: false},
+    {id: 3, text: "Finition surface correcte", checked: false},
+    {id: 4, text: "Supports retires proprement", checked: false},
+    {id: 5, text: "Post-traitement resine (lavage+UV)", checked: false},
+    {id: 6, text: "Dimensions conformes", checked: false},
+    {id: 7, text: "Emballage adapte", checked: false},
+    {id: 8, text: "Photo finale prise", checked: false}
+  ],
+  qualityResults: {}
 };
 
 var activeTimers = [];
 var finishedTimers = [];
+var currentOrderId = null;
+var photoOrderId = null;
+var qualityOrderId = null;
 var planningCurrentDate = new Date();
 
 // ==================== INIT ====================
@@ -250,38 +384,35 @@ function init() {
     renderAll();
     calculateCost();
     updateMachineSelects();
-  } catch(e) {
-    console.log("init error: " + e.message);
-  }
+  } catch(e) { console.log("init error: " + e.message); }
 }
 
 function loadData() {
   try {
-    var saved = localStorage.getItem("tli9_data");
+    var saved = localStorage.getItem("tli10_data");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.orders) data.orders = parsed.orders;
       if (parsed.clients) data.clients = parsed.clients;
+      if (parsed.models) data.models = parsed.models;
+      if (parsed.stock) data.stock = parsed.stock;
       if (parsed.planningEvents) data.planningEvents = parsed.planningEvents;
+      if (parsed.qualityResults) data.qualityResults = parsed.qualityResults;
     }
   } catch(e) {}
 }
 
 function saveData() {
-  try {
-    localStorage.setItem("tli9_data", JSON.stringify(data));
-  } catch(e) {}
+  try { localStorage.setItem("tli10_data", JSON.stringify(data)); } catch(e) {}
 }
 
 function saveTimers() {
-  try {
-    localStorage.setItem("tli9_timers", JSON.stringify({active: activeTimers, finished: finishedTimers}));
-  } catch(e) {}
+  try { localStorage.setItem("tli10_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
 }
 
 function loadTimers() {
   try {
-    var saved = localStorage.getItem("tli9_timers");
+    var saved = localStorage.getItem("tli10_timers");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.active) activeTimers = parsed.active;
@@ -299,6 +430,8 @@ function showSection(id, tabEl) {
   document.getElementById(id).classList.add("active");
   if (tabEl) tabEl.classList.add("active");
   if (id === "orders") renderOrders();
+  if (id === "catalog") renderCatalog();
+  if (id === "stock") renderStock();
   if (id === "planning") renderPlanning();
   if (id === "timer") renderTimers();
   if (id === "dashboard") renderStats();
@@ -310,9 +443,7 @@ function openModal(id) {
   if (el) {
     el.classList.add("active");
     if (id === "newOrderModal") { updateClientSelect(); updateMachineSelects(); }
-    if (id === "planningModal") {
-      if (!document.getElementById("planDate").value) document.getElementById("planDate").value = new Date().toISOString().split("T")[0];
-    }
+    if (id === "planningModal") { if (!document.getElementById("planDate").value) document.getElementById("planDate").value = new Date().toISOString().split("T")[0]; }
   }
 }
 
@@ -365,7 +496,7 @@ function saveOrder() {
       price: document.getElementById("orderPrice").value || 0,
       priority: document.getElementById("orderPriority").value,
       notes: document.getElementById("orderNotes").value || "",
-      status: "pending", date: new Date().toISOString()
+      status: "pending", date: new Date().toISOString(), photos: []
     };
     data.orders.push(order);
     saveData();
@@ -393,19 +524,34 @@ function saveClient() {
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
+function saveModel() {
+  try {
+    var model = {id: Date.now(), name: document.getElementById("modelName").value || "Sans nom", category: document.getElementById("modelCategory").value, type: document.getElementById("modelType").value, time: document.getElementById("modelTime").value || 0, weight: document.getElementById("modelWeight").value || 0, price: document.getElementById("modelPrice").value || 0, description: document.getElementById("modelDesc").value || ""};
+    data.models.push(model);
+    saveData();
+    closeModal("newModelModal");
+    showToast("Modele ajoute !");
+    renderCatalog();
+  } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
+function saveStock() {
+  try {
+    var item = {id: Date.now(), type: document.getElementById("stockType").value, name: document.getElementById("stockName").value || "Sans nom", qty: parseFloat(document.getElementById("stockQty").value) || 0, unit: document.getElementById("stockUnit").value, alert: parseFloat(document.getElementById("stockAlert").value) || 1, supplier: document.getElementById("stockSupplier").value || ""};
+    data.stock.push(item);
+    saveData();
+    closeModal("newStockModal");
+    showToast("Stock ajoute !");
+    renderStock();
+  } catch(e) { showToast("Erreur: " + e.message, "error"); }
+}
+
 function savePlanningEvent() {
   try {
     var title = document.getElementById("planTitle").value.trim();
     var date = document.getElementById("planDate").value;
     if (!title || !date) { showToast("Titre et date obligatoires", "warning"); return; }
-    var event = {
-      id: Date.now(), title: title, type: document.getElementById("planType").value,
-      date: date, startTime: document.getElementById("planStartTime").value,
-      endTime: document.getElementById("planEndTime").value,
-      assignee: document.getElementById("planAssignee").value,
-      priority: document.getElementById("planPriority").value,
-      notes: document.getElementById("planNotes").value || ""
-    };
+    var event = {id: Date.now(), title: title, type: document.getElementById("planType").value, date: date, startTime: document.getElementById("planStartTime").value, endTime: document.getElementById("planEndTime").value, assignee: document.getElementById("planAssignee").value, priority: document.getElementById("planPriority").value, notes: document.getElementById("planNotes").value || ""};
     data.planningEvents.push(event);
     saveData();
     closeModal("planningModal");
@@ -416,10 +562,143 @@ function savePlanningEvent() {
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
+// ==================== ORDER DETAIL & QUALITY ====================
+function openOrderDetail(id) {
+  currentOrderId = id;
+  var order = null;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === id) order = data.orders[i];
+  if (!order) return;
+  document.getElementById("detailTitle").textContent = "#" + order.id + " — " + (order.name || "Sans nom");
+  document.getElementById("detailStatus").value = order.status || "pending";
+  var content = document.getElementById("orderDetailContent");
+  var svc = order.service === "print" ? "🖨️ Impression" : order.service === "modeling" ? "🎨 Modelisation" : order.service === "design" ? "💡 Conception" : order.service;
+  var typeLabel = order.type === "fdm" ? "FDM" : order.type === "resin" ? "Resine" : "-";
+  var notesHtml = order.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + order.notes + '</div></div>' : "";
+  content.innerHTML = '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">' + (order.clientName || "Inconnu") + '</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>' + svc + '</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>' + typeLabel + '</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>' + (order.weight || 0) + 'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>' + (order.time || 0) + 'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">' + (order.price || 0) + '€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>' + new Date(order.date).toLocaleDateString("fr-FR") + '</div></div></div>' + notesHtml;
+  renderOrderPhotos(order);
+  openModal("orderDetailModal");
+}
+
+function renderOrderPhotos(order) {
+  var div = document.getElementById("detailPhotos");
+  if (!order.photos || order.photos.length === 0) { div.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>'; return; }
+  var html = "";
+  for (var i = 0; i < order.photos.length; i++) html += '<div class="photo-item"><img src="' + order.photos[i] + '" alt="Photo"><button class="photo-delete" onclick="deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
+  div.innerHTML = html;
+}
+
+function updateOrderStatus() {
+  var order = null;
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === currentOrderId) order = data.orders[i];
+  if (!order) return;
+  var oldStatus = order.status;
+  order.status = document.getElementById("detailStatus").value;
+  saveData();
+  if (oldStatus !== "finished" && order.status === "finished" && order.service === "print") showQualityOverlay(order.id, order.name);
+  showToast("Statut mis a jour");
+  renderOrders();
+  renderStats();
+}
+
+function showQualityOverlay(orderId, orderName) {
+  qualityOrderId = orderId;
+  document.getElementById("qualityOrderName").textContent = orderName || "Commande";
+  if (!data.qualityResults[orderId]) data.qualityResults[orderId] = [];
+  if (data.qualityResults[orderId].length === 0) {
+    for (var i = 0; i < data.checklist.length; i++) data.qualityResults[orderId].push({id: data.checklist[i].id, text: data.checklist[i].text, checked: false});
+  }
+  var div = document.getElementById("qualityChecklist");
+  var html = "";
+  for (var i = 0; i < data.qualityResults[orderId].length; i++) {
+    var item = data.qualityResults[orderId][i];
+    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
+  }
+  div.innerHTML = html;
+  updateQualityProgress();
+  document.getElementById("qualityOverlay").classList.add("active");
+}
+
+function toggleQualityCheck(idx) {
+  if (!data.qualityResults[qualityOrderId]) return;
+  data.qualityResults[qualityOrderId][idx].checked = !data.qualityResults[qualityOrderId][idx].checked;
+  saveData();
+  updateQualityProgress();
+  var div = document.getElementById("qualityChecklist");
+  var html = "";
+  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) {
+    var item = data.qualityResults[qualityOrderId][i];
+    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
+  }
+  div.innerHTML = html;
+}
+
+function updateQualityProgress() {
+  if (!data.qualityResults[qualityOrderId]) return;
+  var checked = 0;
+  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) if (data.qualityResults[qualityOrderId][i].checked) checked++;
+  var total = data.qualityResults[qualityOrderId].length;
+  var pct = Math.round((checked / total) * 100);
+  document.getElementById("qualityProgress").style.width = pct + "%";
+  document.getElementById("qualityPercent").textContent = pct + "% complete";
+  document.getElementById("qualityValidateBtn").disabled = pct < 100;
+}
+
+function validateQuality() {
+  if (window.tempQualityPhoto && qualityOrderId) {
+    var order = null;
+    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === qualityOrderId) order = data.orders[i];
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(window.tempQualityPhoto); saveData(); }
+    window.tempQualityPhoto = null;
+  }
+  document.getElementById("qualityOverlay").classList.remove("active");
+  showToast("Qualite validee !", "success");
+}
+
+function skipQuality() {
+  window.tempQualityPhoto = null;
+  document.getElementById("qualityOverlay").classList.remove("active");
+  showToast("Cloture sans validation", "warning");
+}
+
+function deleteCurrentOrder() { if (!confirm("Supprimer ?")) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal("orderDetailModal"); showToast("Supprime", "warning"); renderOrders(); renderStats(); }
+function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast("Photo supprimee", "warning"); } }
+
+// ==================== CAMERA ====================
+function openCamera() { photoOrderId = currentOrderId; document.getElementById("cameraInput").click(); }
+function handleCameraFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var photoData = e.target.result;
+    var order = null;
+    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
+    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast("Photo ajoutee", "success"); }
+  };
+  reader.readAsDataURL(file);
+  input.value = "";
+}
+function openQualityCamera() { document.getElementById("qualityCameraInput").click(); }
+function handleQualityCameraFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window.tempQualityPhoto = e.target.result;
+    var preview = document.getElementById("qualityPhotoPreview");
+    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualite"></div>'; preview.style.display = "grid"; }
+    showToast("Photo qualite prise", "success");
+  };
+  reader.readAsDataURL(file);
+  input.value = "";
+}
+
 // ==================== RENDER ====================
 function renderAll() {
   renderStats();
   renderOrders();
+  renderCatalog();
+  renderStock();
   renderPlanning();
   renderTimers();
 }
@@ -434,6 +713,16 @@ function renderStats() {
   html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>4</div><div style='font-size:.75rem;color:#888;'>Machines</div></div>";
   html += "</div>";
   document.getElementById("statsDisplay").innerHTML = html;
+
+  var alerts = [];
+  for (var i = 0; i < data.stock.length; i++) if (parseFloat(data.stock[i].qty) <= parseFloat(data.stock[i].alert)) alerts.push(data.stock[i]);
+  var adiv = document.getElementById("stockAlerts");
+  if (alerts.length === 0) adiv.innerHTML = '<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';
+  else {
+    var ahtml = "";
+    for (var i = 0; i < alerts.length; i++) ahtml += '<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>' + alerts[i].name + '</strong> — ' + alerts[i].qty + ' ' + alerts[i].unit + ' restant(s)</div>';
+    adiv.innerHTML = ahtml;
+  }
 }
 
 function renderOrders() {
@@ -444,7 +733,36 @@ function renderOrders() {
     var o = data.orders[i];
     var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
     var statusClass = o.status || "pending";
-    html += '<div class="order-item"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + o.name + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + o.clientName + '</span><span>💰 ' + o.price + '€</span></div></div>';
+    var hasPhotos = (o.photos && o.photos.length > 0) ? '<span>📷</span>' : "";
+    html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + o.name + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + o.clientName + '</span><span>💰 ' + o.price + '€</span>' + hasPhotos + '</div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function renderCatalog() {
+  var div = document.getElementById("catalogList");
+  if (data.models.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; return; }
+  var html = "";
+  for (var i = 0; i < data.models.length; i++) {
+    var m = data.models[i];
+    var typeLabel = m.type === "fdm" ? "FDM" : m.type === "resin" ? "Resine" : "FDM + Resine";
+    html += '<div class="card"><div style="font-weight:700">' + (m.name || "Sans nom") + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || "") + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function renderStock() {
+  var div = document.getElementById("stockList");
+  if (data.stock.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; return; }
+  var html = "";
+  for (var i = 0; i < data.stock.length; i++) {
+    var s = data.stock[i];
+    var qty = parseFloat(s.qty) || 0;
+    var alert = parseFloat(s.alert) || 0;
+    var isLow = qty <= alert;
+    var borderColor = isLow ? "3px solid var(--warning)" : "3px solid var(--success)";
+    var qtyColor = isLow ? "var(--warning)" : "var(--success)";
+    html += '<div class="card" style="border-left:' + borderColor + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">' + (s.name || "Sans nom") + '</div><div style="font-size:.75rem;color:#888">' + (s.type || "") + '</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:' + qtyColor + '">' + qty + ' ' + (s.unit || "") + '</div><div style="font-size:.7rem;color:#666">Seuil: ' + alert + '</div></div></div></div>';
   }
   div.innerHTML = html;
 }
@@ -481,10 +799,7 @@ function renderPlanning() {
   renderPlanningEvents();
 }
 
-function changePlanningMonth(delta) {
-  planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta);
-  renderPlanning();
-}
+function changePlanningMonth(delta) { planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta); renderPlanning(); }
 
 function renderPlanningEvents() {
   var div = document.getElementById("planningEventsList");
@@ -518,7 +833,7 @@ function startPrintTimer() {
   showToast("Timer demarre !");
   document.getElementById("timerName").value = "";
   renderTimers();
-  showSection("timer", document.querySelectorAll(".nav-tab")[3]);
+  showSection("timer", document.querySelectorAll(".nav-tab")[5]);
 }
 
 function renderTimers() {
@@ -577,6 +892,8 @@ function startTimerLoop() {
         finishedTimers.push(t);
         changed = true;
         showToast("Impression terminee: " + t.name, "success");
+        if (document.getElementById("notifSound").checked) playSound();
+        if (document.getElementById("notifVibrate").checked && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
       }
     }
     var filtered = [];
@@ -600,6 +917,26 @@ function formatTime(ms) {
   return h.toString().padStart(2, "0") + ":" + m.toString().padStart(2, "0") + ":" + sec.toString().padStart(2, "0");
 }
 
+function playSound() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [600, 800, 1000].forEach(function(freq, i) {
+      setTimeout(function() {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = "sine";
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      }, i * 150);
+    });
+  } catch(e) {}
+}
+
 // ==================== CALCULATOR ====================
 function calculateCost() {
   var service = document.getElementById("calcService").value;
@@ -616,7 +953,39 @@ function calculateCost() {
   document.getElementById("calcTotal").textContent = total.toFixed(2) + "€";
 }
 
-// ==================== EXPORT / RESET ====================
+// ==================== SYNC ====================
+function syncWithGoogle() {
+  if (!navigator.onLine) { showToast("Hors-ligne", "warning"); return; }
+  var apiUrl = localStorage.getItem("tli10_apiUrl") || "";
+  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
+  fetch(apiUrl, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({action: "syncAll", orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents})
+  }).then(function(r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(function(res) {
+    if (!res.success) throw new Error(res.error || "Sync failed");
+    showToast("Synchronise !", "success");
+  }).catch(function(e) { showToast("Sync: " + e.message, "error"); });
+}
+
+function testConnection() {
+  var apiUrl = localStorage.getItem("tli10_apiUrl") || "";
+  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
+  fetch(apiUrl + "?action=getAll").then(function(r) {
+    showToast(r.ok ? "Connexion OK" : "Erreur " + r.status, r.ok ? "success" : "error");
+  }).catch(function() { showToast("Connexion impossible", "error"); });
+}
+
+function saveConfig() {
+  var el = document.getElementById("apiUrl");
+  localStorage.setItem("tli10_apiUrl", el ? (el.value || "").trim() : "");
+  showToast("Config sauvegardee");
+}
+
+// ==================== EXPORT / IMPORT / RESET ====================
 function exportData() {
   var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: "application/json"});
   var url = URL.createObjectURL(blob);
@@ -628,11 +997,30 @@ function exportData() {
   showToast("Export reussi !");
 }
 
+function importData(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var imported = JSON.parse(e.target.result);
+      if (imported.data) data = imported.data;
+      if (imported.timers) { activeTimers = imported.timers.active || []; finishedTimers = imported.timers.finished || []; }
+      saveData(); saveTimers(); renderAll(); showToast("Import reussi !", "success");
+    } catch(err) { showToast("Erreur import", "error"); }
+  };
+  reader.readAsText(file);
+  input.value = "";
+}
+
 function clearAll() {
   if (!confirm("Tout supprimer ?")) return;
   data.orders = [];
   data.clients = [{id: 1, name: "Client Test", phone: "", email: ""}];
+  data.models = [];
+  data.stock = [];
   data.planningEvents = [];
+  data.qualityResults = {};
   activeTimers = [];
   finishedTimers = [];
   saveData();
