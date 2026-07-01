@@ -2,7 +2,7 @@
   "name": "TLI - Technical Layer Innovation",
   "short_name": "TLI",
   "description": "Gestion d'atelier d'impression 3D",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f0f1a",
   "theme_color": "#1a1a2e",
