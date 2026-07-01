@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<title>TLI v10 - Complet</title>
+<title>TLI v11 - Complet</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -75,9 +75,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .event-item-title{font-weight:700;font-size:.9rem}
 .event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative}
+.photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative;cursor:pointer}
 .photo-item img{width:100%;height:100%;object-fit:cover}
-.photo-delete{position:absolute;top:4px;right:4px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer}
+.photo-delete{position:absolute;top:4px;right:4px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer;z-index:2}
 .checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
 .checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
 .checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
@@ -87,6 +87,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .quality-header{text-align:center;margin-bottom:18px}
 .quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
 .quality-header p{color:#888;font-size:.85rem;margin-top:6px}
+/* SOUS-ONGLETS COMMANDES */
+.order-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.order-tabs::-webkit-scrollbar{display:none}
+.order-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.order-tab.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent}
+/* OVERLAY PHOTO */
+.photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
+.photo-overlay.active{display:flex}
+.photo-overlay img{max-width:100%;max-height:80vh;border-radius:12px;object-fit:contain}
+.photo-overlay-close{position:absolute;top:20px;right:20px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
+/* CLIENT CARD */
+.client-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
+.client-card:hover{border-color:var(--primary)}
+.client-name{font-weight:700;font-size:1.05rem}
+.client-info{font-size:.8rem;color:#888;margin-top:4px}
+.client-orders{font-size:.75rem;color:#666;margin-top:4px}
 </style>
 </head>
 <body>
@@ -99,6 +115,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <nav class="nav-tabs">
   <div class="nav-tab active" onclick="showSection('dashboard', this)">📊 Tableau</div>
   <div class="nav-tab" onclick="showSection('orders', this)">📦 Commandes</div>
+  <div class="nav-tab" onclick="showSection('clients', this)">👥 Clients</div>
   <div class="nav-tab" onclick="showSection('catalog', this)">🎨 Catalogue</div>
   <div class="nav-tab" onclick="showSection('stock', this)">📋 Stock</div>
   <div class="nav-tab" onclick="showSection('planning', this)">📅 Planning</div>
@@ -117,7 +134,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="card-title">⚡ Actions rapides</div>
     <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
     <button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button>
-    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[5])" style="margin-top:8px">⏰ Lancer timer</button>
+    <button class="btn btn-secondary" onclick="showSection('timer', document.querySelectorAll('.nav-tab')[6])" style="margin-top:8px">⏰ Lancer timer</button>
   </div>
   <div class="card" id="activeTimersCard" style="display:none">
     <div class="card-title">🔥 Impressions en cours</div>
@@ -131,7 +148,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 
 <!-- ORDERS -->
 <section id="orders" class="section">
-  <div id="ordersList"><div class="empty-state"><div class="icon">📦</div>Aucune commande</div></div>
+  <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button>
+  <div class="order-tabs" style="margin-top:12px">
+    <div class="order-tab active" onclick="filterOrders('all', this)">Toutes</div>
+    <div class="order-tab" onclick="filterOrders('pending', this)">A faire</div>
+    <div class="order-tab" onclick="filterOrders('printing', this)">En cours</div>
+    <div class="order-tab" onclick="filterOrders('finished', this)">Terminees</div>
+    <div class="order-tab" onclick="filterOrders('delivered', this)">Livrees</div>
+  </div>
+  <div id="ordersList"></div>
+</section>
+
+<!-- CLIENTS -->
+<section id="clients" class="section">
+  <button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button>
+  <div id="clientsList" style="margin-top:12px"></div>
 </section>
 
 <!-- CATALOG -->
@@ -260,7 +291,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group">
       <label class="form-label">Photos</label>
       <div class="photo-grid" id="detailPhotos"></div>
-      <button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Photo</button>
+      <button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Ajouter une photo</button>
     </div>
     <button class="btn btn-danger" onclick="deleteCurrentOrder()">🗑️ Supprimer</button>
   </div>
@@ -275,6 +306,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
     <button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="clientDetailModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Client</div><button class="modal-close" onclick="closeModal('clientDetailModal')">×</button></div>
+    <div id="clientDetailContent"></div>
+    <button class="btn btn-danger" onclick="deleteCurrentClient()">🗑️ Supprimer</button>
   </div>
 </div>
 
@@ -339,6 +378,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   </div>
 </div>
 
+<!-- PHOTO OVERLAY -->
+<div class="photo-overlay" id="photoOverlay" onclick="closePhotoOverlay()">
+  <button class="photo-overlay-close" onclick="closePhotoOverlay()">×</button>
+  <img id="photoOverlayImg" src="" alt="Photo">
+</div>
+
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCameraFile(this)">
 <input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleQualityCameraFile(this)">
 <div class="toast" id="toast"></div>
@@ -373,9 +418,11 @@ var data = {
 var activeTimers = [];
 var finishedTimers = [];
 var currentOrderId = null;
+var currentClientId = null;
 var photoOrderId = null;
 var qualityOrderId = null;
 var planningCurrentDate = new Date();
+var currentOrderFilter = "all";
 
 // ==================== INIT ====================
 function init() {
@@ -389,7 +436,7 @@ function init() {
 
 function loadData() {
   try {
-    var saved = localStorage.getItem("tli10_data");
+    var saved = localStorage.getItem("tli11_data");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.orders) data.orders = parsed.orders;
@@ -403,16 +450,16 @@ function loadData() {
 }
 
 function saveData() {
-  try { localStorage.setItem("tli10_data", JSON.stringify(data)); } catch(e) {}
+  try { localStorage.setItem("tli11_data", JSON.stringify(data)); } catch(e) {}
 }
 
 function saveTimers() {
-  try { localStorage.setItem("tli10_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
+  try { localStorage.setItem("tli11_timers", JSON.stringify({active: activeTimers, finished: finishedTimers})); } catch(e) {}
 }
 
 function loadTimers() {
   try {
-    var saved = localStorage.getItem("tli10_timers");
+    var saved = localStorage.getItem("tli11_timers");
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed.active) activeTimers = parsed.active;
@@ -430,6 +477,7 @@ function showSection(id, tabEl) {
   document.getElementById(id).classList.add("active");
   if (tabEl) tabEl.classList.add("active");
   if (id === "orders") renderOrders();
+  if (id === "clients") renderClients();
   if (id === "catalog") renderCatalog();
   if (id === "stock") renderStock();
   if (id === "planning") renderPlanning();
@@ -521,6 +569,12 @@ function saveClient() {
     closeModal("newClientModal");
     showToast("Client ajoute !");
     renderStats();
+    renderClients();
+    document.getElementById("clientName").value = "";
+    document.getElementById("clientPhone").value = "";
+    document.getElementById("clientEmail").value = "";
+    document.getElementById("clientAddress").value = "";
+    document.getElementById("clientNotes").value = "";
   } catch(e) { showToast("Erreur: " + e.message, "error"); }
 }
 
@@ -583,8 +637,21 @@ function renderOrderPhotos(order) {
   var div = document.getElementById("detailPhotos");
   if (!order.photos || order.photos.length === 0) { div.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>'; return; }
   var html = "";
-  for (var i = 0; i < order.photos.length; i++) html += '<div class="photo-item"><img src="' + order.photos[i] + '" alt="Photo"><button class="photo-delete" onclick="deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
+  for (var i = 0; i < order.photos.length; i++) {
+    html += '<div class="photo-item" onclick="openPhotoOverlay('' + order.photos[i] + '')"><img src="' + order.photos[i] + '" alt="Photo"><button class="photo-delete" onclick="event.stopPropagation();deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
+  }
   div.innerHTML = html;
+}
+
+function openPhotoOverlay(src) {
+  var overlay = document.getElementById("photoOverlay");
+  var img = document.getElementById("photoOverlayImg");
+  img.src = src;
+  overlay.classList.add("active");
+}
+
+function closePhotoOverlay() {
+  document.getElementById("photoOverlay").classList.remove("active");
 }
 
 function updateOrderStatus() {
@@ -663,6 +730,47 @@ function skipQuality() {
 function deleteCurrentOrder() { if (!confirm("Supprimer ?")) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal("orderDetailModal"); showToast("Supprime", "warning"); renderOrders(); renderStats(); }
 function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast("Photo supprimee", "warning"); } }
 
+// ==================== CLIENT DETAIL ====================
+function openClientDetail(id) {
+  currentClientId = id;
+  var client = null;
+  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === id) client = data.clients[i];
+  if (!client) return;
+  document.getElementById("clientDetailTitle").textContent = client.name || "Client";
+  var content = document.getElementById("clientDetailContent");
+  var phone = client.phone ? '<div style="margin-bottom:8px"><span style="color:#888">📞 </span>' + client.phone + '</div>' : "";
+  var email = client.email ? '<div style="margin-bottom:8px"><span style="color:#888">✉️ </span>' + client.email + '</div>' : "";
+  var address = client.address ? '<div style="margin-bottom:8px"><span style="color:#888">📍 </span>' + client.address + '</div>' : "";
+  var notes = client.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + client.notes + '</div></div>' : "";
+  var clientOrders = [];
+  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId === id) clientOrders.push(data.orders[i]);
+  var ordersHtml = '<div style="margin-top:14px"><div style="font-size:.9rem;font-weight:700;margin-bottom:8px">Commandes (' + clientOrders.length + ')</div>';
+  if (clientOrders.length === 0) ordersHtml += '<div style="color:#888;font-size:.85rem">Aucune commande</div>';
+  else {
+    for (var i = 0; i < clientOrders.length; i++) {
+      var o = clientOrders[i];
+      var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
+      ordersHtml += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer" onclick="closeModal('clientDetailModal');openOrderDetail(' + o.id + ')"><div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:.9rem">' + o.name + '</span><span style="font-size:.7rem;color:var(--warning)">' + statusLabel + '</span></div><div style="font-size:.8rem;color:#888">' + o.price + '€ • ' + new Date(o.date).toLocaleDateString("fr-FR") + '</div></div>';
+    }
+  }
+  ordersHtml += '</div>';
+  content.innerHTML = phone + email + address + notes + ordersHtml;
+  openModal("clientDetailModal");
+}
+
+function deleteCurrentClient() {
+  if (!confirm("Supprimer ce client et toutes ses commandes ?")) return;
+  var clientId = currentClientId;
+  data.clients = data.clients.filter(function(c) { return c.id !== clientId; });
+  data.orders = data.orders.filter(function(o) { return o.clientId !== clientId; });
+  saveData();
+  closeModal("clientDetailModal");
+  showToast("Client supprime", "warning");
+  renderStats();
+  renderClients();
+  renderOrders();
+}
+
 // ==================== CAMERA ====================
 function openCamera() { photoOrderId = currentOrderId; document.getElementById("cameraInput").click(); }
 function handleCameraFile(input) {
@@ -697,6 +805,7 @@ function handleQualityCameraFile(input) {
 function renderAll() {
   renderStats();
   renderOrders();
+  renderClients();
   renderCatalog();
   renderStock();
   renderPlanning();
@@ -725,16 +834,48 @@ function renderStats() {
   }
 }
 
+function filterOrders(filter, tabEl) {
+  currentOrderFilter = filter;
+  var tabs = document.querySelectorAll(".order-tab");
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+  if (tabEl) tabEl.classList.add("active");
+  renderOrders();
+}
+
 function renderOrders() {
   var div = document.getElementById("ordersList");
-  if (data.orders.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>'; return; }
+  var orders = [];
+  for (var i = 0; i < data.orders.length; i++) {
+    if (currentOrderFilter === "all" || data.orders[i].status === currentOrderFilter) orders.push(data.orders[i]);
+  }
+  orders.sort(function(a, b) { return b.id - a.id; });
+  if (orders.length === 0) {
+    var msg = currentOrderFilter === "all" ? "Aucune commande" : "Aucune commande dans cette categorie";
+    div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>' + msg + '</div>';
+    return;
+  }
   var html = "";
-  for (var i = data.orders.length - 1; i >= 0; i--) {
-    var o = data.orders[i];
+  for (var i = 0; i < orders.length; i++) {
+    var o = orders[i];
     var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
     var statusClass = o.status || "pending";
     var hasPhotos = (o.photos && o.photos.length > 0) ? '<span>📷</span>' : "";
     html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + o.name + '</span><span class="badge badge-' + statusClass + '">' + statusLabel + '</span></div><div class="order-item-meta"><span>👤 ' + o.clientName + '</span><span>💰 ' + o.price + '€</span>' + hasPhotos + '</div></div>';
+  }
+  div.innerHTML = html;
+}
+
+function renderClients() {
+  var div = document.getElementById("clientsList");
+  if (data.clients.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; return; }
+  var html = "";
+  for (var i = 0; i < data.clients.length; i++) {
+    var c = data.clients[i];
+    var phone = c.phone ? '📞 ' + c.phone : "";
+    var email = c.email ? '✉️ ' + c.email : "";
+    var orderCount = 0;
+    for (var j = 0; j < data.orders.length; j++) if (data.orders[j].clientId === c.id) orderCount++;
+    html += '<div class="client-card" onclick="openClientDetail(' + c.id + ')"><div class="client-name">' + (c.name || "Sans nom") + '</div><div class="client-info">' + phone + ' ' + email + '</div><div class="client-orders">' + orderCount + ' commande(s)</div></div>';
   }
   div.innerHTML = html;
 }
@@ -833,7 +974,7 @@ function startPrintTimer() {
   showToast("Timer demarre !");
   document.getElementById("timerName").value = "";
   renderTimers();
-  showSection("timer", document.querySelectorAll(".nav-tab")[5]);
+  showSection("timer", document.querySelectorAll(".nav-tab")[6]);
 }
 
 function renderTimers() {
@@ -854,7 +995,7 @@ function renderTimers() {
       var t = active[i];
       var remaining = Math.max(0, t.endTime - Date.now());
       var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
-      html += '<div class="timer-card"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
+      html += '<div class="timer-card" id="timerCard_' + t.id + '"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" id="timerBar_' + t.id + '" style="width:' + pct + '%"></div></div></div>';
     }
     al.innerHTML = html;
   }
@@ -902,8 +1043,12 @@ function startTimerLoop() {
     if (changed) { saveTimers(); renderTimers(); renderStats(); }
     for (var i = 0; i < activeTimers.length; i++) {
       var t = activeTimers[i];
-      var el = document.getElementById("timer_" + t.id);
-      if (el) el.textContent = formatTime(Math.max(0, t.endTime - Date.now()));
+      var remaining = Math.max(0, t.endTime - Date.now());
+      var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
+      var elText = document.getElementById("timer_" + t.id);
+      var elBar = document.getElementById("timerBar_" + t.id);
+      if (elText) elText.textContent = formatTime(remaining);
+      if (elBar) elBar.style.width = pct + "%";
     }
   }, 1000);
 }
@@ -956,8 +1101,9 @@ function calculateCost() {
 // ==================== SYNC ====================
 function syncWithGoogle() {
   if (!navigator.onLine) { showToast("Hors-ligne", "warning"); return; }
-  var apiUrl = localStorage.getItem("tli10_apiUrl") || "";
-  if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
+  var apiUrl = localStorage.getItem("tli11_apiUrl") || "";
+  if (!apiUrl) { showToast("URL API non configuree. Va dans Config et colle ton lien Apps Script.", "warning"); return; }
+  showToast("Synchronisation en cours...", "success");
   fetch(apiUrl, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -968,20 +1114,21 @@ function syncWithGoogle() {
   }).then(function(res) {
     if (!res.success) throw new Error(res.error || "Sync failed");
     showToast("Synchronise !", "success");
-  }).catch(function(e) { showToast("Sync: " + e.message, "error"); });
+  }).catch(function(e) { showToast("Erreur sync: " + e.message + " | Verifie que ton Apps Script autorise les requetes POST.", "error"); });
 }
 
 function testConnection() {
-  var apiUrl = localStorage.getItem("tli10_apiUrl") || "";
+  var apiUrl = localStorage.getItem("tli11_apiUrl") || "";
   if (!apiUrl) { showToast("URL API non configuree", "warning"); return; }
+  showToast("Test en cours...");
   fetch(apiUrl + "?action=getAll").then(function(r) {
-    showToast(r.ok ? "Connexion OK" : "Erreur " + r.status, r.ok ? "success" : "error");
-  }).catch(function() { showToast("Connexion impossible", "error"); });
+    showToast(r.ok ? "Connexion OK !" : "Erreur " + r.status, r.ok ? "success" : "error");
+  }).catch(function(e) { showToast("Connexion impossible: " + e.message + " | Verifie l'URL et que ton Apps Script est deploye en mode 'Anyone'.", "error"); });
 }
 
 function saveConfig() {
   var el = document.getElementById("apiUrl");
-  localStorage.setItem("tli10_apiUrl", el ? (el.value || "").trim() : "");
+  localStorage.setItem("tli11_apiUrl", el ? (el.value || "").trim() : "");
   showToast("Config sauvegardee");
 }
 
@@ -1035,7 +1182,7 @@ function showToast(msg, type) {
   toast.textContent = msg;
   toast.className = "toast" + (type ? " " + type : "");
   toast.classList.add("show");
-  setTimeout(function() { toast.classList.remove("show"); }, 2500);
+  setTimeout(function() { toast.classList.remove("show"); }, 3000);
 }
 
 // ==================== BOOT ====================
