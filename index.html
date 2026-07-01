@@ -4,16 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>TLI - Gestion 3D</title>
+<title>TLI v8 - Test Progressif</title>
 <style>
 :root{--primary:#00d4ff;--secondary:#ff6b6b;--accent:#7b2cbf;--dark:#1a1a2e;--darker:#0f0f1a;--light:#e0e0e0;--success:#00ff88;--warning:#ffaa00;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:var(--light);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
 .app-header{background:linear-gradient(135deg,var(--dark) 0%,var(--accent) 100%);padding:18px 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;justify-content:space-between;align-items:center}
-.app-header h1{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:6px}
+.app-header h1{font-size:1.1rem;font-weight:800}
 .app-header .white{color:#fff}.app-header .blue{color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.4)}
-.sync-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--light);padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
 .nav-tabs{display:flex;gap:8px;padding:12px 10px;overflow-x:auto;background:var(--dark);position:sticky;top:58px;z-index:99;border-bottom:1px solid var(--glass-border);scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{flex-shrink:0;padding:8px 16px;border-radius:25px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap;font-family:inherit}
@@ -22,1123 +20,254 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .section.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:12px}
-.card-title{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:12px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:12px;border:none;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;width:100%;margin-top:8px}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
 .btn-secondary{background:var(--glass);border:1px solid var(--glass-border);color:var(--light)}
-.btn-danger{background:linear-gradient(135deg,var(--secondary),#cc5555);color:#fff}
-.btn-sm{padding:8px 14px;font-size:.8rem;width:auto}
-.form-group{margin-bottom:14px}
-.form-label{display:block;margin-bottom:5px;font-size:.8rem;color:#aaa}
-.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
-.form-textarea{min-height:70px;resize:vertical}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
-.badge-pending{background:rgba(255,170,0,0.2);color:var(--warning)}
-.badge-printing{background:rgba(0,212,255,0.2);color:var(--primary)}
-.badge-finished{background:rgba(0,255,136,0.2);color:var(--success)}
-.badge-delivered{background:rgba(123,44,191,0.2);color:#c77dff}
-.order-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
-.order-item:hover{border-color:var(--primary)}
-.order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.order-item-title{font-weight:700;font-size:.95rem}
-.order-item-meta{font-size:.8rem;color:#888;display:flex;gap:12px;flex-wrap:wrap}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-.stat-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;text-align:center}
-.stat-value{font-size:1.6rem;font-weight:800;color:var(--primary)}
-.stat-label{font-size:.75rem;color:#888;margin-top:4px}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.active{display:flex}
-.modal-content{background:var(--dark);border:1px solid var(--glass-border);border-radius:20px;padding:22px;width:100%;max-height:90vh;overflow-y:auto;max-width:480px}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.modal-title{font-size:1.1rem;font-weight:700}
-.modal-close{background:none;border:none;color:var(--light);font-size:1.5rem;cursor:pointer}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);border:1px solid var(--primary);color:var(--light);padding:12px 20px;border-radius:12px;font-size:.9rem;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast-success{border-color:var(--success)}.toast-error{border-color:var(--secondary)}.toast-warning{border-color:var(--warning)}
-.progress-bar{height:6px;background:var(--darker);border-radius:3px;overflow:hidden;margin-top:8px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width .5s}
-.timer-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px}
-.timer-card.finished{border-color:var(--success);background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,255,136,0.05));animation:glow 2s infinite}
-@keyframes glow{0%,100%{box-shadow:0 0 5px rgba(0,255,136,0.2)}50%{box-shadow:0 0 20px rgba(0,255,136,0.4)}}
-.timer-name{font-weight:700;margin-bottom:4px}.timer-info{font-size:.8rem;color:#888}
-.timer-remaining{font-size:1.5rem;font-weight:700;color:var(--primary);margin-top:6px}
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.photo-item{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--darker);border:1px solid var(--glass-border);position:relative}
-.photo-item img{width:100%;height:100%;object-fit:cover}
-.photo-delete{position:absolute;top:4px;right:4px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;cursor:pointer}
 .empty-state{text-align:center;padding:30px 20px;color:#666}
 .empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
-.search-bar{position:relative;margin-bottom:12px}
-.search-bar input{width:100%;padding:12px 15px 12px 42px;border-radius:12px;border:1px solid var(--glass-border);background:var(--darker);color:var(--light);font-family:inherit;font-size:1rem;outline:none}
-.search-bar::before{content:"🔍";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem}
-.planning-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
-.planning-day-header{text-align:center;font-size:.7rem;color:#888;padding:6px 2px}
-.planning-day{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:5px;min-height:55px;cursor:pointer;transition:all .2s;position:relative}
-.planning-day:hover{border-color:var(--primary)}.planning-day.today{border-color:var(--primary);background:rgba(0,212,255,0.1)}
-.planning-day-number{font-size:.75rem;font-weight:700;margin-bottom:3px}
-.planning-day.today .planning-day-number{color:var(--primary)}
-.planning-event-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
-.event-type-printing{background:var(--primary)}.event-type-modeling{background:var(--warning)}.event-type-design{background:#ff6b81}
-.event-type-maintenance{background:var(--secondary)}.event-type-rdv{background:#a855f7}.event-type-logistics{background:#22d3ee}.event-type-other{background:#888}
-.event-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--primary)}
-.event-item:hover{border-color:var(--primary)}
-.event-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.event-item-title{font-weight:700;font-size:.9rem}
-.event-item-meta{font-size:.75rem;color:#888;display:flex;gap:10px;flex-wrap:wrap}
-.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
-.quality-overlay.active{display:flex}
-.quality-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 0 30px rgba(0,212,255,0.3)}
-.quality-header{text-align:center;margin-bottom:18px}
-.quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
-.quality-header p{color:#888;font-size:.85rem;margin-top:6px}
-.checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
-.checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
-.checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
-@media(min-width:768px){.app-header{padding:18px 40px}.section{padding:20px 40px;max-width:800px;margin:0 auto}.nav-tabs{padding:12px 40px;justify-content:center}}
 </style>
 </head>
 <body>
 
-<header class="app-header"><h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1><button class="sync-btn" id="syncBtn" onclick="syncWithGoogle()"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button></header>
+<header class="app-header">
+  <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+</header>
 
-<nav class="nav-tabs" id="navTabs">
-<div class="nav-tab active" data-section="dashboard" onclick="showSection('dashboard')">📊 Tableau</div>
-<div class="nav-tab" data-section="orders" onclick="showSection('orders')">📦 Commandes</div>
-<div class="nav-tab" data-section="catalog" onclick="showSection('catalog')">🎨 Catalogue</div>
-<div class="nav-tab" data-section="stock" onclick="showSection('stock')">📋 Stock</div>
-<div class="nav-tab" data-section="planning" onclick="showSection('planning')">📅 Planning</div>
-<div class="nav-tab" data-section="clients" onclick="showSection('clients')">👥 Clients</div>
-<div class="nav-tab" data-section="calculator" onclick="showSection('calculator')">🧮 Devis</div>
-<div class="nav-tab" data-section="timer" onclick="showSection('timer')">⏰ Timer</div>
-<div class="nav-tab" data-section="settings" onclick="showSection('settings')">⚙️ Config</div>
+<nav class="nav-tabs">
+  <div class="nav-tab active" onclick="showSection('dashboard', this)">📊 Tableau</div>
+  <div class="nav-tab" onclick="showSection('orders', this)">📦 Commandes</div>
+  <div class="nav-tab" onclick="showSection('clients', this)">👥 Clients</div>
+  <div class="nav-tab" onclick="showSection('settings', this)">⚙️ Config</div>
 </nav>
 
 <section id="dashboard" class="section active">
-<div class="stats-grid"><div class="stat-box"><div class="stat-value" id="statOrders">0</div><div class="stat-label">En cours</div></div><div class="stat-box"><div class="stat-value" id="statFinished">0</div><div class="stat-label">Terminées</div></div><div class="stat-box"><div class="stat-value" id="statRevenue">0€</div><div class="stat-label">CA estimé</div></div><div class="stat-box"><div class="stat-value" id="statMachines">4</div><div class="stat-label">Machines</div></div></div>
-<div class="card"><div class="card-title">🧪 DIAGNOSTIC</div><button class="btn btn-primary" onclick="testButton()">1. Tester JS (alert)</button><button class="btn btn-secondary" onclick="testLocalStorage()" style="margin-top:8px">2. Tester LocalStorage</button><button class="btn btn-secondary" onclick="testModal()" style="margin-top:8px">3. Tester Modal</button><div id="testResult" style="margin-top:10px;color:var(--success);font-weight:700;text-align:center;"></div></div>
-<div class="card"><div class="card-title">⚡ Actions rapides</div><button class="btn btn-primary" onclick="openModal('newOrderModal')">+ Nouvelle commande</button><button class="btn btn-secondary" onclick="openModal('newClientModal')" style="margin-top:8px">+ Nouveau client</button><button class="btn btn-secondary" onclick="showSection('timer')" style="margin-top:8px">⏰ Lancer timer</button></div>
-<div class="card" id="activeTimersCard" style="display:none"><div class="card-title">🔥 Impressions en cours</div><div id="activeTimersList"></div></div>
-<div class="card"><div class="card-title">🔔 Alertes stock</div><div id="stockAlerts"></div></div>
-<div class="card"><div class="card-title">📅 Aujourd'hui</div><div id="todayEvents"></div></div>
+  <div class="card">
+    <div class="card-title">🧪 Tests de base</div>
+    <button class="btn btn-primary" onclick="testAlert()">1. Test Alert</button>
+    <button class="btn btn-secondary" onclick="testToast()" style="margin-top:8px">2. Test Toast</button>
+    <button class="btn btn-secondary" onclick="testLocalStorage()" style="margin-top:8px">3. Test LocalStorage</button>
+    <button class="btn btn-secondary" onclick="testNav()" style="margin-top:8px">4. Test Navigation</button>
+  </div>
+  <div class="card">
+    <div class="card-title">⚡ Actions</div>
+    <button class="btn btn-primary" onclick="createOrder()">+ Nouvelle commande</button>
+    <button class="btn btn-secondary" onclick="createClient()" style="margin-top:8px">+ Nouveau client</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Stats</div>
+    <div id="statsDisplay">Chargement...</div>
+  </div>
 </section>
 
-<section id="orders" class="section"><div class="search-bar"><input type="text" id="orderSearch" placeholder="Rechercher..." oninput="renderOrders()"></div><div id="ordersList"></div></section>
-<section id="catalog" class="section"><button class="btn btn-primary" onclick="openModal('newModelModal')">+ Ajouter modèle</button><div id="catalogList" style="margin-top:12px"></div></section>
-<section id="stock" class="section"><button class="btn btn-primary" onclick="openModal('newStockModal')">+ Ajouter stock</button><div id="stockList" style="margin-top:12px"></div></section>
-<section id="planning" class="section">
-<div class="card"><div class="card-title">📅 Calendrier</div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(-1)" style="width:auto">◀</button><div id="planningMonthLabel" style="font-weight:700"></div><button class="btn btn-sm btn-secondary" onclick="changePlanningMonth(1)" style="width:auto">▶</button></div><div class="planning-calendar" id="planningCalendar"></div></div>
-<div class="card"><div class="card-title">📋 Événements du jour</div><div id="planningEventsList"></div></div><button class="btn btn-primary" onclick="openPlanningModal()">+ Ajouter événement</button>
+<section id="orders" class="section">
+  <div class="card">
+    <div class="card-title">📦 Commandes</div>
+    <div id="ordersList"><div class="empty-state"><div class="icon">📦</div>Aucune commande</div></div>
+  </div>
 </section>
-<section id="clients" class="section"><button class="btn btn-primary" onclick="openModal('newClientModal')">+ Nouveau client</button><div id="clientsList" style="margin-top:12px"></div></section>
-<section id="calculator" class="section">
-<div class="card"><div class="card-title">🧮 Calculateur de devis</div>
-<div class="form-group"><label class="form-label">Type de prestation</label><select class="form-select" id="calcService" onchange="calculateCost()"><option value="print">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception / Prototypage</option></select></div>
-<div class="form-group"><label class="form-label">Technologie</label><select class="form-select" id="calcType" onchange="calculateCost()"><option value="fdm">FDM</option><option value="resin">Résine</option></select></div>
-<div class="form-group"><label class="form-label">Poids / Volume estimé (g)</label><input type="number" class="form-input" id="calcWeight" value="50" oninput="calculateCost()"></div>
-<div class="form-group"><label class="form-label">Temps estimé (h)</label><input type="number" class="form-input" id="calcTime" value="4" oninput="calculateCost()"></div>
-<div class="form-group"><label class="form-label">Complexité</label><select class="form-select" id="calcComplexity" onchange="calculateCost()"><option value="1">Simple</option><option value="1.5">Moyenne</option><option value="2.5">Complexe</option></select></div>
-<div class="form-group"><label class="form-label">Quantité</label><input type="number" class="form-input" id="calcQty" value="1" min="1" oninput="calculateCost()"></div>
-<div class="card" style="background:linear-gradient(135deg,var(--primary),var(--accent));margin-top:14px"><div style="text-align:center"><div style="font-size:.85rem;opacity:.9;color:#fff">Devis estimé</div><div style="font-size:2.2rem;font-weight:800;color:#fff" id="calcTotal">0.00€</div></div></div>
-</div>
+
+<section id="clients" class="section">
+  <div class="card">
+    <div class="card-title">👥 Clients</div>
+    <div id="clientsList"><div class="empty-state"><div class="icon">👥</div>Aucun client</div></div>
+  </div>
 </section>
-<section id="timer" class="section">
-<div class="card"><div class="card-title">⏰ Nouveau timer</div>
-<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="timerName" placeholder="ex: Support téléphone"></div>
-<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="timerMachine"></select></div>
-<div class="form-group"><label class="form-label">Durée (h)</label><input type="number" class="form-input" id="timerHours" value="4" min="0.5" step="0.5"></div>
-<div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="timerMinutes" value="0" min="0" max="59"></div>
-<button class="btn btn-primary" onclick="startPrintTimer()">🚀 Démarrer</button>
-<button class="btn btn-secondary" onclick="requestWakeLock()" style="margin-top:8px">🔒 Garder écran allumé</button>
-</div>
-<div class="card" id="activeTimersSection" style="display:none"><div class="card-title">🔥 En cours</div><div id="timerList"></div></div>
-<div class="card" id="finishedTimersSection" style="display:none"><div class="card-title">✅ Terminées</div><div id="finishedTimerList"></div></div>
-</section>
+
 <section id="settings" class="section">
-<div class="card"><div class="card-title">🔗 Synchronisation</div><div class="form-group"><label class="form-label">URL API Apps Script</label><input type="text" class="form-input" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"></div><button class="btn btn-primary" onclick="saveConfig()">💾 Sauvegarder</button><button class="btn btn-secondary" onclick="testConnection()" style="margin-top:8px">🧪 Tester</button></div>
-<div class="card"><div class="card-title">🔔 Notifications</div><div class="checklist-item"><input type="checkbox" id="notifSound" checked><label for="notifSound">Son timer terminé</label></div><div class="checklist-item"><input type="checkbox" id="notifVibrate" checked><label for="notifVibrate">Vibration</label></div><div class="checklist-item"><input type="checkbox" id="notifScreen" checked><label for="notifScreen">Garder écran allumé</label></div></div>
-<div class="card"><div class="card-title">📤 Export / Import</div><button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button><button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="margin-top:8px">📥 Importer JSON</button><input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)"></div>
-<div class="card"><div class="card-title">⚠️ Danger Zone</div><button class="btn btn-danger" onclick="resetAllData()">🗑️ Tout réinitialiser</button><button class="btn btn-secondary" onclick="clearCache()" style="margin-top:8px">🧹 Vider le cache local</button></div>
+  <div class="card">
+    <div class="card-title">⚙️ Parametres</div>
+    <button class="btn btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
+  </div>
 </section>
 
-<div class="modal-overlay" id="newOrderModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouvelle commande</div><button class="modal-close" onclick="closeModal('newOrderModal')">×</button></div>
-<div class="form-group"><label class="form-label">Client</label><select class="form-select" id="orderClient"></select></div>
-<div class="form-group"><label class="form-label">Nom du projet</label><input type="text" class="form-input" id="orderName" placeholder="ex: Support téléphone"></div>
-<div class="form-group"><label class="form-label">Type de prestation</label><select class="form-select" id="orderService" onchange="toggleOrderFields()"><option value="print">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception / Prototypage</option></select></div>
-<div class="form-group" id="printTypeGroup"><label class="form-label">Technologie</label><select class="form-select" id="orderType"><option value="fdm">FDM</option><option value="resin">Résine</option></select></div>
-<div class="form-group" id="machineGroup"><label class="form-label">Machine</label><select class="form-select" id="orderMachine"></select></div>
-<div class="form-group"><label class="form-label">Matériau</label><input type="text" class="form-input" id="orderMaterial" placeholder="ex: PLA, Résine..."></div>
-<div class="form-group"><label class="form-label">Poids estimé (g)</label><input type="number" class="form-input" id="orderWeight" placeholder="50"></div>
-<div class="form-group"><label class="form-label">Temps estimé (h)</label><input type="number" class="form-input" id="orderTime" placeholder="4"></div>
-<div class="form-group"><label class="form-label">Prix vendu (€)</label><input type="number" class="form-input" id="orderPrice" placeholder="15.00" step="0.01"></div>
-<div class="form-group"><label class="form-label">Priorité</label><select class="form-select" id="orderPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
-<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="orderNotes" placeholder="Détails..."></textarea></div>
-<button class="btn btn-primary" onclick="saveOrder()">Créer</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="orderDetailModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title" id="detailTitle">Détail</div><button class="modal-close" onclick="closeModal('orderDetailModal')">×</button></div>
-<div id="orderDetailContent"></div>
-<div class="form-group" style="margin-top:14px"><label class="form-label">Statut</label><select class="form-select" id="detailStatus" onchange="updateOrderStatus()"><option value="pending">À faire</option><option value="printing">En cours</option><option value="finished">Terminée</option><option value="delivered">Livrée / Payée</option></select></div>
-<div class="form-group"><label class="form-label">Photos</label><div class="photo-grid" id="detailPhotos"></div><button class="btn btn-secondary" onclick="openCamera()" style="margin-top:8px">📷 Photo</button></div>
-<button class="btn btn-danger" onclick="deleteCurrentOrder()">🗑️ Supprimer</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="newClientModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouveau client</div><button class="modal-close" onclick="closeModal('newClientModal')">×</button></div>
-<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="clientName" placeholder="Nom"></div>
-<div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-input" id="clientPhone" placeholder="06 12 34 56 78"></div>
-<div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="email@exemple.com"></div>
-<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-textarea" id="clientAddress" placeholder="Adresse..."></textarea></div>
-<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="clientNotes" placeholder="Infos..."></textarea></div>
-<button class="btn btn-primary" onclick="saveClient()">Ajouter</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="newModelModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title">Nouveau modèle</div><button class="modal-close" onclick="closeModal('newModelModal')">×</button></div>
-<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="modelName" placeholder="ex: Porte-clés"></div>
-<div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="modelCategory"><option value="prototype">Prototype</option><option value="decoration">Décoration</option><option value="functional">Fonctionnel</option><option value="jewelry">Bijouterie</option><option value="other">Autre</option></select></div>
-<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="modelType"><option value="fdm">FDM</option><option value="resin">Résine</option><option value="both">Les deux</option></select></div>
-<div class="form-group"><label class="form-label">Temps moyen (h)</label><input type="number" class="form-input" id="modelTime" placeholder="3"></div>
-<div class="form-group"><label class="form-label">Poids moyen (g)</label><input type="number" class="form-input" id="modelWeight" placeholder="30"></div>
-<div class="form-group"><label class="form-label">Prix base (€)</label><input type="number" class="form-input" id="modelPrice" placeholder="10.00" step="0.01"></div>
-<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="modelDesc" placeholder="Description..."></textarea></div>
-<button class="btn btn-primary" onclick="saveModel()">Ajouter</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="newStockModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title">Ajouter stock</div><button class="modal-close" onclick="closeModal('newStockModal')">×</button></div>
-<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="stockType"><option value="filament">Filament</option><option value="resin">Résine</option><option value="part">Pièce détachée</option><option value="tool">Outil</option><option value="other">Autre</option></select></div>
-<div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="stockName" placeholder="ex: PLA Blanc 1.75mm"></div>
-<div class="form-group"><label class="form-label">Quantité</label><input type="number" class="form-input" id="stockQty" placeholder="1"></div>
-<div class="form-group"><label class="form-label">Unité</label><select class="form-select" id="stockUnit"><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="pcs">pièces</option><option value="m">mètres</option></select></div>
-<div class="form-group"><label class="form-label">Seuil alerte</label><input type="number" class="form-input" id="stockAlert" value="1"></div>
-<div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" id="stockSupplier" placeholder="Amazon, 3DJake..."></div>
-<button class="btn btn-primary" onclick="saveStock()">Ajouter</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="planningModal">
-<div class="modal-content"><div class="modal-header"><div class="modal-title">📅 Ajouter événement</div><button class="modal-close" onclick="closeModal('planningModal')">×</button></div>
-<div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="planTitle" placeholder="ex: Impression support Jean"></div>
-<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="planType" onchange="togglePlanningFields()"><option value="printing">Impression 3D</option><option value="modeling">Modélisation 3D</option><option value="design">Conception</option><option value="maintenance">Maintenance machine</option><option value="rdv">RDV client</option><option value="logistics">Logistique / Livraison</option><option value="other">Divers</option></select></div>
-<div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="planDate"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">Début</label><input type="time" class="form-input" id="planStartTime" value="09:00"></div><div class="form-group"><label class="form-label">Fin</label><input type="time" class="form-input" id="planEndTime" value="12:00"></div></div>
-<div class="form-group" id="planMachineGroup"><label class="form-label">Machine</label><select class="form-select" id="planMachine"></select></div>
-<div class="form-group"><label class="form-label">Assigné à</label><select class="form-select" id="planAssignee"><option value="florian">Florian</option><option value="elie">Élie</option><option value="both">Les deux</option></select></div>
-<div class="form-group"><label class="form-label">Priorité</label><select class="form-select" id="planPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
-<div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="planNotes" placeholder="Détails..."></textarea></div>
-<button class="btn btn-primary" onclick="savePlanningEvent()">Ajouter</button>
-</div>
-</div>
-
-<div class="quality-overlay" id="qualityOverlay">
-<div class="quality-content"><div class="quality-header"><h3>✅ Validation qualité</h3><p id="qualityOrderName">Commande terminée</p></div><div id="qualityChecklist"></div><div class="progress-bar" style="margin:14px 0"><div class="progress-fill" id="qualityProgress" style="width:0%"></div></div><div style="text-align:center;font-size:.8rem;color:#888;margin-bottom:14px" id="qualityPercent">0% complété</div><div class="form-group" style="margin:14px 0"><label class="form-label">📷 Photo de la pièce finie</label><div class="photo-grid" id="qualityPhotoPreview" style="display:none;margin-bottom:8px"></div><button class="btn btn-secondary" onclick="openQualityCamera()" style="margin-top:0">📷 Prendre une photo</button></div><button class="btn btn-primary" id="qualityValidateBtn" onclick="validateQuality()" disabled>Valider la clôture</button><button class="btn btn-secondary" onclick="skipQuality()" style="margin-top:8px">Passer (pas une impression)</button></div>
-</div>
-
-<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCameraFile(this)">
-<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleQualityCameraFile(this)">
 <div class="toast" id="toast"></div>
 
 <script>
-/* ==================== ALERT DE TEST AU DEMARRAGE ==================== */
-try { alert('TLI v7 JS loaded - OK'); } catch(e) {}
-
-/* ==================== CONFIG & STATE ==================== */
-var data = {
-  orders: [],
-  clients: [{id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: ''}],
-  models: [],
-  stock: [],
-  machines: [
-    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
-    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
-  ],
-  checklist: [
-    {id: 1, text: 'Adhesion plateau OK', checked: false},
-    {id: 2, text: 'Pas de warping / deformation', checked: false},
-    {id: 3, text: 'Finition surface correcte', checked: false},
-    {id: 4, text: 'Supports retires proprement', checked: false},
-    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
-    {id: 6, text: 'Dimensions conformes', checked: false},
-    {id: 7, text: 'Emballage adapte', checked: false},
-    {id: 8, text: 'Photo finale prise', checked: false}
-  ],
-  planningEvents: [],
-  qualityResults: {}
-};
-
-var activeTimers = [];
-var finishedTimers = [];
-var currentOrderId = null;
-var photoOrderId = null;
-var planningCurrentDate = new Date();
-var selectedPlanningDay = null;
-var qualityOrderId = null;
-var config = {};
-
-/* ==================== INIT ==================== */
-function init() {
-  try {
-    alert('init() called');
-    loadData();
-    alert('loadData OK');
-    loadConfig();
-    alert('loadConfig OK');
-    loadTimers();
-    alert('loadTimers OK');
-    renderAll();
-    alert('renderAll OK');
-    startTimerLoop();
-    alert('startTimerLoop OK');
-    calculateCost();
-    alert('TLI v7 READY');
-  } catch(err) {
-    alert('ERROR in init: ' + err.message);
-  }
+// ==================== PARTIE 1 : TESTS DE BASE (comme TLI_TEST) ====================
+function testAlert() {
+  alert("ALERT OK - JavaScript fonctionne !");
 }
 
-window.onload = init;
+function testToast() {
+  showToast("Toast OK - Tout marche !");
+}
 
-/* ==================== DATA PERSISTENCE ==================== */
-function loadData() {
-  var saved = localStorage.getItem('tli7_data');
-  if (saved) {
-    try {
-      var p = JSON.parse(saved);
-      if (p.orders) data.orders = p.orders;
-      if (p.clients) data.clients = p.clients;
-      if (p.models) data.models = p.models;
-      if (p.stock) data.stock = p.stock;
-      if (p.machines) data.machines = p.machines;
-      if (p.checklist) data.checklist = p.checklist;
-      if (p.planningEvents) data.planningEvents = p.planningEvents;
-      if (p.qualityResults) data.qualityResults = p.qualityResults;
-    } catch(e) {}
-  }
-}
-function saveData() { localStorage.setItem('tli7_data', JSON.stringify(data)); }
-
-function loadConfig() {
-  var el = document.getElementById('apiUrl');
-  if (el) el.value = localStorage.getItem('tli7_apiUrl') || '';
-  var ns = document.getElementById('notifSound');
-  var nv = document.getElementById('notifVibrate');
-  var nsc = document.getElementById('notifScreen');
-  if (ns) ns.checked = localStorage.getItem('tli7_notifSound') !== 'false';
-  if (nv) nv.checked = localStorage.getItem('tli7_notifVibrate') !== 'false';
-  if (nsc) nsc.checked = localStorage.getItem('tli7_notifScreen') !== 'false';
-}
-function saveConfig() {
-  var el = document.getElementById('apiUrl');
-  config.apiUrl = el ? (el.value || '').trim() : '';
-  localStorage.setItem('tli7_apiUrl', config.apiUrl);
-  showToast('Config sauvegardee', 'success');
-}
-function loadTimers() {
-  var saved = localStorage.getItem('tli7_timers');
-  if (saved) {
-    try {
-      var p = JSON.parse(saved);
-      if (p.active) activeTimers = p.active;
-      if (p.finished) finishedTimers = p.finished;
-    } catch(e) {}
-  }
-}
-function saveTimers() { localStorage.setItem('tli7_timers', JSON.stringify({active: activeTimers, finished: finishedTimers})); }
-
-/* ==================== DIAGNOSTIC BUTTONS ==================== */
-function testButton() { alert('TEST OK - Le bouton fonctionne !'); showToast('Test reussi', 'success'); }
 function testLocalStorage() {
   try {
-    localStorage.setItem('tli7_test', 'ca_marche');
-    var val = localStorage.getItem('tli7_test');
-    alert('LocalStorage OK: ' + val);
-  } catch(e) { alert('LocalStorage ERROR: ' + e.message); }
-}
-function testModal() { openModal('newClientModal'); }
-
-/* ==================== NAV ==================== */
-function showSection(id) {
-  var sections = document.querySelectorAll('.section');
-  for (var i = 0; i < sections.length; i++) sections[i].classList.remove('active');
-  var tabs = document.querySelectorAll('.nav-tab');
-  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
-  var s = document.getElementById(id);
-  var t = document.querySelector('[data-section="' + id + '"]');
-  if (s) s.classList.add('active');
-  if (t) t.classList.add('active');
-  renderAll();
-}
-
-/* ==================== RENDER ALL ==================== */
-function renderAll() {
-  try { renderDashboard(); } catch(e) {}
-  try { renderOrders(); } catch(e) {}
-  try { renderClients(); } catch(e) {}
-  try { renderCatalog(); } catch(e) {}
-  try { renderStock(); } catch(e) {}
-  try { renderTimers(); } catch(e) {}
-  try { renderPlanning(); } catch(e) {}
-  try { updateClientSelect(); } catch(e) {}
-  try { updateMachineSelects(); } catch(e) {}
-}
-
-function renderDashboard() {
-  updateStats();
-  renderActiveTimers();
-  var alerts = [];
-  for (var i = 0; i < data.stock.length; i++) {
-    if (parseFloat(data.stock[i].qty) <= parseFloat(data.stock[i].alert)) alerts.push(data.stock[i]);
+    localStorage.setItem("tli8_test", "ca_marche");
+    var val = localStorage.getItem("tli8_test");
+    alert("LocalStorage OK: " + val);
+  } catch(e) {
+    alert("LocalStorage ERROR: " + e.message);
   }
-  var div = document.getElementById('stockAlerts');
-  if (alerts.length === 0) {
-    div.innerHTML = '<div class="empty-state"><div class="icon">✅</div>Aucune alerte</div>';
-  } else {
-    var html = '';
-    for (var i = 0; i < alerts.length; i++) {
-      html += '<div style="padding:10px;background:rgba(255,170,0,0.1);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--warning)"><strong>' + alerts[i].name + '</strong> — ' + alerts[i].qty + ' ' + alerts[i].unit + ' restant(s)</div>';
+}
+
+function testNav() {
+  showSection("orders", document.querySelectorAll(".nav-tab")[1]);
+  showToast("Navigation OK");
+}
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+
+// ==================== PARTIE 2 : NAVIGATION ====================
+function showSection(id, tabEl) {
+  var sections = document.querySelectorAll(".section");
+  for (var i = 0; i < sections.length; i++) {
+    sections[i].classList.remove("active");
+  }
+  var tabs = document.querySelectorAll(".nav-tab");
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove("active");
+  }
+  document.getElementById(id).classList.add("active");
+  if (tabEl) tabEl.classList.add("active");
+
+  // Refresh content
+  if (id === "orders") renderOrders();
+  if (id === "clients") renderClients();
+  if (id === "dashboard") renderStats();
+}
+
+// ==================== PARTIE 3 : DONNEES ====================
+var data = {
+  orders: [],
+  clients: [{id: 1, name: "Client Test", phone: "", email: ""}]
+};
+
+function loadData() {
+  try {
+    var saved = localStorage.getItem("tli8_data");
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed.orders) data.orders = parsed.orders;
+      if (parsed.clients) data.clients = parsed.clients;
     }
-    div.innerHTML = html;
-  }
-  var today = new Date();
-  var todayEvents = [];
-  for (var i = 0; i < data.planningEvents.length; i++) {
-    var d = new Date(data.planningEvents[i].date);
-    if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) todayEvents.push(data.planningEvents[i]);
-  }
-  var tdiv = document.getElementById('todayEvents');
-  if (todayEvents.length === 0) {
-    tdiv.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Rien de prevu</div>';
-  } else {
-    var html = '';
-    for (var i = 0; i < todayEvents.length; i++) html += renderEventItem(todayEvents[i]);
-    tdiv.innerHTML = html;
+  } catch(e) {
+    console.log("loadData error: " + e.message);
   }
 }
 
-function updateStats() {
+function saveData() {
+  try {
+    localStorage.setItem("tli8_data", JSON.stringify(data));
+  } catch(e) {
+    console.log("saveData error: " + e.message);
+  }
+}
+
+// ==================== PARTIE 4 : ACTIONS ====================
+function createOrder() {
+  var name = prompt("Nom du projet ?");
+  if (!name) return;
+  var clientName = prompt("Nom du client ?");
+  if (!clientName) return;
+  var price = prompt("Prix (€) ?");
+  var order = {
+    id: Date.now(),
+    name: name,
+    clientName: clientName || "Inconnu",
+    price: price || "0",
+    status: "pending",
+    date: new Date().toISOString()
+  };
+  data.orders.push(order);
+  saveData();
+  showToast("Commande creee !");
+  renderStats();
+  renderOrders();
+}
+
+function createClient() {
+  var name = prompt("Nom du client ?");
+  if (!name) return;
+  var client = {
+    id: Date.now(),
+    name: name,
+    phone: "",
+    email: ""
+  };
+  data.clients.push(client);
+  saveData();
+  showToast("Client ajoute !");
+  renderClients();
+}
+
+function clearAll() {
+  if (!confirm("Tout supprimer ?")) return;
+  data.orders = [];
+  data.clients = [{id: 1, name: "Client Test", phone: "", email: ""}];
+  saveData();
+  showToast("Tout efface");
+  renderStats();
+  renderOrders();
+  renderClients();
+}
+
+// ==================== PARTIE 5 : RENDER ====================
+function renderStats() {
   var active = 0;
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].status !== 'delivered') active++;
-  var finished = 0;
-  var n = new Date();
   for (var i = 0; i < data.orders.length; i++) {
-    var d = new Date(data.orders[i].date);
-    if (data.orders[i].status === 'finished' && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear()) finished++;
+    if (data.orders[i].status !== "delivered") active++;
   }
-  var revenue = 0;
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].status === 'delivered') revenue += parseFloat(data.orders[i].price) || 0;
-  document.getElementById('statOrders').textContent = active;
-  document.getElementById('statFinished').textContent = finished;
-  document.getElementById('statRevenue').textContent = revenue.toFixed(0) + '€';
-}
-
-function renderActiveTimers() {
-  var card = document.getElementById('activeTimersCard');
-  var list = document.getElementById('activeTimersList');
-  var active = [];
-  for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
-  if (active.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-  var html = '';
-  for (var i = 0; i < active.length; i++) {
-    var t = active[i];
-    var remaining = Math.max(0, t.endTime - Date.now());
-    var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
-    html += '<div class="timer-card"><div class="timer-name">' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
-  }
-  list.innerHTML = html;
+  var html = "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;'>";
+  html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>" + active + "</div><div style='font-size:.75rem;color:#888;'>En cours</div></div>";
+  html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>" + data.orders.length + "</div><div style='font-size:.75rem;color:#888;'>Total</div></div>";
+  html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>" + data.clients.length + "</div><div style='font-size:.75rem;color:#888;'>Clients</div></div>";
+  html += "<div style='background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;'><div style='font-size:1.6rem;font-weight:800;color:var(--primary);'>4</div><div style='font-size:.75rem;color:#888;'>Machines</div></div>";
+  html += "</div>";
+  document.getElementById("statsDisplay").innerHTML = html;
 }
 
 function renderOrders() {
-  var searchInput = document.getElementById('orderSearch');
-  var search = '';
-  if (searchInput && searchInput.value) search = searchInput.value.toLowerCase();
-  var orders = [];
-  for (var i = 0; i < data.orders.length; i++) orders.push(data.orders[i]);
-  orders.sort(function(a, b) { return b.id - a.id; });
-  if (search) {
-    var filtered = [];
-    for (var i = 0; i < orders.length; i++) {
-      var name = (orders[i].name || '').toLowerCase();
-      var clientName = (orders[i].clientName || '').toLowerCase();
-      if (name.indexOf(search) !== -1 || clientName.indexOf(search) !== -1) filtered.push(orders[i]);
-    }
-    orders = filtered;
+  var div = document.getElementById("ordersList");
+  if (data.orders.length === 0) {
+    div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>';
+    return;
   }
-  var div = document.getElementById('ordersList');
-  if (orders.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucune commande</div>'; return; }
-  var html = '';
-  for (var i = 0; i < orders.length; i++) {
-    var o = orders[i];
-    var svc = o.service === 'print' ? '🖨️ Impression' : o.service === 'modeling' ? '🎨 Modélisation' : o.service === 'design' ? '💡 Conception' : o.service;
-    var statusClass = o.status || 'pending';
-    var hasPhotos = (o.photos && o.photos.length > 0) ? '<span>📷</span>' : '';
-    html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ')"><div class="order-item-header"><span class="order-item-title">#' + o.id + ' — ' + (o.name || 'Sans nom') + '</span><span class="badge badge-' + statusClass + '">' + getStatusLabel(o.status) + '</span></div><div class="order-item-meta"><span>👤 ' + (o.clientName || 'Inconnu') + '</span><span>' + svc + '</span><span>💰 ' + (o.price || 0) + '€</span>' + hasPhotos + '</div></div>';
+  var html = "";
+  for (var i = data.orders.length - 1; i >= 0; i--) {
+    var o = data.orders[i];
+    var statusLabel = o.status === "pending" ? "A faire" : o.status === "printing" ? "En cours" : o.status === "finished" ? "Terminee" : "Livree";
+    html += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.95rem;">#' + o.id + ' — ' + o.name + '</span><span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;background:rgba(255,170,0,0.2);color:var(--warning);">' + statusLabel + '</span></div>';
+    html += '<div style="font-size:.8rem;color:#888;"><span>👤 ' + o.clientName + '</span> <span>💰 ' + o.price + '€</span></div>';
+    html += '</div>';
   }
   div.innerHTML = html;
-}
-
-function getStatusLabel(s) {
-  if (s === 'pending') return 'A faire';
-  if (s === 'printing') return 'En cours';
-  if (s === 'finished') return 'Terminee';
-  if (s === 'delivered') return 'Livree';
-  return s;
 }
 
 function renderClients() {
-  var div = document.getElementById('clientsList');
-  if (data.clients.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>'; return; }
-  var html = '';
+  var div = document.getElementById("clientsList");
+  if (data.clients.length === 0) {
+    div.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Aucun client</div>';
+    return;
+  }
+  var html = "";
   for (var i = 0; i < data.clients.length; i++) {
     var c = data.clients[i];
-    var phone = c.phone ? '📞 ' + c.phone : '';
-    var email = c.email ? '✉️ ' + c.email : '';
-    var orderCount = 0;
-    for (var j = 0; j < data.orders.length; j++) if (data.orders[j].clientId === c.id) orderCount++;
-    html += '<div class="card" style="cursor:pointer" onclick="showClientOrders(' + c.id + ')"><div style="font-weight:700;font-size:1.05rem">' + (c.name || 'Sans nom') + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + phone + ' ' + email + '</div><div style="font-size:.75rem;color:#666;margin-top:4px">' + orderCount + ' commande(s)</div></div>';
+    html += '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;">';
+    html += '<div style="font-weight:700;font-size:1.05rem;">' + c.name + '</div>';
+    if (c.phone) html += '<div style="font-size:.8rem;color:#888;margin-top:4px;">📞 ' + c.phone + '</div>';
+    html += '</div>';
   }
   div.innerHTML = html;
 }
 
-function renderCatalog() {
-  var div = document.getElementById('catalogList');
-  if (data.models.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">🎨</div>Catalogue vide</div>'; return; }
-  var html = '';
-  for (var i = 0; i < data.models.length; i++) {
-    var m = data.models[i];
-    var typeLabel = m.type === 'fdm' ? 'FDM' : m.type === 'resin' ? 'Resine' : 'FDM + Resine';
-    html += '<div class="card"><div style="font-weight:700">' + (m.name || 'Sans nom') + '</div><div style="font-size:.8rem;color:#888;margin-top:4px">' + (m.category || '') + ' • ' + typeLabel + '</div><div style="display:flex;gap:12px;margin-top:8px;font-size:.8rem;color:#aaa"><span>⏱️ ' + (m.time || 0) + 'h</span><span>⚖️ ' + (m.weight || 0) + 'g</span><span style="color:var(--primary);font-weight:700">' + (m.price || 0) + '€</span></div></div>';
-  }
-  div.innerHTML = html;
-}
-
-function renderStock() {
-  var div = document.getElementById('stockList');
-  if (data.stock.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Stock vide</div>'; return; }
-  var html = '';
-  for (var i = 0; i < data.stock.length; i++) {
-    var s = data.stock[i];
-    var qty = parseFloat(s.qty) || 0;
-    var alert = parseFloat(s.alert) || 0;
-    var isLow = qty <= alert;
-    var borderColor = isLow ? '3px solid var(--warning)' : '3px solid var(--success)';
-    var qtyColor = isLow ? 'var(--warning)' : 'var(--success)';
-    html += '<div class="card" style="border-left:' + borderColor + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">' + (s.name || 'Sans nom') + '</div><div style="font-size:.75rem;color:#888">' + (s.type || '') + '</div></div><div style="text-align:right"><div style="font-size:1.2rem;font-weight:800;color:' + qtyColor + '">' + qty + ' ' + (s.unit || '') + '</div><div style="font-size:.7rem;color:#666">Seuil: ' + alert + '</div></div></div></div>';
-  }
-  div.innerHTML = html;
-}
-
-/* ==================== PLANNING ==================== */
-function renderPlanning() {
-  var calDiv = document.getElementById('planningCalendar');
-  if (!calDiv) return;
-  var year = planningCurrentDate.getFullYear();
-  var month = planningCurrentDate.getMonth();
-  var monthNames = ['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
-  var label = document.getElementById('planningMonthLabel');
-  if (label) label.textContent = monthNames[month] + ' ' + year;
-  var firstDay = new Date(year, month, 1).getDay();
-  var daysInMonth = new Date(year, month + 1, 0).getDate();
-  var days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-  var html = '';
-  for (var i = 0; i < days.length; i++) html += '<div class="planning-day-header">' + days[i] + '</div>';
-  for (var i = 0; i < firstDay; i++) html += '<div></div>';
-  var today = new Date();
-  for (var d = 1; d <= daysInMonth; d++) {
-    var isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-    var dayEvents = [];
-    for (var i = 0; i < data.planningEvents.length; i++) {
-      var ed = new Date(data.planningEvents[i].date);
-      if (ed.getDate() === d && ed.getMonth() === month && ed.getFullYear() === year) dayEvents.push(data.planningEvents[i]);
-    }
-    var dots = '';
-    var labels = '';
-    for (var i = 0; i < Math.min(dayEvents.length, 3); i++) {
-      dots += '<span class="planning-event-dot event-type-' + dayEvents[i].type + '"></span>';
-      if (dayEvents.length <= 2) labels += '<div style="font-size:.6rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + dayEvents[i].title + '</div>';
-    }
-    var todayClass = isToday ? 'today' : '';
-    html += '<div class="planning-day ' + todayClass + '" onclick="selectPlanningDay(' + d + ')"><div class="planning-day-number">' + d + '</div><div>' + dots + '</div>' + labels + '</div>';
-  }
-  calDiv.innerHTML = html;
-  renderPlanningEventsList();
-}
-function changePlanningMonth(delta) { planningCurrentDate.setMonth(planningCurrentDate.getMonth() + delta); renderPlanning(); }
-function selectPlanningDay(day) { selectedPlanningDay = new Date(planningCurrentDate.getFullYear(), planningCurrentDate.getMonth(), day); document.getElementById('planDate').value = selectedPlanningDay.toISOString().split('T')[0]; renderPlanningEventsList(); }
-function renderPlanningEventsList() {
-  var div = document.getElementById('planningEventsList');
-  if (!div) return;
-  var target = selectedPlanningDay || new Date();
-  var events = [];
-  for (var i = 0; i < data.planningEvents.length; i++) {
-    var d = new Date(data.planningEvents[i].date);
-    if (d.getDate() === target.getDate() && d.getMonth() === target.getMonth() && d.getFullYear() === target.getFullYear()) events.push(data.planningEvents[i]);
-  }
-  events.sort(function(a, b) { return a.startTime.localeCompare(b.startTime); });
-  if (events.length === 0) { div.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Aucun evenement</div>'; return; }
-  var html = '';
-  for (var i = 0; i < events.length; i++) html += renderEventItem(events[i]);
-  div.innerHTML = html;
-}
-function renderEventItem(e) {
-  var typeLabels = {printing: 'Impression', modeling: 'Modelisation', design: 'Conception', maintenance: 'Maintenance', rdv: 'RDV', logistics: 'Logistique', other: 'Divers'};
-  var typeColors = {printing: 'var(--primary)', modeling: 'var(--warning)', design: '#ff6b81', maintenance: 'var(--secondary)', rdv: '#a855f7', logistics: '#22d3ee', other: '#888'};
-  var typeLabel = typeLabels[e.type] || e.type;
-  var typeColor = typeColors[e.type] || 'var(--primary)';
-  var machineSpan = e.machineName ? '<span>🖨️ ' + e.machineName + '</span>' : '';
-  var assigneeLabel = e.assignee === 'florian' ? 'Florian' : e.assignee === 'elie' ? 'Elie' : 'Les deux';
-  var priorityLabel = e.priority === 'high' ? '<span style="color:var(--secondary)">🔴 Haute</span>' : e.priority === 'medium' ? '<span style="color:var(--warning)">🟡 Moyenne</span>' : '<span style="color:var(--success)">🟢 Basse</span>';
-  return '<div class="event-item" style="border-left-color:' + typeColor + '" onclick="editPlanningEvent(' + e.id + ')"><div class="event-item-header"><span class="event-item-title">' + e.title + '</span><span style="font-size:.7rem;color:' + typeColor + ';font-weight:700">' + typeLabel + '</span></div><div class="event-item-meta"><span>🕐 ' + e.startTime + ' — ' + e.endTime + '</span>' + machineSpan + '<span>👤 ' + assigneeLabel + '</span>' + priorityLabel + '</div></div>';
-}
-function openPlanningModal() {
-  if (!document.getElementById('planDate').value) document.getElementById('planDate').value = new Date().toISOString().split('T')[0];
-  updateMachineSelects();
-  document.getElementById('planningModal').classList.add('active');
-}
-function togglePlanningFields() {
-  var type = document.getElementById('planType').value;
-  var mg = document.getElementById('planMachineGroup');
-  mg.style.display = (type === 'printing' || type === 'maintenance') ? 'block' : 'none';
-}
-function savePlanningEvent() {
-  try {
-    var title = document.getElementById('planTitle').value.trim();
-    var type = document.getElementById('planType').value;
-    var date = document.getElementById('planDate').value;
-    var startTime = document.getElementById('planStartTime').value;
-    var endTime = document.getElementById('planEndTime').value;
-    var machineId = document.getElementById('planMachine').value;
-    var assignee = document.getElementById('planAssignee').value;
-    var priority = document.getElementById('planPriority').value;
-    var notes = document.getElementById('planNotes').value;
-    if (!title || !date) { showToast('Titre et date obligatoires', 'warning'); return; }
-    var machine = null;
-    for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === parseInt(machineId)) machine = data.machines[i];
-    var event = {id: Date.now(), title: title, type: type, date: date, startTime: startTime, endTime: endTime, machineId: machineId ? parseInt(machineId) : null, machineName: machine ? machine.name : null, assignee: assignee, priority: priority, notes: notes};
-    data.planningEvents.push(event);
-    saveData();
-    closeModal('planningModal');
-    showToast('Evenement ajoute', 'success');
-    renderPlanning();
-    document.getElementById('planTitle').value = '';
-    document.getElementById('planNotes').value = '';
-  } catch(err) { alert('savePlanningEvent error: ' + err.message); showToast('Erreur', 'error'); }
-}
-function editPlanningEvent(id) { if (!confirm('Supprimer cet evenement ?')) return; var filtered = []; for (var i = 0; i < data.planningEvents.length; i++) if (data.planningEvents[i].id !== id) filtered.push(data.planningEvents[i]); data.planningEvents = filtered; saveData(); renderPlanning(); showToast('Supprime', 'warning'); }
-
-/* ==================== TIMER ==================== */
-function updateMachineSelects() {
-  var ids = ['timerMachine', 'orderMachine', 'planMachine'];
-  for (var i = 0; i < ids.length; i++) {
-    var sel = document.getElementById(ids[i]);
-    if (!sel) continue;
-    var html = '';
-    for (var j = 0; j < data.machines.length; j++) html += '<option value="' + data.machines[j].id + '">' + data.machines[j].name + '</option>';
-    sel.innerHTML = html;
-  }
-}
-function startPrintTimer() {
-  var name = document.getElementById('timerName').value.trim();
-  var machineId = parseInt(document.getElementById('timerMachine').value);
-  var hours = parseFloat(document.getElementById('timerHours').value) || 0;
-  var minutes = parseFloat(document.getElementById('timerMinutes').value) || 0;
-  if (!name || !machineId) { showToast('Remplis tous les champs', 'warning'); return; }
-  var machine = null;
-  for (var i = 0; i < data.machines.length; i++) if (data.machines[i].id === machineId) machine = data.machines[i];
-  if (!machine) return;
-  var duration = (hours * 60 + minutes) * 60 * 1000;
-  var timer = {id: Date.now(), name: name, machineId: machineId, machineName: machine.name, duration: duration, endTime: Date.now() + duration, startTime: Date.now(), finished: false};
-  activeTimers.push(timer);
-  machine.status = 'busy';
-  machine.currentJob = name;
-  saveTimers();
-  saveData();
-  showToast('Timer demarre', 'success');
-  document.getElementById('timerName').value = '';
-  renderAll();
-  showSection('timer');
-}
-function renderTimers() {
-  var as = document.getElementById('activeTimersSection');
-  var fs = document.getElementById('finishedTimersSection');
-  var al = document.getElementById('timerList');
-  var fl = document.getElementById('finishedTimerList');
-  var active = [];
-  for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) active.push(activeTimers[i]);
-  var finished = [];
-  for (var i = Math.max(0, finishedTimers.length - 5); i < finishedTimers.length; i++) finished.push(finishedTimers[i]);
-  finished.reverse();
-  if (active.length === 0) as.style.display = 'none';
-  else {
-    as.style.display = 'block';
-    var html = '';
-    for (var i = 0; i < active.length; i++) {
-      var t = active[i];
-      var remaining = Math.max(0, t.endTime - Date.now());
-      var pct = Math.min(100, ((t.duration - remaining) / t.duration) * 100);
-      html += '<div class="timer-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="timer-name">' + t.name + '</div><button class="btn btn-sm btn-danger" onclick="stopTimer(' + t.id + ')" style="width:auto;margin-top:0">Arreter</button></div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + formatDuration(t.duration) + '</div><div class="timer-remaining" id="timer_' + t.id + '">' + formatTime(remaining) + '</div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>';
-    }
-    al.innerHTML = html;
-  }
-  if (finished.length === 0) fs.style.display = 'none';
-  else {
-    fs.style.display = 'block';
-    var html = '';
-    for (var i = 0; i < finished.length; i++) {
-      var t = finished[i];
-      html += '<div class="timer-card finished"><div class="timer-name">✅ ' + t.name + '</div><div class="timer-info">🖨️ ' + t.machineName + ' • ' + new Date(t.endTime).toLocaleTimeString('fr-FR') + '</div></div>';
-    }
-    fl.innerHTML = html;
-  }
-}
-function startTimerLoop() {
-  setInterval(function() {
-    var changed = false;
-    for (var i = 0; i < activeTimers.length; i++) {
-      var t = activeTimers[i];
-      if (!t.finished && Date.now() >= t.endTime) {
-        t.finished = true;
-        finishedTimers.push(t);
-        for (var j = 0; j < data.machines.length; j++) {
-          if (data.machines[j].id === t.machineId) { data.machines[j].status = 'idle'; data.machines[j].currentJob = null; }
-        }
-        changed = true;
-      }
-    }
-    var filtered = [];
-    for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) filtered.push(activeTimers[i]);
-    activeTimers = filtered;
-    if (changed) { saveTimers(); saveData(); renderAll(); }
-    for (var i = 0; i < activeTimers.length; i++) {
-      var t = activeTimers[i];
-      var el = document.getElementById('timer_' + t.id);
-      if (el) el.textContent = formatTime(Math.max(0, t.endTime - Date.now()));
-    }
-    renderActiveTimers();
-  }, 1000);
-}
-function stopTimer(timerId) {
-  var timer = null;
-  for (var i = 0; i < activeTimers.length; i++) if (activeTimers[i].id === timerId) timer = activeTimers[i];
-  if (!timer) return;
-  timer.finished = true;
-  finishedTimers.push(timer);
-  var filtered = [];
-  for (var i = 0; i < activeTimers.length; i++) if (activeTimers[i].id !== timerId) filtered.push(activeTimers[i]);
-  activeTimers = filtered;
-  for (var i = 0; i < data.machines.length; i++) {
-    if (data.machines[i].id === timer.machineId) { data.machines[i].status = 'idle'; data.machines[i].currentJob = null; }
-  }
-  saveTimers(); saveData(); renderAll(); showToast('Timer arrete', 'warning');
-}
-function formatTime(ms) {
-  if (ms <= 0) return '00:00:00';
-  var s = Math.floor(ms / 1000);
-  var h = Math.floor(s / 3600);
-  var m = Math.floor((s % 3600) / 60);
-  var sec = s % 60;
-  return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
-}
-function formatDuration(ms) {
-  var h = Math.floor(ms / 3600000);
-  var m = Math.floor((ms % 3600000) / 60000);
-  return h > 0 ? h + 'h' + (m > 0 ? m + 'min' : '') : m + 'min';
-}
-
-/* ==================== MODALS ==================== */
-function openModal(id) {
-  var el = document.getElementById(id);
-  if (el) {
-    el.classList.add('active');
-    if (id === 'newOrderModal') { updateClientSelect(); updateMachineSelects(); }
-  }
-}
-function closeModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('active');
-}
-function updateClientSelect() {
-  var sel = document.getElementById('orderClient');
-  if (!sel) return;
-  var html = '';
-  for (var i = 0; i < data.clients.length; i++) html += '<option value="' + data.clients[i].id + '">' + (data.clients[i].name || 'Sans nom') + '</option>';
-  sel.innerHTML = html;
-}
-function toggleOrderFields() {
-  var service = document.getElementById('orderService').value;
-  document.getElementById('printTypeGroup').style.display = (service === 'print') ? 'block' : 'none';
-  document.getElementById('machineGroup').style.display = (service === 'print') ? 'block' : 'none';
-}
-
-/* ==================== SAVE FUNCTIONS ==================== */
-function saveOrder() {
-  try {
-    var clientId = parseInt(document.getElementById('orderClient').value);
-    var client = null;
-    for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
-    var service = document.getElementById('orderService').value;
-    var order = {
-      id: Date.now(), clientId: clientId, clientName: client ? client.name : 'Inconnu',
-      name: document.getElementById('orderName').value || 'Sans nom',
-      service: service,
-      type: service === 'print' ? document.getElementById('orderType').value : null,
-      machineId: service === 'print' ? parseInt(document.getElementById('orderMachine').value) : null,
-      material: document.getElementById('orderMaterial').value || '',
-      weight: document.getElementById('orderWeight').value || 0,
-      time: document.getElementById('orderTime').value || 0,
-      price: document.getElementById('orderPrice').value || 0,
-      priority: document.getElementById('orderPriority').value,
-      notes: document.getElementById('orderNotes').value || '',
-      status: 'pending', date: new Date().toISOString(), photos: []
-    };
-    data.orders.push(order);
-    saveData();
-    closeModal('newOrderModal');
-    showToast('Commande creee', 'success');
-    renderAll();
-    document.getElementById('orderName').value = '';
-    document.getElementById('orderMaterial').value = '';
-    document.getElementById('orderWeight').value = '';
-    document.getElementById('orderTime').value = '';
-    document.getElementById('orderPrice').value = '';
-    document.getElementById('orderNotes').value = '';
-  } catch(err) { alert('saveOrder error: ' + err.message); showToast('Erreur', 'error'); }
-}
-function saveClient() {
-  try {
-    var client = {id: Date.now(), name: document.getElementById('clientName').value || 'Sans nom', phone: document.getElementById('clientPhone').value || '', email: document.getElementById('clientEmail').value || '', address: document.getElementById('clientAddress').value || '', notes: document.getElementById('clientNotes').value || ''};
-    data.clients.push(client);
-    saveData();
-    closeModal('newClientModal');
-    showToast('Client ajoute', 'success');
-    renderAll();
-    document.getElementById('clientName').value = '';
-    document.getElementById('clientPhone').value = '';
-    document.getElementById('clientEmail').value = '';
-    document.getElementById('clientAddress').value = '';
-    document.getElementById('clientNotes').value = '';
-  } catch(err) { alert('saveClient error: ' + err.message); showToast('Erreur', 'error'); }
-}
-function saveModel() {
-  try {
-    var model = {id: Date.now(), name: document.getElementById('modelName').value || 'Sans nom', category: document.getElementById('modelCategory').value, type: document.getElementById('modelType').value, time: document.getElementById('modelTime').value || 0, weight: document.getElementById('modelWeight').value || 0, price: document.getElementById('modelPrice').value || 0, description: document.getElementById('modelDesc').value || ''};
-    data.models.push(model);
-    saveData();
-    closeModal('newModelModal');
-    showToast('Modele ajoute', 'success');
-    renderAll();
-    document.getElementById('modelName').value = '';
-    document.getElementById('modelTime').value = '';
-    document.getElementById('modelWeight').value = '';
-    document.getElementById('modelPrice').value = '';
-    document.getElementById('modelDesc').value = '';
-  } catch(err) { alert('saveModel error: ' + err.message); showToast('Erreur', 'error'); }
-}
-function saveStock() {
-  try {
-    var item = {id: Date.now(), type: document.getElementById('stockType').value, name: document.getElementById('stockName').value || 'Sans nom', qty: parseFloat(document.getElementById('stockQty').value) || 0, unit: document.getElementById('stockUnit').value, alert: parseFloat(document.getElementById('stockAlert').value) || 1, supplier: document.getElementById('stockSupplier').value || ''};
-    data.stock.push(item);
-    saveData();
-    closeModal('newStockModal');
-    showToast('Stock ajoute', 'success');
-    renderAll();
-    document.getElementById('stockName').value = '';
-    document.getElementById('stockQty').value = '';
-    document.getElementById('stockSupplier').value = '';
-  } catch(err) { alert('saveStock error: ' + err.message); showToast('Erreur', 'error'); }
-}
-
-/* ==================== ORDER DETAIL & QUALITY ==================== */
-function openOrderDetail(id) {
-  currentOrderId = id;
-  var order = null;
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === id) order = data.orders[i];
-  if (!order) return;
-  document.getElementById('detailTitle').textContent = '#' + order.id + ' — ' + (order.name || 'Sans nom');
-  document.getElementById('detailStatus').value = order.status || 'pending';
-  var content = document.getElementById('orderDetailContent');
-  var svc = order.service === 'print' ? '🖨️ Impression' : order.service === 'modeling' ? '🎨 Modelisation' : order.service === 'design' ? '💡 Conception' : order.service;
-  var typeLabel = order.type === 'fdm' ? 'FDM' : order.type === 'resin' ? 'Resine' : '-';
-  var notesHtml = order.notes ? '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888">Notes</div><div style="background:var(--darker);padding:10px;border-radius:8px;margin-top:4px;font-size:.9rem">' + order.notes + '</div></div>' : '';
-  content.innerHTML = '<div style="margin-bottom:12px"><div style="font-size:.8rem;color:#888;margin-bottom:4px">Client</div><div style="font-weight:700">' + (order.clientName || 'Inconnu') + '</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:.8rem;color:#888">Service</div><div>' + svc + '</div></div><div><div style="font-size:.8rem;color:#888">Technologie</div><div>' + typeLabel + '</div></div><div><div style="font-size:.8rem;color:#888">Poids</div><div>' + (order.weight || 0) + 'g</div></div><div><div style="font-size:.8rem;color:#888">Temps</div><div>' + (order.time || 0) + 'h</div></div><div><div style="font-size:.8rem;color:#888">Prix</div><div style="color:var(--primary);font-weight:700">' + (order.price || 0) + '€</div></div><div><div style="font-size:.8rem;color:#888">Date</div><div>' + new Date(order.date).toLocaleDateString('fr-FR') + '</div></div></div>' + notesHtml;
-  renderOrderPhotos(order);
-  openModal('orderDetailModal');
-}
-function renderOrderPhotos(order) {
-  var div = document.getElementById('detailPhotos');
-  if (!order.photos || order.photos.length === 0) { div.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:16px">Aucune photo</div>'; return; }
-  var html = '';
-  for (var i = 0; i < order.photos.length; i++) html += '<div class="photo-item"><img src="' + order.photos[i] + '" alt="Photo"><button class="photo-delete" onclick="deletePhoto(' + order.id + ',' + i + ')">×</button></div>';
-  div.innerHTML = html;
-}
-function updateOrderStatus() {
-  var order = null;
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === currentOrderId) order = data.orders[i];
-  if (!order) return;
-  var oldStatus = order.status;
-  order.status = document.getElementById('detailStatus').value;
-  saveData();
-  if (oldStatus !== 'finished' && order.status === 'finished' && order.service === 'print') showQualityOverlay(order.id, order.name);
-  showToast('Statut mis a jour', 'success');
-  renderAll();
-}
-function showQualityOverlay(orderId, orderName) {
-  qualityOrderId = orderId;
-  document.getElementById('qualityOrderName').textContent = orderName || 'Commande';
-  if (!data.qualityResults[orderId]) data.qualityResults[orderId] = [];
-  if (data.qualityResults[orderId].length === 0) {
-    for (var i = 0; i < data.checklist.length; i++) data.qualityResults[orderId].push({id: data.checklist[i].id, text: data.checklist[i].text, checked: false});
-  }
-  var div = document.getElementById('qualityChecklist');
-  var html = '';
-  for (var i = 0; i < data.qualityResults[orderId].length; i++) {
-    var item = data.qualityResults[orderId][i];
-    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
-  }
-  div.innerHTML = html;
-  updateQualityProgress();
-  document.getElementById('qualityOverlay').classList.add('active');
-}
-function toggleQualityCheck(idx) {
-  if (!data.qualityResults[qualityOrderId]) return;
-  data.qualityResults[qualityOrderId][idx].checked = !data.qualityResults[qualityOrderId][idx].checked;
-  saveData();
-  updateQualityProgress();
-  var div = document.getElementById('qualityChecklist');
-  var html = '';
-  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) {
-    var item = data.qualityResults[qualityOrderId][i];
-    html += '<div class="checklist-item"><input type="checkbox" id="quality_' + i + '" ' + (item.checked ? 'checked' : '') + ' onchange="toggleQualityCheck(' + i + ')"><label for="quality_' + i + '">' + item.text + '</label></div>';
-  }
-  div.innerHTML = html;
-}
-function updateQualityProgress() {
-  if (!data.qualityResults[qualityOrderId]) return;
-  var checked = 0;
-  for (var i = 0; i < data.qualityResults[qualityOrderId].length; i++) if (data.qualityResults[qualityOrderId][i].checked) checked++;
-  var total = data.qualityResults[qualityOrderId].length;
-  var pct = Math.round((checked / total) * 100);
-  document.getElementById('qualityProgress').style.width = pct + '%';
-  document.getElementById('qualityPercent').textContent = pct + '% complete';
-  document.getElementById('qualityValidateBtn').disabled = pct < 100;
-}
-function validateQuality() {
-  if (window.tempQualityPhoto && qualityOrderId) {
-    var order = null;
-    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === qualityOrderId) order = data.orders[i];
-    if (order) { if (!order.photos) order.photos = []; order.photos.push(window.tempQualityPhoto); saveData(); }
-    window.tempQualityPhoto = null;
-  }
-  document.getElementById('qualityOverlay').classList.remove('active');
-  showToast('Qualite validee ! Commande cloturee', 'success');
-}
-function skipQuality() {
-  window.tempQualityPhoto = null;
-  document.getElementById('qualityOverlay').classList.remove('active');
-  showToast('Cloture sans validation', 'warning');
-}
-function deleteCurrentOrder() { if (!confirm('Supprimer ?')) return; var filtered = []; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id !== currentOrderId) filtered.push(data.orders[i]); data.orders = filtered; saveData(); closeModal('orderDetailModal'); showToast('Supprime', 'warning'); renderAll(); }
-function deletePhoto(orderId, photoIdx) { var order = null; for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === orderId) order = data.orders[i]; if (order && order.photos) { order.photos.splice(photoIdx, 1); saveData(); renderOrderPhotos(order); showToast('Photo supprimee', 'warning'); } }
-function showClientOrders(clientId) {
-  var client = null;
-  for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === clientId) client = data.clients[i];
-  if (!client) return;
-  var clientOrders = [];
-  for (var i = 0; i < data.orders.length; i++) if (data.orders[i].clientId === clientId) clientOrders.push(data.orders[i]);
-  var html = '<div style="margin-bottom:12px;font-weight:700">Commandes de ' + (client.name || 'Client') + '</div>';
-  if (clientOrders.length === 0) html += '<div style="color:#888">Aucune commande</div>';
-  else {
-    for (var i = 0; i < clientOrders.length; i++) {
-      var o = clientOrders[i];
-      html += '<div class="order-item" onclick="openOrderDetail(' + o.id + ');closeModal('orderDetailModal')"><div class="order-item-header"><span>' + (o.name || 'Sans nom') + '</span><span class="badge badge-' + (o.status || 'pending') + '">' + getStatusLabel(o.status) + '</span></div><div class="order-item-meta">' + (o.price || 0) + '€ • ' + new Date(o.date).toLocaleDateString('fr-FR') + '</div></div>';
-    }
-  }
-  document.getElementById('orderDetailContent').innerHTML = html;
-  document.getElementById('detailTitle').textContent = client.name || 'Client';
-  document.getElementById('detailStatus').style.display = 'none';
-  openModal('orderDetailModal');
-}
-
-/* ==================== CAMERA ==================== */
-function openCamera() { photoOrderId = currentOrderId; document.getElementById('cameraInput').click(); }
-function handleCameraFile(input) {
-  var file = input.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var photoData = e.target.result;
-    var order = null;
-    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
-    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast('Photo ajoutee', 'success'); }
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-function openQualityCamera() { document.getElementById('qualityCameraInput').click(); }
-function handleQualityCameraFile(input) {
-  var file = input.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    window.tempQualityPhoto = e.target.result;
-    var preview = document.getElementById('qualityPhotoPreview');
-    if (preview) { preview.innerHTML = '<div class="photo-item"><img src="' + window.tempQualityPhoto + '" alt="Photo qualite"></div>'; preview.style.display = 'grid'; }
-    showToast('Photo qualite prise', 'success');
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
-/* ==================== CALCULATOR ==================== */
-function calculateCost() {
-  var service = document.getElementById('calcService').value;
-  var type = document.getElementById('calcType').value;
-  var weight = parseFloat(document.getElementById('calcWeight').value) || 0;
-  var time = parseFloat(document.getElementById('calcTime').value) || 0;
-  var complexity = parseFloat(document.getElementById('calcComplexity').value) || 1;
-  var qty = parseInt(document.getElementById('calcQty').value) || 1;
-  var materialCost = 0, hourlyRate = 0, serviceMultiplier = 1;
-  if (service === 'print') { if (type === 'fdm') { materialCost = (weight / 1000) * 25; hourlyRate = 2; } else { materialCost = (weight / 1000) * 60; hourlyRate = 3; } }
-  else if (service === 'modeling') { hourlyRate = 35; serviceMultiplier = 1.2; }
-  else if (service === 'design') { hourlyRate = 45; serviceMultiplier = 1.3; }
-  var total = (materialCost + (time * hourlyRate)) * complexity * qty * serviceMultiplier;
-  document.getElementById('calcTotal').textContent = total.toFixed(2) + '€';
-}
-
-/* ==================== EXPORT / IMPORT / RESET ==================== */
-function exportData() {
-  var blob = new Blob([JSON.stringify({data: data, timers: {active: activeTimers, finished: finishedTimers}, exportDate: new Date().toISOString()}, null, 2)], {type: 'application/json'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'TLI_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Export reussi', 'success');
-}
-function importData(input) {
-  var file = input.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var imported = JSON.parse(e.target.result);
-      if (imported.data) data = imported.data;
-      if (imported.timers) { activeTimers = imported.timers.active || []; finishedTimers = imported.timers.finished || []; }
-      saveData(); saveTimers(); renderAll(); showToast('Import reussi', 'success');
-    } catch(err) { showToast('Erreur import', 'error'); }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
-function resetAllData() {
-  if (!confirm('Tout supprimer ?')) return;
-  if (!confirm('Vraiment ?')) return;
-  data = {orders: [], clients: [], models: [], stock: [], machines: [
-    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
-    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
-  ], checklist: [
-    {id: 1, text: 'Adhesion plateau OK', checked: false},
-    {id: 2, text: 'Pas de warping / deformation', checked: false},
-    {id: 3, text: 'Finition surface correcte', checked: false},
-    {id: 4, text: 'Supports retires proprement', checked: false},
-    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
-    {id: 6, text: 'Dimensions conformes', checked: false},
-    {id: 7, text: 'Emballage adapte', checked: false},
-    {id: 8, text: 'Photo finale prise', checked: false}
-  ], planningEvents: [], qualityResults: {}};
-  activeTimers = [];
-  finishedTimers = [];
-  saveData(); saveTimers(); renderAll(); showToast('Reinitialise', 'warning');
-}
-function clearCache() {
-  localStorage.removeItem('tli7_data');
-  localStorage.removeItem('tli7_timers');
-  localStorage.removeItem('tli7_apiUrl');
-  localStorage.removeItem('tli7_test');
-  data = {orders: [], clients: [{id: 1, name: 'Client Test', phone: '', email: '', address: '', notes: ''}], models: [], stock: [], machines: [
-    {id: 1, name: 'Elegoo Saturn 4 Ultra', type: 'resin', status: 'idle', currentJob: null},
-    {id: 2, name: 'Bambulab P2S #1', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 3, name: 'Bambulab P2S #2', type: 'fdm', status: 'idle', currentJob: null},
-    {id: 4, name: 'Bambulab H2C', type: 'fdm', status: 'idle', currentJob: null}
-  ], checklist: [
-    {id: 1, text: 'Adhesion plateau OK', checked: false},
-    {id: 2, text: 'Pas de warping / deformation', checked: false},
-    {id: 3, text: 'Finition surface correcte', checked: false},
-    {id: 4, text: 'Supports retires proprement', checked: false},
-    {id: 5, text: 'Post-traitement resine (lavage+UV)', checked: false},
-    {id: 6, text: 'Dimensions conformes', checked: false},
-    {id: 7, text: 'Emballage adapte', checked: false},
-    {id: 8, text: 'Photo finale prise', checked: false}
-  ], planningEvents: [], qualityResults: {}};
-  activeTimers = [];
-  finishedTimers = [];
-  renderAll();
-  showToast('Cache vide', 'success');
-}
-
-/* ==================== SYNC & WAKE LOCK ==================== */
-function syncWithGoogle() {
-  if (!navigator.onLine) { showToast('Hors-ligne', 'warning'); return; }
-  var apiUrl = localStorage.getItem('tli7_apiUrl') || '';
-  if (!apiUrl) { showToast('URL API non configuree', 'warning'); return; }
-  var btn = document.getElementById('syncBtn');
-  var icon = document.getElementById('syncIcon');
-  var text = document.getElementById('syncText');
-  btn.style.color = 'var(--primary)';
-  icon.textContent = '⏳'; text.textContent = 'Sync...';
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: 'syncAll', orders: data.orders, clients: data.clients, models: data.models, stock: data.stock, machines: data.machines, planningEvents: data.planningEvents})
-  }).then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(res) {
-    if (!res.success) throw new Error(res.error || 'Sync failed');
-    icon.textContent = '✅'; text.textContent = 'OK';
-    showToast('Synchronise', 'success');
-    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
-  }).catch(function(e) {
-    icon.textContent = '❌'; text.textContent = 'Erreur';
-    showToast('Sync: ' + e.message, 'error');
-    setTimeout(function() { icon.textContent = '🔄'; text.textContent = 'Sync'; btn.style.color = ''; }, 3000);
-  });
-}
-function testConnection() {
-  var apiUrl = localStorage.getItem('tli7_apiUrl') || '';
-  if (!apiUrl) { showToast('URL API non configuree', 'warning'); return; }
-  fetch(apiUrl + '?action=getAll').then(function(r) {
-    showToast(r.ok ? 'Connexion OK' : 'Erreur ' + r.status, r.ok ? 'success' : 'error');
-  }).catch(function() { showToast('Connexion impossible', 'error'); });
-}
-function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      navigator.wakeLock.request('screen').then(function(wl) { showToast('Ecran allume', 'success'); });
-    } else { showToast('Non supporte', 'warning'); }
-  } catch(e) { showToast('Impossible', 'error'); }
-}
-
-/* ==================== UTILS ==================== */
-function showToast(msg, type) {
-  var toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = 'toast' + (type ? ' ' + type : '');
-  toast.classList.add('show');
-  setTimeout(function() { toast.classList.remove('show'); }, 2500);
-}
+// ==================== BOOT ====================
+alert("TLI v8 JS loaded - OK");
+loadData();
+renderStats();
+alert("TLI v8 READY - Tout est charge !");
 </script>
+
 </body>
 </html>
