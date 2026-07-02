@@ -2476,44 +2476,59 @@ function initFirebase() {
 }
 
 function loginUser() {
+  console.log("[TLI] loginUser() appelé!");
   var email = document.getElementById("authEmail").value.trim();
   var password = document.getElementById("authPassword").value;
   var errorDiv = document.getElementById("authError");
 
+  console.log("[TLI] Email:", email, "Password length:", password.length);
+
   if (!email || !password) {
     errorDiv.textContent = "Email et mot de passe requis";
     errorDiv.style.display = "block";
+    console.log("[TLI] Champs manquants");
     return;
   }
 
+  console.log("[TLI] Tentative de connexion...");
   auth.signInWithEmailAndPassword(email, password).then(function(cred) {
+    console.log("[TLI] Connexion réussie!");
     errorDiv.style.display = "none";
   }).catch(function(err) {
+    console.error("[TLI] Erreur connexion:", err.code, err.message);
     errorDiv.textContent = "Erreur: " + err.message;
     errorDiv.style.display = "block";
   });
 }
 
 function registerUser() {
+  console.log("[TLI] registerUser() appelé!");
   var email = document.getElementById("authEmail").value.trim();
   var password = document.getElementById("authPassword").value;
   var errorDiv = document.getElementById("authError");
 
+  console.log("[TLI] Email:", email, "Password length:", password.length);
+
   if (!email || !password) {
     errorDiv.textContent = "Email et mot de passe requis";
     errorDiv.style.display = "block";
+    console.log("[TLI] Champs manquants");
     return;
   }
   if (password.length < 6) {
     errorDiv.textContent = "Mot de passe: 6 caractères minimum";
     errorDiv.style.display = "block";
+    console.log("[TLI] Mot de passe trop court");
     return;
   }
 
+  console.log("[TLI] Tentative de création de compte...");
   auth.createUserWithEmailAndPassword(email, password).then(function(cred) {
+    console.log("[TLI] Compte créé!");
     errorDiv.style.display = "none";
     showToast("Compte créé !", "success");
   }).catch(function(err) {
+    console.error("[TLI] Erreur création compte:", err.code, err.message);
     errorDiv.textContent = "Erreur: " + err.message;
     errorDiv.style.display = "block";
   });
@@ -2628,9 +2643,13 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 // Attacher les listeners de connexion (les fonctions existent maintenant)
+console.log("[TLI] Attachement des listeners de connexion...");
 document.getElementById('btnLogin').addEventListener('click', loginUser);
+console.log("[TLI] btnLogin attaché");
 document.getElementById('btnRegister').addEventListener('click', registerUser);
+console.log("[TLI] btnRegister attaché");
 document.getElementById('btnLogout').addEventListener('click', logoutUser);
+console.log("[TLI] btnLogout attaché");
 
 // Mettre à jour l'affichage du compte dans les paramètres
 function updateAuthDisplay() {
