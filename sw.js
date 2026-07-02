@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tli-v14-cache-v7';
+const CACHE_NAME = 'tli-v14-cache-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing v7...');
+  console.log('[SW] Installing v8...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
       .catch(() => caches.open(CACHE_NAME).then((cache) => cache.add('./index.html')))
@@ -17,7 +17,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating v7...');
+  console.log('[SW] Activating v8...');
   event.waitUntil(
     caches.keys().then((cacheNames) =>
       Promise.all(cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)))
