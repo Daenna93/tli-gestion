@@ -2380,6 +2380,33 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+
+
+      <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="authPassword" placeholder="••••••••"></div>
+      <button class="btn btn-primary" id="btnLogin">Se connecter</button>
+      <button class="btn btn-secondary" id="btnRegister" style="margin-top:8px">Créer un compte</button>
+      <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:10px;text-align:center;display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONNEXION -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">🔐 Connexion TLI</div></div>
+    <div id="authForm">
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="authEmail" placeholder="florian@exemple.com"></div>
+      <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="authPassword" placeholder="••••••••"></div>
+      <button class="btn btn-primary" id="btnLogin">Se connecter</button>
+      <button class="btn btn-secondary" id="btnRegister" style="margin-top:8px">Créer un compte</button>
+      <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:10px;text-align:center;display:none"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
 <script>
 // ============================================================
 // FIREBASE REALTIME SYNC - TLI v14
@@ -2626,20 +2653,5 @@ updateSyncStatus = function(status) {
   updateAuthDisplay();
 };
 </script>
-
-<!-- MODAL CONNEXION -->
-<div class="modal-overlay" id="authModal">
-  <div class="modal-content">
-    <div class="modal-header"><div class="modal-title">🔐 Connexion TLI</div></div>
-    <div id="authForm">
-      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="authEmail" placeholder="florian@exemple.com"></div>
-      <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="authPassword" placeholder="••••••••"></div>
-      <button class="btn btn-primary" id="btnLogin">Se connecter</button>
-      <button class="btn btn-secondary" id="btnRegister" style="margin-top:8px">Créer un compte</button>
-      <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:10px;text-align:center;display:none"></div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
