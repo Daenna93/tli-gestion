@@ -699,6 +699,7 @@ function loadData() {
       if (parsed.planningEvents) data.planningEvents = parsed.planningEvents;
       if (parsed.qualityResults) data.qualityResults = parsed.qualityResults;
       if (parsed.machines && parsed.machines.length > 0) data.machines = parsed.machines;
+      if (parsed.generalPhotos) data.generalPhotos = parsed.generalPhotos;
     }
   } catch(e) { console.error("loadData error:", e); }
 }
@@ -1670,13 +1671,15 @@ function deleteCurrentClient() {
 // PHOTOS / CAMERA
 // ============================================================
 function openCamera() { 
+  console.log('[TLI] openCamera appelé, currentOrderId:', currentOrderId);
   photoOrderId = currentOrderId; 
   document.getElementById("cameraInput").click(); 
 }
 
 function handleCameraFile(input) {
+  console.log('[TLI] handleCameraFile appelé, photoOrderId:', photoOrderId, 'files:', input.files);
   var file = input.files[0];
-  if (!file) return;
+  if (!file) { console.log('[TLI] Aucun fichier sélectionné'); return; }
   var reader = new FileReader();
   reader.onload = function(e) {
     var photoData = e.target.result;
@@ -1697,6 +1700,8 @@ function handleCameraFile(input) {
   };
   reader.readAsDataURL(file);
   input.value = "";
+  // Réinitialiser pour éviter les effets de bord
+  photoOrderId = null;
 }
 
 function openQualityCamera() { 
@@ -1715,6 +1720,8 @@ function handleQualityCameraFile(input) {
   };
   reader.readAsDataURL(file);
   input.value = "";
+  // Réinitialiser pour éviter les effets de bord
+  photoOrderId = null;
 }
 
 // ============================================================
@@ -2588,8 +2595,9 @@ setInterval(checkReminders, 30000); // Vérifier toutes les 30 secondes
 // ONGLET PHOTOS
 // ============================================================
 function renderPhotos() {
+  console.log('[TLI] renderPhotos appelé, generalPhotos:', data.generalPhotos ? data.generalPhotos.length : 0, 'orders avec photos:', data.orders.filter(function(o){return o.photos && o.photos.length>0;}).length);
   var div = document.getElementById("photosGallery");
-  if (!div) return;
+  if (!div) { console.log('[TLI] photosGallery non trouvé'); return; }
   div.innerHTML = "";
 
   var allPhotos = [];
@@ -2661,6 +2669,7 @@ function closeGalleryPhotoOverlay() {
 }
 
 function openGalleryCamera() {
+  console.log('[TLI] openGalleryCamera appelé');
   photoOrderId = null; // Photo générale, pas liée à une commande spécifique
   document.getElementById("cameraInput").click();
 }
