@@ -850,10 +850,12 @@ function attachStaticListeners() {
 
   document.getElementById('photoOverlay').addEventListener('click', closePhotoOverlay);
   document.getElementById('btnClosePhoto').addEventListener('click', closePhotoOverlay);
+  document.getElementById('btnCloseGalleryPhoto').addEventListener('click', closeGalleryPhotoOverlay);
 
   document.getElementById('btnQualityCam').addEventListener('click', openQualityCamera);
   document.getElementById('qualityValidateBtn').addEventListener('click', validateQuality);
   document.getElementById('btnSkipQuality').addEventListener('click', skipQuality);
+  document.getElementById('btnTakePhoto').addEventListener('click', openGalleryCamera);
 
   document.getElementById('cameraInput').addEventListener('change', function() { handleCameraFile(this); });
   document.getElementById('qualityCameraInput').addEventListener('change', function() { handleQualityCameraFile(this); });
@@ -888,6 +890,7 @@ function showSection(id, tabEl) {
   if (id === "timer") renderTimers();
   if (id === "machines") renderMachines();
   if (id === "dashboard") renderStats();
+  if (id === "photos") renderPhotos();
 }
 
 function openModal(id) {
@@ -2412,6 +2415,16 @@ function escapeHtml(text) {
 // ============================================================
 init();
 startTimerLoop();
+
+// Hook SW v10 — reload forcé quand nouveau Service Worker s'active
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'SW_RELOAD') {
+      console.log('[TLI] Reload forcé par SW v' + event.data.version);
+      window.location.reload();
+    }
+  });
+}
 </script>
 
 <script>
@@ -2455,6 +2468,18 @@ function sendNotification(title, body, icon) {
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
 
+  // Essayer d'abord via le Service Worker (même quand l'app est en arrière-plan)
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SHOW_NOTIFICATION',
+      title: title,
+      body: body,
+      tag: 'tli-' + Date.now()
+    });
+    return;
+  }
+
+  // Fallback: notification directe (app doit être ouverte)
   try {
     new Notification(title, {
       body: body,
