@@ -1533,11 +1533,21 @@ function updateQualityProgress() {
 }
 
 function validateQuality() {
+  console.log('[TLI] validateQuality, tempQualityPhoto:', !!window.tempQualityPhoto, 'qualityOrderId:', qualityOrderId);
   if (window.tempQualityPhoto && qualityOrderId) {
     var order = null;
     for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === qualityOrderId) order = data.orders[i];
-    if (order) { if (!order.photos) order.photos = []; order.photos.push(window.tempQualityPhoto); saveData(); }
+    if (order) {
+      if (!order.photos) order.photos = [];
+      order.photos.push(window.tempQualityPhoto);
+      saveData();
+      console.log('[TLI] Photo qualité ajoutée à commande', qualityOrderId, 'total:', order.photos.length);
+    } else {
+      console.log('[TLI] ERREUR: commande qualité', qualityOrderId, 'non trouvée');
+    }
     window.tempQualityPhoto = null;
+  } else {
+    console.log('[TLI] Pas de photo qualité à sauvegarder');
   }
   document.getElementById("qualityOverlay").classList.remove("active");
   showToast("Qualite validee !", "success");
@@ -1633,12 +1643,19 @@ function openClientDetail(id) {
 }
 
 function openCallOverlay() {
-  if (!callNumber) return;
+  console.log('[TLI] openCallOverlay, callNumber:', callNumber, 'currentClientId:', currentClientId);
+  if (!callNumber) {
+    console.log('[TLI] Pas de numéro à appeler');
+    showToast("Aucun numéro enregistré", "warning");
+    return;
+  }
   var client = null;
   for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === currentClientId) client = data.clients[i];
   document.getElementById("callClientName").textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
   document.getElementById("callNumber").textContent = callNumber;
-  document.getElementById("callOverlay").classList.add("active");
+  var overlay = document.getElementById("callOverlay");
+  overlay.classList.add("active");
+  console.log('[TLI] Overlay appel affiché');
 }
 
 function closeCallOverlay() {
@@ -1646,7 +1663,11 @@ function closeCallOverlay() {
 }
 
 function confirmCall() {
-  if (callNumber) window.location.href = "tel:" + callNumber.replace(/\s/g, "");
+  if (callNumber) {
+    var cleanNumber = callNumber.replace(/\s/g, "").replace(/\./g, "").replace(/\-/g, "");
+    console.log('[TLI] Appel:', cleanNumber);
+    window.location.href = "tel:" + cleanNumber;
+  }
   closeCallOverlay();
 }
 
@@ -1672,6 +1693,11 @@ function deleteCurrentClient() {
 // ============================================================
 function openCamera() { 
   console.log('[TLI] openCamera appelé, currentOrderId:', currentOrderId);
+  if (!currentOrderId) {
+    console.log('[TLI] ERREUR: currentOrderId est null, photo ne sera pas liée à une commande');
+    showToast("Erreur: aucune commande ouverte", "error");
+    return;
+  }
   photoOrderId = currentOrderId; 
   document.getElementById("cameraInput").click(); 
 }
@@ -1680,27 +1706,47 @@ function handleCameraFile(input) {
   console.log('[TLI] handleCameraFile appelé, photoOrderId:', photoOrderId, 'files:', input.files);
   var file = input.files[0];
   if (!file) { console.log('[TLI] Aucun fichier sélectionné'); return; }
+
+  // CAPTURER photoOrderId dans une variable locale pour éviter les effets de bord
+  var targetOrderId = photoOrderId;
+  console.log('[TLI] targetOrderId capturé:', targetOrderId);
+
   var reader = new FileReader();
   reader.onload = function(e) {
     var photoData = e.target.result;
-    if (photoOrderId) {
+    console.log('[TLI] FileReader onload, targetOrderId:', targetOrderId, 'taille photo:', photoData.length);
+
+    if (targetOrderId) {
       // Photo liée à une commande
       var order = null;
-      for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
-      if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast("Photo ajoutee", "success"); }
+      for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === targetOrderId) order = data.orders[i];
+      if (order) {
+        if (!order.photos) order.photos = [];
+        order.photos.push(photoData);
+        saveData();
+        renderOrderPhotos(order);
+        showToast("Photo ajoutee à la commande", "success");
+        console.log('[TLI] Photo ajoutée à commande', targetOrderId, 'total photos:', order.photos.length);
+      } else {
+        console.log('[TLI] ERREUR: commande', targetOrderId, 'non trouvée');
+      }
     } else {
-      // Photo générale (onglet Photos) - liée à la dernière commande ou stockée séparément
-      // On crée une "commande virtuelle" pour stocker les photos générales
+      // Photo générale (onglet Photos)
       if (!data.generalPhotos) data.generalPhotos = [];
       data.generalPhotos.push({ id: Date.now(), src: photoData, date: new Date().toISOString() });
       saveData();
-      showToast("Photo ajoutee a la galerie", "success");
+      showToast("Photo ajoutee à la galerie", "success");
       if (document.getElementById("photos").classList.contains("active")) renderPhotos();
+      console.log('[TLI] Photo ajoutée à la galerie, total:', data.generalPhotos.length);
     }
+  };
+  reader.onerror = function(e) {
+    console.error('[TLI] FileReader error:', e);
+    showToast("Erreur lors de la lecture de la photo", "error");
   };
   reader.readAsDataURL(file);
   input.value = "";
-  // Réinitialiser pour éviter les effets de bord
+  // Réinitialiser APRÈS avoir capturé targetOrderId
   photoOrderId = null;
 }
 
@@ -2761,7 +2807,15 @@ function initFirebase() {
   // Demander permission notifications
   requestNotificationPermission();
 
+  // Forcer la persistance LOCAL pour survivre au verrouillage du téléphone
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
+    console.log("[TLI] Persistance auth LOCAL activée");
+  }).catch(function(err) {
+    console.error("[TLI] Erreur persistance auth:", err);
+  });
+
   // Écouter les changements d'état d'authentification
+  var authModalTimeout = null;
   auth.onAuthStateChanged(function(user) {
     if (user) {
       // Utilisateur connecté
@@ -2770,6 +2824,8 @@ function initFirebase() {
       console.log("[TLI] Connecté:", currentUserEmail);
       closeModal("authModal");
       document.getElementById("authError").style.display = "none";
+      // Annuler tout timeout d'affichage du modal
+      if (authModalTimeout) { clearTimeout(authModalTimeout); authModalTimeout = null; }
 
       var userRef = usersRef.child(currentUserId);
       userRef.set({ online: true, email: currentUserEmail, lastSeen: firebase.database.ServerValue.TIMESTAMP, device: navigator.userAgent.substring(0, 50) });
@@ -2780,11 +2836,18 @@ function initFirebase() {
       updateSyncStatus("synced");
       showToast("Connecté en tant que " + currentUserEmail, "success");
     } else {
-      // Pas connecté → afficher le modal
-      currentUserId = null;
-      currentUserEmail = null;
-      updateSyncStatus("offline");
-      openModal("authModal");
+      // Pas connecté → attendre 2s avant d'afficher le modal (Firebase peut être en train de rafraîchir le token)
+      console.log("[TLI] Auth state = null, attente 2s avant affichage modal...");
+      if (authModalTimeout) clearTimeout(authModalTimeout);
+      authModalTimeout = setTimeout(function() {
+        if (!currentUserId) {
+          console.log("[TLI] Affichage modal auth après timeout");
+          currentUserId = null;
+          currentUserEmail = null;
+          updateSyncStatus("offline");
+          openModal("authModal");
+        }
+      }, 2000);
     }
   });
 }
