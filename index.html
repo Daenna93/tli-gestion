@@ -628,6 +628,7 @@ var data = {
   models: [],
   stock: [],
   planningEvents: [],
+  generalPhotos: [],
   machines: JSON.parse(JSON.stringify(defaultMachines)),
   checklist: [
     {id: 1, text: "Adhesion plateau OK", checked: false},
@@ -866,6 +867,22 @@ function attachStaticListeners() {
   document.getElementById('btnConfirmCall').addEventListener('click', confirmCall);
 
 
+  // Toggle rappel planning - afficher/masquer les minutes
+  var planReminderCb = document.getElementById('planReminder');
+  if (planReminderCb) {
+    planReminderCb.addEventListener('change', function() {
+      var g = document.getElementById('planReminderMinutesGroup');
+      if (g) g.style.display = this.checked ? 'block' : 'none';
+    });
+  }
+  var editPlanReminderCb = document.getElementById('editPlanReminder');
+  if (editPlanReminderCb) {
+    editPlanReminderCb.addEventListener('change', function() {
+      var g = document.getElementById('editPlanReminderMinutesGroup');
+      if (g) g.style.display = this.checked ? 'block' : 'none';
+    });
+  }
+
   // Recherche
   document.getElementById('clientSearch').addEventListener('input', function() { renderClients(); });
   document.getElementById('catalogSearch').addEventListener('input', function() { renderCatalog(); });
@@ -1044,6 +1061,7 @@ function saveOrder() {
       priority: document.getElementById("orderPriority").value,
       notes: document.getElementById("orderNotes").value || "",
       status: "pending",
+      photos: [],
       dateCreated: new Date().toISOString(),
       dateFinished: null,
       dateDelivered: null,
@@ -2465,28 +2483,44 @@ function requestNotificationPermission() {
 }
 
 function sendNotification(title, body, icon) {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
+  if (!('Notification' in window)) {
+    console.log('[TLI] Notifications non supportées par ce navigateur');
+    return;
+  }
+  if (Notification.permission !== 'granted') {
+    console.log('[TLI] Permission notifications non accordée');
+    return;
+  }
 
-  // Essayer d'abord via le Service Worker (même quand l'app est en arrière-plan)
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({
-      type: 'SHOW_NOTIFICATION',
-      title: title,
-      body: body,
-      tag: 'tli-' + Date.now()
+  var notifOptions = {
+    body: body,
+    icon: icon || './icon-192.png',
+    badge: './icon-192.png',
+    tag: 'tli-' + Date.now()
+  };
+
+  // Essayer via le Service Worker (même quand l'app est en arrière-plan ou fermée)
+  if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+    navigator.serviceWorker.ready.then(function(registration) {
+      if (registration.active) {
+        registration.showNotification(title, notifOptions);
+        console.log('[TLI] Notification SW envoyée:', title);
+      } else {
+        // Fallback direct
+        new Notification(title, notifOptions);
+        console.log('[TLI] Notification directe (fallback):', title);
+      }
+    }).catch(function(err) {
+      console.error('[TLI] Erreur SW notification:', err);
+      try { new Notification(title, notifOptions); } catch(e) {}
     });
     return;
   }
 
-  // Fallback: notification directe (app doit être ouverte)
+  // Fallback immédiat si pas de SW
   try {
-    new Notification(title, {
-      body: body,
-      icon: icon || './icon-192.png',
-      badge: './icon-192.png',
-      tag: 'tli-' + Date.now()
-    });
+    new Notification(title, notifOptions);
+    console.log('[TLI] Notification directe:', title);
   } catch(e) {
     console.error('[TLI] Notification error:', e);
   }
@@ -2497,31 +2531,56 @@ function sendNotification(title, body, icon) {
 // ============================================================
 var checkedReminders = {};
 
+function loadCheckedReminders() {
+  try {
+    var saved = localStorage.getItem('tli14_checkedReminders');
+    if (saved) checkedReminders = JSON.parse(saved);
+  } catch(e) { checkedReminders = {}; }
+}
+
+function saveCheckedReminders() {
+  try { localStorage.setItem('tli14_checkedReminders', JSON.stringify(checkedReminders)); } catch(e) {}
+}
+
 function checkReminders() {
   var now = new Date();
   var nowMs = now.getTime();
+  var triggered = false;
 
   for (var i = 0; i < data.planningEvents.length; i++) {
     var e = data.planningEvents[i];
     if (!e.reminder || !e.reminderMinutes) continue;
 
-    var eventDate = new Date(e.date + 'T' + e.startTime);
+    var eventDate = new Date(e.date + 'T' + (e.startTime || '00:00'));
     var reminderMs = eventDate.getTime() - (parseInt(e.reminderMinutes) * 60 * 1000);
+    var reminderId = e.id + '_' + e.reminderMinutes;
 
     if (nowMs >= reminderMs && nowMs < eventDate.getTime()) {
-      var reminderId = e.id + '_' + e.reminderMinutes;
       if (!checkedReminders[reminderId]) {
         checkedReminders[reminderId] = true;
+        saveCheckedReminders();
+        console.log('[TLI] Rappel déclenché:', e.title, 'dans', e.reminderMinutes, 'min');
         sendNotification(
           '🔔 Rappel TLI',
           e.title + ' dans ' + e.reminderMinutes + ' min',
           './icon-192.png'
         );
         showToast('🔔 ' + e.title + ' dans ' + e.reminderMinutes + ' min', 'warning');
+        triggered = true;
+      }
+    } else if (nowMs >= eventDate.getTime() + 60 * 60 * 1000) {
+      // Événement passé depuis +1h, on reset le reminder pour permettre un futur rappel si récurrent
+      if (checkedReminders[reminderId]) {
+        delete checkedReminders[reminderId];
+        saveCheckedReminders();
       }
     }
   }
+  return triggered;
 }
+
+// Charger les reminders déjà envoyés au démarrage
+loadCheckedReminders();
 
 setInterval(checkReminders, 30000); // Vérifier toutes les 30 secondes
 
