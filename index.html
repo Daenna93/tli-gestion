@@ -164,6 +164,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div class="nav-tab" data-section="timer">⏰ Timer</div>
   <div class="nav-tab" data-section="machines">🖨️ Machines</div>
   <div class="nav-tab" data-section="calculator">🧮 Devis</div>
+  <div class="nav-tab" data-section="photos">📷 Photos</div>
   <div class="nav-tab" data-section="settings">⚙️ Config</div>
 </nav>
 
@@ -294,6 +295,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
       <div class="form-group" style="margin-bottom:0"><label class="form-label">Resine (€/kg)</label><input type="number" class="form-input" id="priceResinKg" value="60" step="0.5"></div>
     </div>
     <button class="btn btn-secondary" id="btnSaveRates" style="margin-top:12px">💾 Sauvegarder les tarifs</button>
+  </div>
+</section>
+
+<section id="photos" class="section">
+  <div class="card">
+    <div class="card-title">📷 Galerie photos</div>
+    <button class="btn btn-primary" id="btnTakePhoto" style="margin-bottom:12px">📷 Prendre une photo</button>
+    <div id="photosGallery"></div>
   </div>
 </section>
 
@@ -480,6 +489,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Assigne a</label><select class="form-select" id="planAssignee"><option value="florian">Florian</option><option value="elie">Elie</option><option value="both">Les deux</option></select></div>
     <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="planPriority"><option value="low">Basse</option><option value="medium" selected>Moyenne</option><option value="high">Haute</option></select></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="planNotes" placeholder="Details..."></textarea></div>
+    <div class="checklist-item" style="margin-bottom:14px"><input type="checkbox" id="planReminder"><label for="planReminder">🔔 Me rappeler</label></div>
+    <div class="form-group" id="planReminderMinutesGroup" style="display:none"><label class="form-label">Minutes avant l'événement</label><input type="number" class="form-input" id="planReminderMinutes" value="30" min="5" step="5"></div>
     <button class="btn btn-primary" id="btnSaveEvent">Ajouter</button>
   </div>
 </div>
@@ -497,6 +508,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group"><label class="form-label">Assigne a</label><select class="form-select" id="editPlanAssignee"><option value="florian">Florian</option><option value="elie">Elie</option><option value="both">Les deux</option></select></div>
     <div class="form-group"><label class="form-label">Priorite</label><select class="form-select" id="editPlanPriority"><option value="low">Basse</option><option value="medium">Moyenne</option><option value="high">Haute</option></select></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="editPlanNotes"></textarea></div>
+    <div class="checklist-item" style="margin-bottom:14px"><input type="checkbox" id="editPlanReminder"><label for="editPlanReminder">🔔 Me rappeler</label></div>
+    <div class="form-group" id="editPlanReminderMinutesGroup" style="display:none"><label class="form-label">Minutes avant l'événement</label><input type="number" class="form-input" id="editPlanReminderMinutes" value="30" min="5" step="5"></div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btnUpdateEvent" style="flex:1">💾 Enregistrer</button>
       <button class="btn btn-danger" id="btnDeleteEvent" style="flex:1">🗑️ Supprimer</button>
@@ -586,6 +599,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <div class="photo-overlay" id="photoOverlay">
   <button class="photo-overlay-close" id="btnClosePhoto">×</button>
   <img id="photoOverlayImg" src="" alt="Photo">
+</div>
+
+<div class="photo-overlay" id="galleryPhotoOverlay">
+  <button class="photo-overlay-close" id="btnCloseGalleryPhoto">×</button>
+  <img id="galleryPhotoOverlayImg" src="" alt="Photo">
+  <div id="galleryPhotoInfo" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:10px 20px;border-radius:12px;text-align:center;max-width:90%"></div>
 </div>
 
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
@@ -1197,6 +1216,9 @@ function savePlanningEvent() {
     var date = document.getElementById("planDate").value;
     if (!title || !date) { showToast("Titre et date obligatoires", "warning"); return; }
     var type = document.getElementById("planType").value;
+    var reminder = document.getElementById("planReminder").checked;
+    var reminderMinutes = reminder ? (parseInt(document.getElementById("planReminderMinutes").value) || 30) : null;
+
     var eventData = {
       title: title,
       type: type,
@@ -1205,7 +1227,9 @@ function savePlanningEvent() {
       endTime: document.getElementById("planEndTime").value,
       assignee: document.getElementById("planAssignee").value,
       priority: document.getElementById("planPriority").value,
-      notes: document.getElementById("planNotes").value || ""
+      notes: document.getElementById("planNotes").value || "",
+      reminder: reminder,
+      reminderMinutes: reminderMinutes
     };
     if (type === "rdv") {
       pendingEventData = eventData;
@@ -1228,7 +1252,9 @@ function createEvent(eventData) {
     priority: eventData.priority,
     notes: eventData.notes,
     clientId: eventData.clientId || null,
-    clientName: eventData.clientName || null
+    clientName: eventData.clientName || null,
+    reminder: eventData.reminder || false,
+    reminderMinutes: eventData.reminderMinutes || null
   };
   data.planningEvents.push(event);
   saveData();
@@ -1633,9 +1659,20 @@ function handleCameraFile(input) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var photoData = e.target.result;
-    var order = null;
-    for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
-    if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast("Photo ajoutee", "success"); }
+    if (photoOrderId) {
+      // Photo liée à une commande
+      var order = null;
+      for (var i = 0; i < data.orders.length; i++) if (data.orders[i].id === photoOrderId) order = data.orders[i];
+      if (order) { if (!order.photos) order.photos = []; order.photos.push(photoData); saveData(); renderOrderPhotos(order); showToast("Photo ajoutee", "success"); }
+    } else {
+      // Photo générale (onglet Photos) - liée à la dernière commande ou stockée séparément
+      // On crée une "commande virtuelle" pour stocker les photos générales
+      if (!data.generalPhotos) data.generalPhotos = [];
+      data.generalPhotos.push({ id: Date.now(), src: photoData, date: new Date().toISOString() });
+      saveData();
+      showToast("Photo ajoutee a la galerie", "success");
+      if (document.getElementById("photos").classList.contains("active")) renderPhotos();
+    }
   };
   reader.readAsDataURL(file);
   input.value = "";
@@ -1961,6 +1998,9 @@ function openEditEvent(id) {
   document.getElementById("editPlanAssignee").value = event.assignee || "florian";
   document.getElementById("editPlanPriority").value = event.priority || "medium";
   document.getElementById("editPlanNotes").value = event.notes || "";
+    document.getElementById("editPlanReminder").checked = event.reminder || false;
+    document.getElementById("editPlanReminderMinutesGroup").style.display = (event.reminder || false) ? "block" : "none";
+    document.getElementById("editPlanReminderMinutes").value = event.reminderMinutes || 30;
   openModal("editPlanningModal");
 }
 
@@ -2103,7 +2143,11 @@ function startTimerLoop() {
     var filtered = [];
     for (var i = 0; i < activeTimers.length; i++) if (!activeTimers[i].finished) filtered.push(activeTimers[i]);
     activeTimers = filtered;
-    if (changed) { saveTimers(); renderTimers(); renderStats(); renderMachines(); }
+    if (changed) { 
+        saveTimers(); renderTimers(); renderStats(); renderMachines(); 
+        // Notification quand timer fini
+        sendNotification('⏰ Impression terminée', 'Votre impression est prête !', './icon-192.png');
+      }
     for (var i = 0; i < activeTimers.length; i++) {
       var t = activeTimers[i];
       var remaining = Math.max(0, t.endTime - Date.now());
@@ -2396,6 +2440,192 @@ if ('serviceWorker' in navigator) {
 </body>
 </html>
 <script>
+
+// ============================================================
+// NOTIFICATIONS LOCALES
+// ============================================================
+function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(function(permission) {
+    console.log('[TLI] Notification permission:', permission);
+  });
+}
+
+function sendNotification(title, body, icon) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  try {
+    new Notification(title, {
+      body: body,
+      icon: icon || './icon-192.png',
+      badge: './icon-192.png',
+      tag: 'tli-' + Date.now()
+    });
+  } catch(e) {
+    console.error('[TLI] Notification error:', e);
+  }
+}
+
+// ============================================================
+// RAPPELS PLANNING
+// ============================================================
+var checkedReminders = {};
+
+function checkReminders() {
+  var now = new Date();
+  var nowMs = now.getTime();
+
+  for (var i = 0; i < data.planningEvents.length; i++) {
+    var e = data.planningEvents[i];
+    if (!e.reminder || !e.reminderMinutes) continue;
+
+    var eventDate = new Date(e.date + 'T' + e.startTime);
+    var reminderMs = eventDate.getTime() - (parseInt(e.reminderMinutes) * 60 * 1000);
+
+    if (nowMs >= reminderMs && nowMs < eventDate.getTime()) {
+      var reminderId = e.id + '_' + e.reminderMinutes;
+      if (!checkedReminders[reminderId]) {
+        checkedReminders[reminderId] = true;
+        sendNotification(
+          '🔔 Rappel TLI',
+          e.title + ' dans ' + e.reminderMinutes + ' min',
+          './icon-192.png'
+        );
+        showToast('🔔 ' + e.title + ' dans ' + e.reminderMinutes + ' min', 'warning');
+      }
+    }
+  }
+}
+
+setInterval(checkReminders, 30000); // Vérifier toutes les 30 secondes
+
+// ============================================================
+// ONGLET PHOTOS
+// ============================================================
+function renderPhotos() {
+  var div = document.getElementById("photosGallery");
+  if (!div) return;
+  div.innerHTML = "";
+
+  var allPhotos = [];
+
+  // Photos générales
+  if (data.generalPhotos) {
+    for (var i = 0; i < data.generalPhotos.length; i++) {
+      var gp = data.generalPhotos[i];
+      allPhotos.push({ src: gp.src, orderId: null, orderName: "Photo générale", clientName: "", date: gp.date });
+    }
+  }
+
+  // Photos des commandes
+  for (var i = 0; i < data.orders.length; i++) {
+    var o = data.orders[i];
+    if (o.photos && o.photos.length > 0) {
+      for (var j = 0; j < o.photos.length; j++) {
+        allPhotos.push({ src: o.photos[j], orderId: o.id, orderName: o.name, clientName: o.clientName });
+      }
+    }
+  }
+
+  if (allPhotos.length === 0) {
+    div.innerHTML = '<div class="empty-state"><div class="icon">📷</div>Aucune photo</div>';
+    return;
+  }
+
+  var grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
+  for (var i = 0; i < allPhotos.length; i++) {
+    var p = allPhotos[i];
+    var item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = '<img src="' + escapeHtml(p.src) + '" alt="Photo">';
+    (function(photoData) {
+      item.addEventListener('click', function() { openGalleryPhoto(photoData); });
+    })(p);
+    grid.appendChild(item);
+  }
+
+  div.appendChild(grid);
+}
+
+function openGalleryPhoto(photoData) {
+  document.getElementById("galleryPhotoOverlayImg").src = photoData.src;
+  var info = document.getElementById("galleryPhotoInfo");
+
+  if (photoData.orderId) {
+    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
+      '<div style="font-size:.8rem;color:#aaa">👤 ' + escapeHtml(photoData.clientName || "Inconnu") + '</div>' +
+      '<button class="btn btn-sm btn-primary" style="margin-top:8px;width:auto;padding:6px 12px;font-size:.75rem" id="btnGoToOrder">📦 Voir la commande</button>';
+    document.getElementById("galleryPhotoOverlay").classList.add("active");
+
+    document.getElementById("btnGoToOrder").addEventListener('click', function() {
+      closeGalleryPhotoOverlay();
+      openOrderDetail(photoData.orderId);
+    });
+  } else {
+    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
+      '<div style="font-size:.8rem;color:#aaa">' + new Date(photoData.date).toLocaleDateString("fr-FR") + '</div>';
+    document.getElementById("galleryPhotoOverlay").classList.add("active");
+  }
+}
+
+function closeGalleryPhotoOverlay() {
+  document.getElementById("galleryPhotoOverlay").classList.remove("active");
+}
+
+function openGalleryCamera() {
+  photoOrderId = null; // Photo générale, pas liée à une commande spécifique
+  document.getElementById("cameraInput").click();
+}
+
+// ============================================================
+// NOTIFICATIONS SUR MODIFICATIONS (détectées via Firebase)
+// ============================================================
+var lastNotifiedOrders = 0;
+var lastNotifiedEvents = 0;
+
+function notifyOnRemoteChanges(remoteData) {
+  if (!remoteData) return;
+
+  // Détecter nouvelle commande
+  if (remoteData.orders && remoteData.orders.length > lastNotifiedOrders && lastNotifiedOrders > 0) {
+    var newOrder = remoteData.orders[remoteData.orders.length - 1];
+    if (newOrder.updatedBy && newOrder.updatedBy !== currentUserId) {
+      sendNotification('📦 Nouvelle commande', newOrder.name + ' par ' + (newOrder.clientName || "client"), './icon-192.png');
+      showToast('📦 Nouvelle commande: ' + newOrder.name, 'success');
+    }
+  }
+  if (remoteData.orders) lastNotifiedOrders = remoteData.orders.length;
+
+  // Détecter nouvel événement planning
+  if (remoteData.planningEvents && remoteData.planningEvents.length > lastNotifiedEvents && lastNotifiedEvents > 0) {
+    var newEvent = remoteData.planningEvents[remoteData.planningEvents.length - 1];
+    sendNotification('📅 Planning modifié', newEvent.title, './icon-192.png');
+    showToast('📅 Planning modifié: ' + newEvent.title, 'success');
+  }
+  if (remoteData.planningEvents) lastNotifiedEvents = remoteData.planningEvents.length;
+
+  // Vérifier stock bas
+  if (remoteData.stock) {
+    for (var i = 0; i < remoteData.stock.length; i++) {
+      var s = remoteData.stock[i];
+      if (parseFloat(s.qty) <= parseFloat(s.alert)) {
+        sendNotification('⚠️ Stock bas', s.name + ' : ' + s.qty + ' ' + s.unit + ' restant', './icon-192.png');
+      }
+    }
+  }
+}
+
+// ============================================================
+// NOTIFICATION TIMER
+// ============================================================
+var originalTimerFinished = null;
+// Hook dans startTimerLoop pour notifier quand timer fini
+// On va modifier la fonction startTimerLoop
+
 // ============================================================
 // FIREBASE REALTIME SYNC - TLI v14
 // ============================================================
@@ -2434,6 +2664,9 @@ function initFirebase() {
     updateSyncStatus("error");
     return;
   }
+
+  // Demander permission notifications
+  requestNotificationPermission();
 
   // Écouter les changements d'état d'authentification
   auth.onAuthStateChanged(function(user) {
@@ -2541,6 +2774,7 @@ function startRealtimeSync() {
 
     if (remoteTime > localTime) {
       syncInProgress = true;
+      notifyOnRemoteChanges(remoteData);
       if (remoteData.orders) data.orders = remoteData.orders;
       if (remoteData.clients) data.clients = remoteData.clients;
       if (remoteData.models) data.models = remoteData.models;
