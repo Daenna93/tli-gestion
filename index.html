@@ -744,6 +744,428 @@ function loadRates() {
   } catch(e) {}
 }
 
+
+// ============================================================
+// PHOTOS / GALERIE (déplacé ici pour être disponible avant init)
+// ============================================================
+function renderPhotos() {
+  console.log('[TLI] renderPhotos appelé, generalPhotos:', data.generalPhotos ? data.generalPhotos.length : 0, 'orders avec photos:', data.orders.filter(function(o){return o.photos && o.photos.length>0;}).length);
+  var div = document.getElementById("photosGallery");
+  if (!div) { console.log('[TLI] photosGallery non trouvé'); return; }
+  div.innerHTML = "";
+
+  var allPhotos = [];
+
+  // Photos générales
+  if (data.generalPhotos) {
+    for (var i = 0; i < data.generalPhotos.length; i++) {
+      var gp = data.generalPhotos[i];
+      allPhotos.push({ src: gp.src, orderId: null, orderName: "Photo générale", clientName: "", date: gp.date });
+    }
+  }
+
+  // Photos des commandes
+  for (var i = 0; i < data.orders.length; i++) {
+    var o = data.orders[i];
+    if (o.photos && o.photos.length > 0) {
+      for (var j = 0; j < o.photos.length; j++) {
+        allPhotos.push({ src: o.photos[j], orderId: o.id, orderName: o.name, clientName: o.clientName });
+      }
+    }
+  }
+
+  if (allPhotos.length === 0) {
+    div.innerHTML = '<div class="empty-state"><div class="icon">📷</div>Aucune photo</div>';
+    return;
+  }
+
+  var grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
+  for (var i = 0; i < allPhotos.length; i++) {
+    var p = allPhotos[i];
+    var item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = '<img src="' + escapeHtml(p.src) + '" alt="Photo">';
+    (function(photoData) {
+      item.addEventListener('click', function() { openGalleryPhoto(photoData); });
+    })(p);
+    grid.appendChild(item);
+  }
+
+  div.appendChild(grid);
+}
+
+function openGalleryPhoto(photoData) {
+  document.getElementById("galleryPhotoOverlayImg").src = photoData.src;
+  var info = document.getElementById("galleryPhotoInfo");
+
+  if (photoData.orderId) {
+    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
+      '<div style="font-size:.8rem;color:#aaa">👤 ' + escapeHtml(photoData.clientName || "Inconnu") + '</div>' +
+      '<button class="btn btn-sm btn-primary" style="margin-top:8px;width:auto;padding:6px 12px;font-size:.75rem" id="btnGoToOrder">📦 Voir la commande</button>';
+    document.getElementById("galleryPhotoOverlay").classList.add("active");
+
+    document.getElementById("btnGoToOrder").addEventListener('click', function() {
+      closeGalleryPhotoOverlay();
+      openOrderDetail(photoData.orderId);
+    });
+  } else {
+    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
+      '<div style="font-size:.8rem;color:#aaa">' + new Date(photoData.date).toLocaleDateString("fr-FR") + '</div>';
+    document.getElementById("galleryPhotoOverlay").classList.add("active");
+  }
+}
+
+function openGalleryCamera() {
+  console.log('[TLI] openGalleryCamera appelé');
+  photoOrderId = null; // Photo générale, pas liée à une commande spécifique
+  var input = document.getElementById("cameraInput");
+  if (input) {
+    input.value = ''; // Reset pour forcer le change event
+    input.click();
+    console.log('[TLI] cameraInput.click() déclenché (galerie)');
+  } else {
+    console.log('[TLI] ERREUR: cameraInput non trouvé');
+    showToast("Erreur: input camera non trouvé", "error");
+  }
+}
+
+// ============================================================
+// NOTIFICATIONS SUR MODIFICATIONS (détectées via Firebase)
+// ============================================================
+var lastNotifiedOrders = 0;
+var lastNotifiedEvents = 0;
+
+function notifyOnRemoteChanges(remoteData) {
+  if (!remoteData) return;
+
+  // Détecter nouvelle commande
+  if (remoteData.orders && remoteData.orders.length > lastNotifiedOrders && lastNotifiedOrders > 0) {
+    var newOrder = remoteData.orders[remoteData.orders.length - 1];
+    if (newOrder.updatedBy && newOrder.updatedBy !== currentUserId) {
+      sendNotification('📦 Nouvelle commande', newOrder.name + ' par ' + (newOrder.clientName || "client"), './icon-192.png');
+      showToast('📦 Nouvelle commande: ' + newOrder.name, 'success');
+    }
+  }
+  if (remoteData.orders) lastNotifiedOrders = remoteData.orders.length;
+
+  // Détecter nouvel événement planning
+  if (remoteData.planningEvents && remoteData.planningEvents.length > lastNotifiedEvents && lastNotifiedEvents > 0) {
+    var newEvent = remoteData.planningEvents[remoteData.planningEvents.length - 1];
+    sendNotification('📅 Planning modifié', newEvent.title, './icon-192.png');
+    showToast('📅 Planning modifié: ' + newEvent.title, 'success');
+  }
+  if (remoteData.planningEvents) lastNotifiedEvents = remoteData.planningEvents.length;
+
+  // Vérifier stock bas
+  if (remoteData.stock) {
+    for (var i = 0; i < remoteData.stock.length; i++) {
+      var s = remoteData.stock[i];
+      if (parseFloat(s.qty) <= parseFloat(s.alert)) {
+        sendNotification('⚠️ Stock bas', s.name + ' : ' + s.qty + ' ' + s.unit + ' restant', './icon-192.png');
+      }
+    }
+  }
+}
+
+// ============================================================
+// NOTIFICATION TIMER
+// ============================================================
+var originalTimerFinished = null;
+// Hook dans startTimerLoop pour notifier quand timer fini
+// On va modifier la fonction startTimerLoop
+
+// ============================================================
+// FIREBASE REALTIME SYNC - TLI v14
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyB2jCioCr3WpNvtKNNqlFhXtKJmpgjTj9A",
+  authDomain: "tli-gestion.firebaseapp.com",
+  databaseURL: "https://tli-gestion-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tli-gestion",
+  storageBucket: "tli-gestion.firebasestorage.app",
+  messagingSenderId: "540516964273",
+  appId: "1:540516964273:web:04713d8c584b7c23230f90",
+  measurementId: "G-4STXLSXY3N"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+const dataRef = db.ref('tli-data');
+const usersRef = db.ref('tli-users');
+const timersRef = db.ref('tli-timers');
+const collaboratorsRef = db.ref('tli-collaborators');
+
+var currentUserId = null;
+var currentUserEmail = null;
+var isOnline = false;
+var syncInProgress = false;
+
+// ============================================================
+// AUTHENTIFICATION EMAIL/PASSWORD
+// ============================================================
+function initFirebase() {
+  console.log("[TLI] Initialisation Firebase...");
+
+  if (!firebase.apps.length) {
+    console.error("[TLI] Firebase non initialisé !");
+    updateSyncStatus("error");
+    return;
+  }
+
+  // Demander permission notifications
+  requestNotificationPermission();
+
+  // Forcer la persistance LOCAL pour survivre au verrouillage du téléphone
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
+    console.log("[TLI] Persistance auth LOCAL activée");
+  }).catch(function(err) {
+    console.error("[TLI] Erreur persistance auth:", err);
+  });
+
+  // Écouter les changements d'état d'authentification
+  var authModalTimeout = null;
+  auth.onAuthStateChanged(function(user) {
+    if (user) {
+      // Utilisateur connecté
+      currentUserId = user.uid;
+      currentUserEmail = user.email;
+      console.log("[TLI] Connecté:", currentUserEmail);
+      closeModal("authModal");
+      document.getElementById("authError").style.display = "none";
+      // Annuler tout timeout d'affichage du modal
+      if (authModalTimeout) { clearTimeout(authModalTimeout); authModalTimeout = null; }
+
+      var userRef = usersRef.child(currentUserId);
+      userRef.set({ online: true, email: currentUserEmail, lastSeen: firebase.database.ServerValue.TIMESTAMP, device: navigator.userAgent.substring(0, 50) });
+      userRef.onDisconnect().remove();
+
+      startRealtimeSync();
+      startTimerSync();
+      updateSyncStatus("synced");
+      showToast("Connecté en tant que " + currentUserEmail, "success");
+    } else {
+      // Pas connecté → attendre 2s avant d'afficher le modal (Firebase peut être en train de rafraîchir le token)
+      console.log("[TLI] Auth state = null, attente 2s avant affichage modal...");
+      if (authModalTimeout) clearTimeout(authModalTimeout);
+      authModalTimeout = setTimeout(function() {
+        if (!currentUserId) {
+          console.log("[TLI] Affichage modal auth après timeout");
+          currentUserId = null;
+          currentUserEmail = null;
+          updateSyncStatus("offline");
+          openModal("authModal");
+        }
+      }, 2000);
+    }
+  });
+}
+
+function loginUser() {
+  console.log("[TLI] loginUser() appelé!");
+  var email = document.getElementById("authEmail").value.trim();
+  var password = document.getElementById("authPassword").value;
+  var errorDiv = document.getElementById("authError");
+
+  console.log("[TLI] Email:", email, "Password length:", password.length);
+
+  if (!email || !password) {
+    errorDiv.textContent = "Email et mot de passe requis";
+    errorDiv.style.display = "block";
+    console.log("[TLI] Champs manquants");
+    return;
+  }
+
+  console.log("[TLI] Tentative de connexion...");
+  auth.signInWithEmailAndPassword(email, password).then(function(cred) {
+    console.log("[TLI] Connexion réussie!");
+    errorDiv.style.display = "none";
+  }).catch(function(err) {
+    console.error("[TLI] Erreur connexion:", err.code, err.message);
+    errorDiv.textContent = "Erreur: " + err.message;
+    errorDiv.style.display = "block";
+  });
+}
+
+function registerUser() {
+  console.log("[TLI] registerUser() appelé!");
+  var email = document.getElementById("authEmail").value.trim();
+  var password = document.getElementById("authPassword").value;
+  var errorDiv = document.getElementById("authError");
+
+  console.log("[TLI] Email:", email, "Password length:", password.length);
+
+  if (!email || !password) {
+    errorDiv.textContent = "Email et mot de passe requis";
+    errorDiv.style.display = "block";
+    console.log("[TLI] Champs manquants");
+    return;
+  }
+  if (password.length < 6) {
+    errorDiv.textContent = "Mot de passe: 6 caractères minimum";
+    errorDiv.style.display = "block";
+    console.log("[TLI] Mot de passe trop court");
+    return;
+  }
+
+  console.log("[TLI] Tentative de création de compte...");
+  auth.createUserWithEmailAndPassword(email, password).then(function(cred) {
+    console.log("[TLI] Compte créé!");
+    errorDiv.style.display = "none";
+    showToast("Compte créé !", "success");
+  }).catch(function(err) {
+    console.error("[TLI] Erreur création compte:", err.code, err.message);
+    errorDiv.textContent = "Erreur: " + err.message;
+    errorDiv.style.display = "block";
+  });
+}
+
+function logoutUser() {
+  if (confirm("Se déconnecter ?")) {
+    auth.signOut().then(function() {
+      showToast("Déconnecté", "warning");
+    });
+  }
+}
+
+function startRealtimeSync() {
+  dataRef.on('value', function(snapshot) {
+    if (syncInProgress) return;
+    var remoteData = snapshot.val();
+    if (!remoteData) { pushToFirebase(); return; }
+
+    var localTime = parseInt(localStorage.getItem("tli14_lastSync") || "0");
+    var remoteTime = remoteData.lastUpdated || 0;
+
+    if (remoteTime > localTime) {
+      syncInProgress = true;
+      notifyOnRemoteChanges(remoteData);
+      if (remoteData.orders) data.orders = remoteData.orders;
+      if (remoteData.clients) data.clients = remoteData.clients;
+      if (remoteData.models) data.models = remoteData.models;
+      if (remoteData.stock) data.stock = remoteData.stock;
+      if (remoteData.planningEvents) data.planningEvents = remoteData.planningEvents;
+      if (remoteData.machines) data.machines = remoteData.machines;
+      if (remoteData.qualityResults) data.qualityResults = remoteData.qualityResults;
+      localStorage.setItem("tli14_data", JSON.stringify(data));
+      localStorage.setItem("tli14_lastSync", remoteTime.toString());
+      renderAll();
+      syncInProgress = false;
+    }
+    updateSyncStatus("synced");
+  });
+
+  db.ref('.info/connected').on('value', function(snapshot) {
+    isOnline = snapshot.val() === true;
+    updateSyncStatus(isOnline ? "synced" : "offline");
+  });
+}
+
+function startTimerSync() {
+  timersRef.on('value', function(snapshot) {
+    if (syncInProgress) return;
+    var timers = snapshot.val();
+    if (!timers) return;
+    var localTime = parseInt(localStorage.getItem("tli14_timersSync") || "0");
+    var remoteTime = timers.lastUpdated || 0;
+    if (remoteTime > localTime) {
+      activeTimers = timers.active || [];
+      finishedTimers = timers.finished || [];
+      saveTimers();
+      renderTimers();
+    }
+  });
+}
+
+function pushToFirebase() {
+  if (!currentUserId || !isOnline) return;
+  syncInProgress = true;
+  var now = Date.now();
+  dataRef.set({
+    orders: data.orders, clients: data.clients, models: data.models,
+    stock: data.stock, planningEvents: data.planningEvents,
+    machines: data.machines, qualityResults: data.qualityResults,
+    lastUpdated: now, updatedBy: currentUserId
+  }).then(function() {
+    localStorage.setItem("tli14_lastSync", now.toString());
+    syncInProgress = false;
+    updateSyncStatus("synced");
+  }).catch(function(err) {
+    syncInProgress = false;
+    updateSyncStatus("error");
+  });
+}
+
+function pushTimersToFirebase() {
+  if (!currentUserId || !isOnline) return;
+  timersRef.set({ active: activeTimers, finished: finishedTimers, lastUpdated: Date.now() });
+}
+
+function updateSyncStatus(status) {
+  var btn = document.getElementById('btnSync');
+  if (!btn) return;
+  var span = btn.querySelector('span:last-child');
+  if (!span) return;
+  if (status === "synced") { btn.style.borderColor = "var(--success)"; btn.style.background = "rgba(0,255,136,0.1)"; span.textContent = "Sync OK"; }
+  else if (status === "offline") { btn.style.borderColor = "var(--danger)"; btn.style.background = "rgba(255,51,51,0.1)"; span.textContent = "Non connecté"; }
+  else if (status === "error") { btn.style.borderColor = "var(--secondary)"; span.textContent = "Erreur Firebase"; }
+  else { btn.style.borderColor = "var(--warning)"; span.textContent = "Connexion..."; }
+}
+
+// Hooks de sauvegarde
+var _origSaveData = saveData;
+saveData = function() { _origSaveData(); pushToFirebase(); };
+
+var _origSaveTimers = saveTimers;
+saveTimers = function() { _origSaveTimers(); pushTimersToFirebase(); };
+
+// Remplacer init
+var _origInit = init;
+init = function() { _origInit(); initFirebase(); };
+// Appel direct car init() a déjà été exécutée avant ce script
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initFirebase();
+} else {
+  window.addEventListener('load', initFirebase);
+}
+
+// Attacher les listeners de connexion (les fonctions existent maintenant)
+console.log("[TLI] Listeners onclick définis dans le HTML");
+
+// Mettre à jour l'affichage du compte dans les paramètres
+function updateAuthDisplay() {
+  var info = document.getElementById("authInfo");
+  if (info) {
+    if (currentUserEmail) {
+      info.textContent = "Connecté: " + currentUserEmail;
+      info.style.color = "var(--success)";
+    } else {
+      info.textContent = "Non connecté";
+      info.style.color = "#888";
+    }
+  }
+}
+
+// Hook pour mettre à jour l'affichage
+var _origUpdateSync = updateSyncStatus;
+updateSyncStatus = function(status) {
+  _origUpdateSync(status);
+  updateAuthDisplay();
+};
+</script>
+</body>
+</html>
+function closeGalleryPhotoOverlay() {
+  document.getElementById("galleryPhotoOverlay").classList.remove("active");
+}
+
+// ============================================================
+// UTILITAIRES
+// ============================================================
+
 // ============================================================
 // EVENT LISTENERS
 // ============================================================
@@ -857,8 +1279,7 @@ function attachStaticListeners() {
   document.getElementById('btnQualityCam').addEventListener('click', openQualityCamera);
   document.getElementById('qualityValidateBtn').addEventListener('click', validateQuality);
   document.getElementById('btnSkipQuality').addEventListener('click', skipQuality);
-  document.getElementById('btnTakePhoto').addEventListener('click', openGalleryCamera);
-
+  // Toggle rappel planning
   document.getElementById('cameraInput').addEventListener('change', function() { 
     console.log('[TLI] cameraInput change event, files:', this.files ? this.files.length : 0);
     handleCameraFile(this); 
@@ -2476,13 +2897,6 @@ function clearAll() {
   renderAll();
 }
 
-function closeGalleryPhotoOverlay() {
-  document.getElementById("galleryPhotoOverlay").classList.remove("active");
-}
-
-// ============================================================
-// UTILITAIRES
-// ============================================================
 function showToast(msg, type) {
   var toast = document.getElementById("toast");
   toast.textContent = msg;
@@ -2524,6 +2938,17 @@ if ('serviceWorker' in navigator) {
       .catch(function(err) { console.log('SW failed:', err); });
   });
 }
+
+// Attacher le listener du bouton Photos (déplacé ici car openGalleryCamera est maintenant dans le 1er script)
+document.addEventListener('DOMContentLoaded', function() {
+  var btnTakePhoto = document.getElementById('btnTakePhoto');
+  if (btnTakePhoto) {
+    btnTakePhoto.addEventListener('click', openGalleryCamera);
+    console.log('[TLI] Listener btnTakePhoto attaché (DOMContentLoaded)');
+  } else {
+    console.log('[TLI] ERREUR: btnTakePhoto non trouvé au DOMContentLoaded');
+  }
+});
 </script><!-- MODAL CONNEXION -->
 <div class="modal-overlay" id="authModal">
   <div class="modal-content">
@@ -2657,413 +3082,4 @@ setInterval(checkReminders, 30000); // Vérifier toutes les 30 secondes
 // ============================================================
 // ONGLET PHOTOS
 // ============================================================
-function renderPhotos() {
-  console.log('[TLI] renderPhotos appelé, generalPhotos:', data.generalPhotos ? data.generalPhotos.length : 0, 'orders avec photos:', data.orders.filter(function(o){return o.photos && o.photos.length>0;}).length);
-  var div = document.getElementById("photosGallery");
-  if (!div) { console.log('[TLI] photosGallery non trouvé'); return; }
-  div.innerHTML = "";
 
-  var allPhotos = [];
-
-  // Photos générales
-  if (data.generalPhotos) {
-    for (var i = 0; i < data.generalPhotos.length; i++) {
-      var gp = data.generalPhotos[i];
-      allPhotos.push({ src: gp.src, orderId: null, orderName: "Photo générale", clientName: "", date: gp.date });
-    }
-  }
-
-  // Photos des commandes
-  for (var i = 0; i < data.orders.length; i++) {
-    var o = data.orders[i];
-    if (o.photos && o.photos.length > 0) {
-      for (var j = 0; j < o.photos.length; j++) {
-        allPhotos.push({ src: o.photos[j], orderId: o.id, orderName: o.name, clientName: o.clientName });
-      }
-    }
-  }
-
-  if (allPhotos.length === 0) {
-    div.innerHTML = '<div class="empty-state"><div class="icon">📷</div>Aucune photo</div>';
-    return;
-  }
-
-  var grid = document.createElement('div');
-  grid.className = 'photo-grid';
-  grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-
-  for (var i = 0; i < allPhotos.length; i++) {
-    var p = allPhotos[i];
-    var item = document.createElement('div');
-    item.className = 'photo-item';
-    item.innerHTML = '<img src="' + escapeHtml(p.src) + '" alt="Photo">';
-    (function(photoData) {
-      item.addEventListener('click', function() { openGalleryPhoto(photoData); });
-    })(p);
-    grid.appendChild(item);
-  }
-
-  div.appendChild(grid);
-}
-
-function openGalleryPhoto(photoData) {
-  document.getElementById("galleryPhotoOverlayImg").src = photoData.src;
-  var info = document.getElementById("galleryPhotoInfo");
-
-  if (photoData.orderId) {
-    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
-      '<div style="font-size:.8rem;color:#aaa">👤 ' + escapeHtml(photoData.clientName || "Inconnu") + '</div>' +
-      '<button class="btn btn-sm btn-primary" style="margin-top:8px;width:auto;padding:6px 12px;font-size:.75rem" id="btnGoToOrder">📦 Voir la commande</button>';
-    document.getElementById("galleryPhotoOverlay").classList.add("active");
-
-    document.getElementById("btnGoToOrder").addEventListener('click', function() {
-      closeGalleryPhotoOverlay();
-      openOrderDetail(photoData.orderId);
-    });
-  } else {
-    info.innerHTML = '<div style="font-weight:700">' + escapeHtml(photoData.orderName) + '</div>' +
-      '<div style="font-size:.8rem;color:#aaa">' + new Date(photoData.date).toLocaleDateString("fr-FR") + '</div>';
-    document.getElementById("galleryPhotoOverlay").classList.add("active");
-  }
-}
-
-function openGalleryCamera() {
-  console.log('[TLI] openGalleryCamera appelé');
-  photoOrderId = null; // Photo générale, pas liée à une commande spécifique
-  var input = document.getElementById("cameraInput");
-  if (input) {
-    input.value = ''; // Reset pour forcer le change event
-    input.click();
-    console.log('[TLI] cameraInput.click() déclenché (galerie)');
-  } else {
-    console.log('[TLI] ERREUR: cameraInput non trouvé');
-    showToast("Erreur: input camera non trouvé", "error");
-  }
-}
-
-// ============================================================
-// NOTIFICATIONS SUR MODIFICATIONS (détectées via Firebase)
-// ============================================================
-var lastNotifiedOrders = 0;
-var lastNotifiedEvents = 0;
-
-function notifyOnRemoteChanges(remoteData) {
-  if (!remoteData) return;
-
-  // Détecter nouvelle commande
-  if (remoteData.orders && remoteData.orders.length > lastNotifiedOrders && lastNotifiedOrders > 0) {
-    var newOrder = remoteData.orders[remoteData.orders.length - 1];
-    if (newOrder.updatedBy && newOrder.updatedBy !== currentUserId) {
-      sendNotification('📦 Nouvelle commande', newOrder.name + ' par ' + (newOrder.clientName || "client"), './icon-192.png');
-      showToast('📦 Nouvelle commande: ' + newOrder.name, 'success');
-    }
-  }
-  if (remoteData.orders) lastNotifiedOrders = remoteData.orders.length;
-
-  // Détecter nouvel événement planning
-  if (remoteData.planningEvents && remoteData.planningEvents.length > lastNotifiedEvents && lastNotifiedEvents > 0) {
-    var newEvent = remoteData.planningEvents[remoteData.planningEvents.length - 1];
-    sendNotification('📅 Planning modifié', newEvent.title, './icon-192.png');
-    showToast('📅 Planning modifié: ' + newEvent.title, 'success');
-  }
-  if (remoteData.planningEvents) lastNotifiedEvents = remoteData.planningEvents.length;
-
-  // Vérifier stock bas
-  if (remoteData.stock) {
-    for (var i = 0; i < remoteData.stock.length; i++) {
-      var s = remoteData.stock[i];
-      if (parseFloat(s.qty) <= parseFloat(s.alert)) {
-        sendNotification('⚠️ Stock bas', s.name + ' : ' + s.qty + ' ' + s.unit + ' restant', './icon-192.png');
-      }
-    }
-  }
-}
-
-// ============================================================
-// NOTIFICATION TIMER
-// ============================================================
-var originalTimerFinished = null;
-// Hook dans startTimerLoop pour notifier quand timer fini
-// On va modifier la fonction startTimerLoop
-
-// ============================================================
-// FIREBASE REALTIME SYNC - TLI v14
-// ============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyB2jCioCr3WpNvtKNNqlFhXtKJmpgjTj9A",
-  authDomain: "tli-gestion.firebaseapp.com",
-  databaseURL: "https://tli-gestion-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "tli-gestion",
-  storageBucket: "tli-gestion.firebasestorage.app",
-  messagingSenderId: "540516964273",
-  appId: "1:540516964273:web:04713d8c584b7c23230f90",
-  measurementId: "G-4STXLSXY3N"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
-const dataRef = db.ref('tli-data');
-const usersRef = db.ref('tli-users');
-const timersRef = db.ref('tli-timers');
-const collaboratorsRef = db.ref('tli-collaborators');
-
-var currentUserId = null;
-var currentUserEmail = null;
-var isOnline = false;
-var syncInProgress = false;
-
-// ============================================================
-// AUTHENTIFICATION EMAIL/PASSWORD
-// ============================================================
-function initFirebase() {
-  console.log("[TLI] Initialisation Firebase...");
-
-  if (!firebase.apps.length) {
-    console.error("[TLI] Firebase non initialisé !");
-    updateSyncStatus("error");
-    return;
-  }
-
-  // Demander permission notifications
-  requestNotificationPermission();
-
-  // Forcer la persistance LOCAL pour survivre au verrouillage du téléphone
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
-    console.log("[TLI] Persistance auth LOCAL activée");
-  }).catch(function(err) {
-    console.error("[TLI] Erreur persistance auth:", err);
-  });
-
-  // Écouter les changements d'état d'authentification
-  var authModalTimeout = null;
-  auth.onAuthStateChanged(function(user) {
-    if (user) {
-      // Utilisateur connecté
-      currentUserId = user.uid;
-      currentUserEmail = user.email;
-      console.log("[TLI] Connecté:", currentUserEmail);
-      closeModal("authModal");
-      document.getElementById("authError").style.display = "none";
-      // Annuler tout timeout d'affichage du modal
-      if (authModalTimeout) { clearTimeout(authModalTimeout); authModalTimeout = null; }
-
-      var userRef = usersRef.child(currentUserId);
-      userRef.set({ online: true, email: currentUserEmail, lastSeen: firebase.database.ServerValue.TIMESTAMP, device: navigator.userAgent.substring(0, 50) });
-      userRef.onDisconnect().remove();
-
-      startRealtimeSync();
-      startTimerSync();
-      updateSyncStatus("synced");
-      showToast("Connecté en tant que " + currentUserEmail, "success");
-    } else {
-      // Pas connecté → attendre 2s avant d'afficher le modal (Firebase peut être en train de rafraîchir le token)
-      console.log("[TLI] Auth state = null, attente 2s avant affichage modal...");
-      if (authModalTimeout) clearTimeout(authModalTimeout);
-      authModalTimeout = setTimeout(function() {
-        if (!currentUserId) {
-          console.log("[TLI] Affichage modal auth après timeout");
-          currentUserId = null;
-          currentUserEmail = null;
-          updateSyncStatus("offline");
-          openModal("authModal");
-        }
-      }, 2000);
-    }
-  });
-}
-
-function loginUser() {
-  console.log("[TLI] loginUser() appelé!");
-  var email = document.getElementById("authEmail").value.trim();
-  var password = document.getElementById("authPassword").value;
-  var errorDiv = document.getElementById("authError");
-
-  console.log("[TLI] Email:", email, "Password length:", password.length);
-
-  if (!email || !password) {
-    errorDiv.textContent = "Email et mot de passe requis";
-    errorDiv.style.display = "block";
-    console.log("[TLI] Champs manquants");
-    return;
-  }
-
-  console.log("[TLI] Tentative de connexion...");
-  auth.signInWithEmailAndPassword(email, password).then(function(cred) {
-    console.log("[TLI] Connexion réussie!");
-    errorDiv.style.display = "none";
-  }).catch(function(err) {
-    console.error("[TLI] Erreur connexion:", err.code, err.message);
-    errorDiv.textContent = "Erreur: " + err.message;
-    errorDiv.style.display = "block";
-  });
-}
-
-function registerUser() {
-  console.log("[TLI] registerUser() appelé!");
-  var email = document.getElementById("authEmail").value.trim();
-  var password = document.getElementById("authPassword").value;
-  var errorDiv = document.getElementById("authError");
-
-  console.log("[TLI] Email:", email, "Password length:", password.length);
-
-  if (!email || !password) {
-    errorDiv.textContent = "Email et mot de passe requis";
-    errorDiv.style.display = "block";
-    console.log("[TLI] Champs manquants");
-    return;
-  }
-  if (password.length < 6) {
-    errorDiv.textContent = "Mot de passe: 6 caractères minimum";
-    errorDiv.style.display = "block";
-    console.log("[TLI] Mot de passe trop court");
-    return;
-  }
-
-  console.log("[TLI] Tentative de création de compte...");
-  auth.createUserWithEmailAndPassword(email, password).then(function(cred) {
-    console.log("[TLI] Compte créé!");
-    errorDiv.style.display = "none";
-    showToast("Compte créé !", "success");
-  }).catch(function(err) {
-    console.error("[TLI] Erreur création compte:", err.code, err.message);
-    errorDiv.textContent = "Erreur: " + err.message;
-    errorDiv.style.display = "block";
-  });
-}
-
-function logoutUser() {
-  if (confirm("Se déconnecter ?")) {
-    auth.signOut().then(function() {
-      showToast("Déconnecté", "warning");
-    });
-  }
-}
-
-function startRealtimeSync() {
-  dataRef.on('value', function(snapshot) {
-    if (syncInProgress) return;
-    var remoteData = snapshot.val();
-    if (!remoteData) { pushToFirebase(); return; }
-
-    var localTime = parseInt(localStorage.getItem("tli14_lastSync") || "0");
-    var remoteTime = remoteData.lastUpdated || 0;
-
-    if (remoteTime > localTime) {
-      syncInProgress = true;
-      notifyOnRemoteChanges(remoteData);
-      if (remoteData.orders) data.orders = remoteData.orders;
-      if (remoteData.clients) data.clients = remoteData.clients;
-      if (remoteData.models) data.models = remoteData.models;
-      if (remoteData.stock) data.stock = remoteData.stock;
-      if (remoteData.planningEvents) data.planningEvents = remoteData.planningEvents;
-      if (remoteData.machines) data.machines = remoteData.machines;
-      if (remoteData.qualityResults) data.qualityResults = remoteData.qualityResults;
-      localStorage.setItem("tli14_data", JSON.stringify(data));
-      localStorage.setItem("tli14_lastSync", remoteTime.toString());
-      renderAll();
-      syncInProgress = false;
-    }
-    updateSyncStatus("synced");
-  });
-
-  db.ref('.info/connected').on('value', function(snapshot) {
-    isOnline = snapshot.val() === true;
-    updateSyncStatus(isOnline ? "synced" : "offline");
-  });
-}
-
-function startTimerSync() {
-  timersRef.on('value', function(snapshot) {
-    if (syncInProgress) return;
-    var timers = snapshot.val();
-    if (!timers) return;
-    var localTime = parseInt(localStorage.getItem("tli14_timersSync") || "0");
-    var remoteTime = timers.lastUpdated || 0;
-    if (remoteTime > localTime) {
-      activeTimers = timers.active || [];
-      finishedTimers = timers.finished || [];
-      saveTimers();
-      renderTimers();
-    }
-  });
-}
-
-function pushToFirebase() {
-  if (!currentUserId || !isOnline) return;
-  syncInProgress = true;
-  var now = Date.now();
-  dataRef.set({
-    orders: data.orders, clients: data.clients, models: data.models,
-    stock: data.stock, planningEvents: data.planningEvents,
-    machines: data.machines, qualityResults: data.qualityResults,
-    lastUpdated: now, updatedBy: currentUserId
-  }).then(function() {
-    localStorage.setItem("tli14_lastSync", now.toString());
-    syncInProgress = false;
-    updateSyncStatus("synced");
-  }).catch(function(err) {
-    syncInProgress = false;
-    updateSyncStatus("error");
-  });
-}
-
-function pushTimersToFirebase() {
-  if (!currentUserId || !isOnline) return;
-  timersRef.set({ active: activeTimers, finished: finishedTimers, lastUpdated: Date.now() });
-}
-
-function updateSyncStatus(status) {
-  var btn = document.getElementById('btnSync');
-  if (!btn) return;
-  var span = btn.querySelector('span:last-child');
-  if (!span) return;
-  if (status === "synced") { btn.style.borderColor = "var(--success)"; btn.style.background = "rgba(0,255,136,0.1)"; span.textContent = "Sync OK"; }
-  else if (status === "offline") { btn.style.borderColor = "var(--danger)"; btn.style.background = "rgba(255,51,51,0.1)"; span.textContent = "Non connecté"; }
-  else if (status === "error") { btn.style.borderColor = "var(--secondary)"; span.textContent = "Erreur Firebase"; }
-  else { btn.style.borderColor = "var(--warning)"; span.textContent = "Connexion..."; }
-}
-
-// Hooks de sauvegarde
-var _origSaveData = saveData;
-saveData = function() { _origSaveData(); pushToFirebase(); };
-
-var _origSaveTimers = saveTimers;
-saveTimers = function() { _origSaveTimers(); pushTimersToFirebase(); };
-
-// Remplacer init
-var _origInit = init;
-init = function() { _origInit(); initFirebase(); };
-// Appel direct car init() a déjà été exécutée avant ce script
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  initFirebase();
-} else {
-  window.addEventListener('load', initFirebase);
-}
-
-// Attacher les listeners de connexion (les fonctions existent maintenant)
-console.log("[TLI] Listeners onclick définis dans le HTML");
-
-// Mettre à jour l'affichage du compte dans les paramètres
-function updateAuthDisplay() {
-  var info = document.getElementById("authInfo");
-  if (info) {
-    if (currentUserEmail) {
-      info.textContent = "Connecté: " + currentUserEmail;
-      info.style.color = "var(--success)";
-    } else {
-      info.textContent = "Non connecté";
-      info.style.color = "#888";
-    }
-  }
-}
-
-// Hook pour mettre à jour l'affichage
-var _origUpdateSync = updateSyncStatus;
-updateSyncStatus = function(status) {
-  _origUpdateSync(status);
-  updateAuthDisplay();
-};
-</script>
-</body>
-</html>
