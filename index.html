@@ -1194,14 +1194,35 @@ TLI.Firebase = {
       if (remoteTime > localTime) {
         TLI.Data.syncInProgress = true;
         self.notifyRemoteChanges(remoteData);
-        if (remoteData.orders) TLI.Data.orders = remoteData.orders;
+        if (remoteData.orders) {
+          // Fusionner les photos des commandes au lieu d'écraser
+          remoteData.orders.forEach(function(ro) {
+            var localOrder = TLI.Data.getOrder(ro.id);
+            if (localOrder && localOrder.photos && localOrder.photos.length > 0) {
+              if (!ro.photos) ro.photos = [];
+              var existingSrcs = {};
+              ro.photos.forEach(function(p) { existingSrcs[p] = true; });
+              localOrder.photos.forEach(function(lp) {
+                if (!existingSrcs[lp]) ro.photos.push(lp);
+              });
+            }
+          });
+          TLI.Data.orders = remoteData.orders;
+        }
         if (remoteData.clients) TLI.Data.clients = remoteData.clients;
         if (remoteData.models) TLI.Data.models = remoteData.models;
         if (remoteData.stock) TLI.Data.stock = remoteData.stock;
         if (remoteData.planningEvents) TLI.Data.planningEvents = remoteData.planningEvents;
         if (remoteData.machines) TLI.Data.machines = remoteData.machines;
         if (remoteData.qualityResults) TLI.Data.qualityResults = remoteData.qualityResults;
-        if (remoteData.generalPhotos) TLI.Data.generalPhotos = remoteData.generalPhotos;
+        if (remoteData.generalPhotos) {
+          // Fusionner les photos générales
+          var existingIds = {};
+          TLI.Data.generalPhotos.forEach(function(gp) { existingIds[gp.id] = true; });
+          remoteData.generalPhotos.forEach(function(rp) {
+            if (!existingIds[rp.id]) TLI.Data.generalPhotos.push(rp);
+          });
+        }
         TLI.Data.save();
         localStorage.setItem("tli15_lastSync", remoteTime.toString());
         TLI.UI.renderAll();
