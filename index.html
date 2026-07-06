@@ -739,7 +739,6 @@ TLI.Data = {
   currentUserId: null,
   currentUserEmail: null,
   isOnline: false,
-  syncInProgress: false,
 
   // Reminders
   checkedReminders: {},
@@ -1184,7 +1183,6 @@ TLI.Firebase = {
   startRealtimeSync: function() {
     var self = this;
     this.dataRef.on('value', function(snapshot) {
-      if (TLI.Data.syncInProgress) return;
       var remoteData = snapshot.val();
       if (!remoteData) { self.push(); return; }
 
@@ -1192,41 +1190,11 @@ TLI.Firebase = {
       var remoteTime = remoteData.lastUpdated || 0;
 
       if (remoteTime > localTime) {
-        TLI.Data.syncInProgress = true;
         self.notifyRemoteChanges(remoteData);
-        if (remoteData.orders) {
-          // Fusionner les photos des commandes au lieu d'écraser
-          remoteData.orders.forEach(function(ro) {
-            var localOrder = TLI.Data.getOrder(ro.id);
-            if (localOrder && localOrder.photos && localOrder.photos.length > 0) {
-              if (!ro.photos) ro.photos = [];
-              var existingSrcs = {};
-              ro.photos.forEach(function(p) { existingSrcs[p] = true; });
-              localOrder.photos.forEach(function(lp) {
-                if (!existingSrcs[lp]) ro.photos.push(lp);
-              });
-            }
-          });
-          TLI.Data.orders = remoteData.orders;
-        }
-        if (remoteData.clients) TLI.Data.clients = remoteData.clients;
-        if (remoteData.models) TLI.Data.models = remoteData.models;
-        if (remoteData.stock) TLI.Data.stock = remoteData.stock;
-        if (remoteData.planningEvents) TLI.Data.planningEvents = remoteData.planningEvents;
-        if (remoteData.machines) TLI.Data.machines = remoteData.machines;
-        if (remoteData.qualityResults) TLI.Data.qualityResults = remoteData.qualityResults;
-        if (remoteData.generalPhotos) {
-          // Fusionner les photos générales
-          var existingIds = {};
-          TLI.Data.generalPhotos.forEach(function(gp) { existingIds[gp.id] = true; });
-          remoteData.generalPhotos.forEach(function(rp) {
-            if (!existingIds[rp.id]) TLI.Data.generalPhotos.push(rp);
-          });
-        }
+        self.mergeData(remoteData);
         TLI.Data.save();
         localStorage.setItem("tli15_lastSync", remoteTime.toString());
         TLI.UI.renderAll();
-        TLI.Data.syncInProgress = false;
       }
       TLI.UI.updateSyncStatus("synced");
     });
@@ -1240,7 +1208,6 @@ TLI.Firebase = {
   startTimerSync: function() {
     var self = this;
     this.timersRef.on('value', function(snapshot) {
-      if (TLI.Data.syncInProgress) return;
       var timers = snapshot.val();
       if (!timers) return;
       var localTime = parseInt(localStorage.getItem("tli15_timersSync") || "0");
@@ -1256,7 +1223,6 @@ TLI.Firebase = {
 
   push: function() {
     if (!TLI.Data.currentUserId || !TLI.Data.isOnline) return;
-    TLI.Data.syncInProgress = true;
     var now = Date.now();
     this.dataRef.set({
       orders: TLI.Data.orders, clients: TLI.Data.clients, models: TLI.Data.models,
@@ -1266,10 +1232,8 @@ TLI.Firebase = {
       lastUpdated: now, updatedBy: TLI.Data.currentUserId
     }).then(function() {
       localStorage.setItem("tli15_lastSync", now.toString());
-      TLI.Data.syncInProgress = false;
       TLI.UI.updateSyncStatus("synced");
     }).catch(function() {
-      TLI.Data.syncInProgress = false;
       TLI.UI.updateSyncStatus("error");
     });
   },
@@ -1311,6 +1275,152 @@ TLI.Firebase = {
 
   lastNotifiedOrders: 0,
   lastNotifiedEvents: 0,
+
+  mergeData: function(remoteData) {
+    // Fusionner les orders (par ID, fusionner les photos)
+    if (remoteData.orders) {
+      var orderMap = {};
+      TLI.Data.orders.forEach(function(o) { orderMap[o.id] = o; });
+      remoteData.orders.forEach(function(ro) {
+        if (!orderMap[ro.id]) {
+          orderMap[ro.id] = ro;
+        } else {
+          var lo = orderMap[ro.id];
+          // Fusionner les photos (dédoublonnage par src)
+          if (ro.photos) {
+            if (!lo.photos) lo.photos = [];
+            var existingPhotos = {};
+            lo.photos.forEach(function(p) { existingPhotos[p] = true; });
+            ro.photos.forEach(function(p) {
+              if (!existingPhotos[p]) lo.photos.push(p);
+            });
+          }
+          // Mettre à jour les autres champs
+          ['name','service','type','machineId','material','weight','time','price',
+           'priority','notes','status','dateFinished','dateDelivered'].forEach(function(f) {
+            if (ro[f] !== undefined) lo[f] = ro[f];
+          });
+        }
+      });
+      TLI.Data.orders = Object.values(orderMap);
+    }
+
+    // Fusionner les clients
+    if (remoteData.clients) {
+      var clientMap = {};
+      TLI.Data.clients.forEach(function(c) { clientMap[c.id] = c; });
+      remoteData.clients.forEach(function(rc) {
+        if (!clientMap[rc.id]) {
+          clientMap[rc.id] = rc;
+        } else {
+          var lc = clientMap[rc.id];
+          ['name','company','role','phone','email','address','notes'].forEach(function(f) {
+            if (rc[f] !== undefined) lc[f] = rc[f];
+          });
+        }
+      });
+      TLI.Data.clients = Object.values(clientMap);
+    }
+
+    // Fusionner les models
+    if (remoteData.models) {
+      var modelMap = {};
+      TLI.Data.models.forEach(function(m) { modelMap[m.id] = m; });
+      remoteData.models.forEach(function(rm) {
+        if (!modelMap[rm.id]) {
+          modelMap[rm.id] = rm;
+        } else {
+          var lm = modelMap[rm.id];
+          ['name','category','type','time','weight','price','description'].forEach(function(f) {
+            if (rm[f] !== undefined) lm[f] = rm[f];
+          });
+        }
+      });
+      TLI.Data.models = Object.values(modelMap);
+    }
+
+    // Fusionner le stock
+    if (remoteData.stock) {
+      var stockMap = {};
+      TLI.Data.stock.forEach(function(s) { stockMap[s.id] = s; });
+      remoteData.stock.forEach(function(rs) {
+        if (!stockMap[rs.id]) {
+          stockMap[rs.id] = rs;
+        } else {
+          var ls = stockMap[rs.id];
+          ['type','name','qty','unit','alert','supplier'].forEach(function(f) {
+            if (rs[f] !== undefined) ls[f] = rs[f];
+          });
+        }
+      });
+      TLI.Data.stock = Object.values(stockMap);
+    }
+
+    // Fusionner les événements de planning
+    if (remoteData.planningEvents) {
+      var eventMap = {};
+      TLI.Data.planningEvents.forEach(function(e) { eventMap[e.id] = e; });
+      remoteData.planningEvents.forEach(function(re) {
+        if (!eventMap[re.id]) {
+          eventMap[re.id] = re;
+        } else {
+          var le = eventMap[re.id];
+          ['title','type','date','startTime','endTime','assignee','priority',
+           'notes','clientId','clientName','reminder','reminderMinutes'].forEach(function(f) {
+            if (re[f] !== undefined) le[f] = re[f];
+          });
+        }
+      });
+      TLI.Data.planningEvents = Object.values(eventMap);
+    }
+
+    // Fusionner les machines
+    if (remoteData.machines) {
+      var machineMap = {};
+      TLI.Data.machines.forEach(function(m) { machineMap[m.id] = m; });
+      remoteData.machines.forEach(function(rm) {
+        if (!machineMap[rm.id]) {
+          machineMap[rm.id] = rm;
+        } else {
+          var lm = machineMap[rm.id];
+          if (rm.totalHours !== undefined) lm.totalHours = rm.totalHours;
+          if (rm.maintenance) {
+            if (!lm.maintenance) lm.maintenance = [];
+            var maintMap = {};
+            lm.maintenance.forEach(function(m) { maintMap[m.id] = m; });
+            rm.maintenance.forEach(function(rmt) {
+              if (!maintMap[rmt.id]) {
+                maintMap[rmt.id] = rmt;
+                lm.maintenance.push(rmt);
+              }
+            });
+          }
+        }
+      });
+      TLI.Data.machines = Object.values(machineMap);
+    }
+
+    // Fusionner les photos générales (par ID)
+    if (remoteData.generalPhotos) {
+      var photoMap = {};
+      TLI.Data.generalPhotos.forEach(function(p) { photoMap[p.id] = p; });
+      remoteData.generalPhotos.forEach(function(rp) {
+        if (!photoMap[rp.id]) {
+          photoMap[rp.id] = rp;
+        }
+      });
+      TLI.Data.generalPhotos = Object.values(photoMap);
+    }
+
+    // Fusionner les qualityResults
+    if (remoteData.qualityResults) {
+      Object.keys(remoteData.qualityResults).forEach(function(key) {
+        if (!TLI.Data.qualityResults[key]) {
+          TLI.Data.qualityResults[key] = remoteData.qualityResults[key];
+        }
+      });
+    }
+  },
 
   sync: function() {
     if (!navigator.onLine) { TLI.UI.showToast("Hors-ligne", "warning"); return; }
@@ -2025,12 +2135,12 @@ TLI.UI = {
 
     var allPhotos = [];
     TLI.Data.generalPhotos.forEach(function(gp) {
-      allPhotos.push({ src: gp.src, orderId: null, orderName: 'Photo generale', clientName: '', date: gp.date, id: gp.id });
+      allPhotos.push({ src: gp.src, orderId: null, orderName: 'Photo generale', clientName: '', date: gp.date });
     });
     TLI.Data.orders.forEach(function(o) {
       if (o.photos && o.photos.length > 0) {
-        o.photos.forEach(function(p, idx) {
-          allPhotos.push({ src: p, orderId: o.id, orderName: o.name, clientName: o.clientName, photoIdx: idx });
+        o.photos.forEach(function(p) {
+          allPhotos.push({ src: p, orderId: o.id, orderName: o.name, clientName: o.clientName });
         });
       }
     });
@@ -2046,13 +2156,9 @@ TLI.UI = {
       var p = allPhotos[i];
       var item = document.createElement('div');
       item.className = 'photo-item';
-      item.innerHTML = '<img src="' + TLI.Utils.escapeHtml(p.src) + '" alt="Photo"><button class="photo-delete">×</button>';
+      item.innerHTML = '<img src="' + TLI.Utils.escapeHtml(p.src) + '" alt="Photo">';
       (function(photoData) {
-        item.querySelector('img').addEventListener('click', function() { TLI.UI.openGalleryPhoto(photoData); });
-        item.querySelector('.photo-delete').addEventListener('click', function(e) {
-          e.stopPropagation();
-          TLI.UI.deleteGalleryPhoto(photoData.orderId, photoData.id, photoData.photoIdx);
-        });
+        item.addEventListener('click', function() { TLI.UI.openGalleryPhoto(photoData); });
       })(p);
       grid.appendChild(item);
     }
@@ -2073,19 +2179,6 @@ TLI.UI = {
       info.innerHTML = '<div style="font-weight:700">' + TLI.Utils.escapeHtml(photoData.orderName) + '</div><div style="font-size:.8rem;color:#aaa">' + TLI.Utils.formatDate(photoData.date) + '</div>';
       document.getElementById('galleryPhotoOverlay').classList.add('active');
     }
-  },
-
-  deleteGalleryPhoto: function(orderId, photoId, photoIdx) {
-    if (!confirm('Supprimer cette photo ?')) return;
-    if (orderId) {
-      TLI.Data.deletePhotoFromOrder(orderId, photoIdx);
-    } else if (photoId) {
-      TLI.Data.generalPhotos = TLI.Data.generalPhotos.filter(function(p) { return p.id !== photoId; });
-      TLI.Data.save();
-    }
-    TLI.UI.showToast('Photo supprimée', 'warning');
-    TLI.UI.renderPhotos();
-    TLI.Firebase.push();
   },
 
   // --- ACTIONS ---
