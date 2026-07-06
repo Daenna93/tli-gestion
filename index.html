@@ -607,8 +607,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
   <div id="galleryPhotoInfo" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:10px 20px;border-radius:12px;text-align:center;max-width:90%"></div>
 </div>
 
-<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
-<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="opacity:0;position:absolute;width:0;height:0;overflow:hidden;z-index:-1">
+<input type="file" id="qualityCameraInput" accept="image/*" capture="environment" style="opacity:0;position:absolute;width:0;height:0;overflow:hidden;z-index:-1">
 <div class="toast" id="toast"></div>
 <script>
 // ============================================================
@@ -859,8 +859,14 @@ function attachStaticListeners() {
   document.getElementById('btnSkipQuality').addEventListener('click', skipQuality);
   document.getElementById('btnTakePhoto').addEventListener('click', openGalleryCamera);
 
-  document.getElementById('cameraInput').addEventListener('change', function() { handleCameraFile(this); });
-  document.getElementById('qualityCameraInput').addEventListener('change', function() { handleQualityCameraFile(this); });
+  document.getElementById('cameraInput').addEventListener('change', function() { 
+    console.log('[TLI] cameraInput change event, files:', this.files ? this.files.length : 0);
+    handleCameraFile(this); 
+  });
+  document.getElementById('qualityCameraInput').addEventListener('change', function() { 
+    console.log('[TLI] qualityCameraInput change event, files:', this.files ? this.files.length : 0);
+    handleQualityCameraFile(this); 
+  });
 
   document.getElementById('orderService').addEventListener('change', toggleOrderFields);
 
@@ -1651,11 +1657,18 @@ function openCallOverlay() {
   }
   var client = null;
   for (var i = 0; i < data.clients.length; i++) if (data.clients[i].id === currentClientId) client = data.clients[i];
-  document.getElementById("callClientName").textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
-  document.getElementById("callNumber").textContent = callNumber;
+  var nameEl = document.getElementById("callClientName");
+  var numEl = document.getElementById("callNumber");
   var overlay = document.getElementById("callOverlay");
+  if (!nameEl || !numEl || !overlay) {
+    console.log('[TLI] ERREUR: Éléments overlay appel manquants');
+    showToast("Erreur: overlay appel non trouvé", "error");
+    return;
+  }
+  nameEl.textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
+  numEl.textContent = callNumber;
   overlay.classList.add("active");
-  console.log('[TLI] Overlay appel affiché');
+  console.log('[TLI] Overlay appel affiché pour', callNumber);
 }
 
 function closeCallOverlay() {
@@ -2463,6 +2476,10 @@ function clearAll() {
   renderAll();
 }
 
+function closeGalleryPhotoOverlay() {
+  document.getElementById("galleryPhotoOverlay").classList.remove("active");
+}
+
 // ============================================================
 // UTILITAIRES
 // ============================================================
@@ -2710,14 +2727,18 @@ function openGalleryPhoto(photoData) {
   }
 }
 
-function closeGalleryPhotoOverlay() {
-  document.getElementById("galleryPhotoOverlay").classList.remove("active");
-}
-
 function openGalleryCamera() {
   console.log('[TLI] openGalleryCamera appelé');
   photoOrderId = null; // Photo générale, pas liée à une commande spécifique
-  document.getElementById("cameraInput").click();
+  var input = document.getElementById("cameraInput");
+  if (input) {
+    input.value = ''; // Reset pour forcer le change event
+    input.click();
+    console.log('[TLI] cameraInput.click() déclenché (galerie)');
+  } else {
+    console.log('[TLI] ERREUR: cameraInput non trouvé');
+    showToast("Erreur: input camera non trouvé", "error");
+  }
 }
 
 // ============================================================
@@ -2962,7 +2983,7 @@ function startTimerSync() {
     if (remoteTime > localTime) {
       activeTimers = timers.active || [];
       finishedTimers = timers.finished || [];
-      saveTimersLocal();
+      saveTimers();
       renderTimers();
     }
   });

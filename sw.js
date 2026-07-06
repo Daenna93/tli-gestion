@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tli-v14-cache-v13';
+const CACHE_NAME = 'tli-v14-cache-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -11,13 +11,13 @@ const ASSETS = [
 // INSTALL — Activation immédiate
 // ============================================================
 self.addEventListener('install', (event) => {
-  console.log('[SW v13] Installing...');
+  console.log('[SW v14] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW v13] Assets mis en cache');
+      console.log('[SW v14] Assets mis en cache');
       return cache.addAll(ASSETS);
     }).catch((err) => {
-      console.log('[SW v13] Erreur cache initiale:', err);
+      console.log('[SW v14] Erreur cache initiale:', err);
       return caches.open(CACHE_NAME).then((cache) => cache.add('./index.html'));
     })
   );
@@ -28,27 +28,27 @@ self.addEventListener('install', (event) => {
 // ACTIVATE — Nettoyage + Reload forcé de tous les clients
 // ============================================================
 self.addEventListener('activate', (event) => {
-  console.log('[SW v13] Activating...');
+  console.log('[SW v14] Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      console.log('[SW v13] Nettoyage des anciens caches...');
+      console.log('[SW v14] Nettoyage des anciens caches...');
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
           .map((name) => {
-            console.log('[SW v13] Suppression cache:', name);
+            console.log('[SW v14] Suppression cache:', name);
             return caches.delete(name);
           })
       );
     }).then(() => {
-      console.log('[SW v13] Claiming clients...');
+      console.log('[SW v14] Claiming clients...');
       return self.clients.claim();
     }).then(() => {
-      console.log('[SW v13] Envoi reload aux clients...');
+      console.log('[SW v14] Envoi reload aux clients...');
       return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
         clients.forEach((client) => {
-          console.log('[SW v13] Reload client:', client.url);
-          client.postMessage({ type: 'SW_RELOAD', version: 13 });
+          console.log('[SW v14] Reload client:', client.url);
+          client.postMessage({ type: 'SW_RELOAD', version: 14 });
           if (client.navigate) {
             client.navigate(client.url);
           }
@@ -75,7 +75,7 @@ self.addEventListener('fetch', (event) => {
       }
       return networkResponse;
     }).catch((err) => {
-      console.log('[SW v13] Network failed, fallback cache:', event.request.url);
+      console.log('[SW v14] Network failed, fallback cache:', event.request.url);
       return caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) return cachedResponse;
         if (event.request.mode === 'navigate') return caches.match('./index.html');
@@ -89,7 +89,7 @@ self.addEventListener('fetch', (event) => {
 // MESSAGE — Écouter les messages de l'app (notifs locales)
 // ============================================================
 self.addEventListener('message', (event) => {
-  console.log('[SW v13] Message reçu:', event.data);
+  console.log('[SW v14] Message reçu:', event.data);
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
@@ -109,14 +109,14 @@ self.addEventListener('message', (event) => {
 // PUSH — Préparation FCM
 // ============================================================
 self.addEventListener('push', (event) => {
-  console.log('[SW v13] Push reçu:', event);
+  console.log('[SW v14] Push reçu:', event);
   if (!event.data) {
-    console.log('[SW v13] Push sans data, ignoré');
+    console.log('[SW v14] Push sans data, ignoré');
     return;
   }
   try {
     const payload = event.data.json();
-    console.log('[SW v13] Payload push:', payload);
+    console.log('[SW v14] Payload push:', payload);
     event.waitUntil(
       self.registration.showNotification(payload.notification.title, {
         body: payload.notification.body,
@@ -126,7 +126,7 @@ self.addEventListener('push', (event) => {
       })
     );
   } catch (e) {
-    console.error('[SW v13] Erreur parsing push:', e);
+    console.error('[SW v14] Erreur parsing push:', e);
   }
 });
 
@@ -134,7 +134,7 @@ self.addEventListener('push', (event) => {
 // NOTIFICATION CLICK
 // ============================================================
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW v13] Notification click:', event.notification.tag);
+  console.log('[SW v14] Notification click:', event.notification.tag);
   event.notification.close();
   event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((clients) => {
