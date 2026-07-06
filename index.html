@@ -301,7 +301,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <section id="photos" class="section">
   <div class="card">
     <div class="card-title">📷 Galerie photos</div>
-    <label for="cameraInput" class="btn btn-primary" style="display:block;text-align:center;margin-bottom:12px;cursor:pointer">📷 Prendre une photo</label>
+    <button type="button" class="btn btn-primary" style="display:block;text-align:center;margin-bottom:12px;width:100%" onclick="TLI.Photos.prepareForGallery()">📷 Prendre une photo</button>
     <div id="photosGallery"></div>
   </div>
 </section>
@@ -370,7 +370,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group">
       <label class="form-label">Photos</label>
       <div class="photo-grid" id="detailPhotos"></div>
-      <label for="cameraInput" class="btn btn-secondary" style="display:block;text-align:center;margin-top:8px;cursor:pointer">📷 Ajouter une photo</label>
+      <button type="button" class="btn btn-secondary" style="display:block;text-align:center;margin-top:8px;width:100%" onclick="TLI.Photos.prepareForOrder(TLI.Data.currentOrderId)">📷 Ajouter une photo</button>
     </div>
     <button class="btn btn-danger" id="btnDeleteOrder">🗑️ Supprimer</button>
   </div>
@@ -577,7 +577,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <div class="form-group" style="margin:14px 0">
       <label class="form-label">📷 Photo de la piece finie</label>
       <div class="photo-grid" id="qualityPhotoPreview" style="display:none;margin-bottom:8px"></div>
-      <label for="qualityCameraInput" class="btn btn-secondary" style="display:block;text-align:center;margin-top:0;cursor:pointer">📷 Prendre une photo</label>
+      <button type="button" class="btn btn-secondary" style="display:block;text-align:center;margin-top:0;width:100%" onclick="TLI.Photos.prepareForQuality(TLI.Data.qualityOrderId)">📷 Prendre une photo</button>
     </div>
     <button class="btn btn-primary" id="qualityValidateBtn" disabled>Valider la cloture</button>
     <button class="btn btn-secondary" id="btnSkipQuality" style="margin-top:8px">Passer</button>
@@ -1339,10 +1339,18 @@ TLI.UI = {
   },
 
   attachModalListeners: function() {
+    var self = this;
     document.querySelectorAll('.modal-close').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var id = this.dataset.close;
         if (id) self.closeModal(id);
+      });
+    });
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
       });
     });
   },
@@ -1759,7 +1767,7 @@ TLI.UI = {
   openCallOverlay: function() {
     if (!TLI.Data.callNumber) { this.showToast('Aucun numero enregistre', 'warning'); return; }
     var client = TLI.Data.getClient(TLI.Data.currentClientId);
-    document.getElementById("callClientName").textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
+    document.getElementById('callClientName').textContent = client ? 'Appeler ' + client.name : 'Confirmer l'appel';
     document.getElementById('callNumber').textContent = TLI.Data.callNumber;
     document.getElementById('callOverlay').classList.add('active');
   },

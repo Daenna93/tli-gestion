@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tli-v15-cache-v18';
+const CACHE_NAME = 'tli-v15-cache-v19';
 const ASSETS = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW v18] Installing...');
+  console.log('[SW v19] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
       .catch(() => caches.open(CACHE_NAME).then((c) => c.add('./index.html')))
@@ -18,14 +18,14 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW v18] Activating...');
+  console.log('[SW v19] Activating...');
   event.waitUntil(
     caches.keys().then((names) =>
       Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
     ).then(() => self.clients.claim()).then(() => {
       return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
         clients.forEach((client) => {
-          client.postMessage({ type: 'SW_RELOAD', version: 18 });
+          client.postMessage({ type: 'SW_RELOAD', version: 19 });
           if (client.navigate) client.navigate(client.url);
         });
       });
@@ -76,7 +76,7 @@ self.addEventListener('push', (event) => {
         tag: payload.notification.tag || 'tli-default'
       })
     );
-  } catch (e) { console.error('[SW v18] Push error:', e); }
+  } catch (e) { console.error('[SW v19] Push error:', e); }
 });
 
 self.addEventListener('notificationclick', (event) => {
