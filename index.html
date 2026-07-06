@@ -1767,7 +1767,7 @@ TLI.UI = {
   openCallOverlay: function() {
     if (!TLI.Data.callNumber) { this.showToast('Aucun numero enregistre', 'warning'); return; }
     var client = TLI.Data.getClient(TLI.Data.currentClientId);
-    document.getElementById('callClientName').textContent = client ? 'Appeler ' + client.name : 'Confirmer l'appel';
+    document.getElementById("callClientName").textContent = client ? "Appeler " + client.name : "Confirmer l'appel";
     document.getElementById('callNumber').textContent = TLI.Data.callNumber;
     document.getElementById('callOverlay').classList.add('active');
   },
