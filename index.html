@@ -2135,12 +2135,12 @@ TLI.UI = {
 
     var allPhotos = [];
     TLI.Data.generalPhotos.forEach(function(gp) {
-      allPhotos.push({ src: gp.src, orderId: null, orderName: 'Photo generale', clientName: '', date: gp.date });
+      allPhotos.push({ src: gp.src, orderId: null, orderName: 'Photo generale', clientName: '', date: gp.date, id: gp.id });
     });
     TLI.Data.orders.forEach(function(o) {
       if (o.photos && o.photos.length > 0) {
-        o.photos.forEach(function(p) {
-          allPhotos.push({ src: p, orderId: o.id, orderName: o.name, clientName: o.clientName });
+        o.photos.forEach(function(p, idx) {
+          allPhotos.push({ src: p, orderId: o.id, orderName: o.name, clientName: o.clientName, photoIdx: idx });
         });
       }
     });
@@ -2156,9 +2156,13 @@ TLI.UI = {
       var p = allPhotos[i];
       var item = document.createElement('div');
       item.className = 'photo-item';
-      item.innerHTML = '<img src="' + TLI.Utils.escapeHtml(p.src) + '" alt="Photo">';
+      item.innerHTML = '<img src="' + TLI.Utils.escapeHtml(p.src) + '" alt="Photo"><button class="photo-delete">×</button>';
       (function(photoData) {
-        item.addEventListener('click', function() { TLI.UI.openGalleryPhoto(photoData); });
+        item.querySelector('img').addEventListener('click', function() { TLI.UI.openGalleryPhoto(photoData); });
+        item.querySelector('.photo-delete').addEventListener('click', function(e) {
+          e.stopPropagation();
+          TLI.UI.deleteGalleryPhoto(photoData.orderId, photoData.id, photoData.photoIdx);
+        });
       })(p);
       grid.appendChild(item);
     }
@@ -2179,6 +2183,19 @@ TLI.UI = {
       info.innerHTML = '<div style="font-weight:700">' + TLI.Utils.escapeHtml(photoData.orderName) + '</div><div style="font-size:.8rem;color:#aaa">' + TLI.Utils.formatDate(photoData.date) + '</div>';
       document.getElementById('galleryPhotoOverlay').classList.add('active');
     }
+  },
+
+  deleteGalleryPhoto: function(orderId, photoId, photoIdx) {
+    if (!confirm('Supprimer cette photo ?')) return;
+    if (orderId) {
+      TLI.Data.deletePhotoFromOrder(orderId, photoIdx);
+    } else if (photoId) {
+      TLI.Data.generalPhotos = TLI.Data.generalPhotos.filter(function(p) { return p.id !== photoId; });
+      TLI.Data.save();
+    }
+    TLI.UI.showToast('Photo supprimée', 'warning');
+    TLI.UI.renderPhotos();
+    TLI.Firebase.push();
   },
 
   // --- ACTIONS ---
@@ -2981,6 +2998,7 @@ TLI.Timer = {
       TLI.Data.activeTimers = TLI.Data.activeTimers.filter(function(t) { return !t.finished; });
       if (changed) { TLI.Data.saveTimers(); TLI.Firebase.pushTimers(); TLI.UI.renderTimers(); TLI.UI.renderStats(); TLI.UI.renderMachines(); }
 
+      // Mettre à jour les timers dans la section Timer
       for (var i = 0; i < TLI.Data.activeTimers.length; i++) {
         var t = TLI.Data.activeTimers[i];
         var remaining = Math.max(0, t.endTime - Date.now());
@@ -2989,6 +3007,24 @@ TLI.Timer = {
         var elBar = document.getElementById('timerBar_' + t.id);
         if (elText) elText.textContent = TLI.Utils.formatTimer(remaining);
         if (elBar) elBar.style.width = pct + '%';
+      }
+
+      // Mettre à jour les timers sur le dashboard
+      var dashList = document.getElementById('activeTimersList');
+      var dashCard = document.getElementById('activeTimersCard');
+      if (dashList && TLI.Data.activeTimers.length > 0) {
+        dashList.innerHTML = '';
+        for (var i = 0; i < TLI.Data.activeTimers.length; i++) {
+          var t = TLI.Data.activeTimers[i];
+          var remaining = Math.max(0, t.endTime - Date.now());
+          var card = document.createElement('div');
+          card.className = 'timer-card';
+          card.innerHTML = '<div class="timer-name">' + TLI.Utils.escapeHtml(t.name) + '</div><div class="timer-info">🖨️ ' + TLI.Utils.escapeHtml(t.machineName) + '</div><div class="timer-remaining">' + TLI.Utils.formatTimer(remaining) + '</div>';
+          dashList.appendChild(card);
+        }
+        if (dashCard) dashCard.style.display = 'block';
+      } else if (dashCard) {
+        dashCard.style.display = 'none';
       }
     }, 1000);
   },
