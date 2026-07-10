@@ -669,6 +669,27 @@ TLI.Utils = {
   },
   toISODate: function(d) {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  },
+  resizeImage: function(base64, maxWidth, maxHeight, quality, callback) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var width = img.width;
+      var height = img.height;
+      if (width > maxWidth || height > maxHeight) {
+        var ratio = Math.min(maxWidth / width, maxHeight / height);
+        width *= ratio;
+        height *= ratio;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      var resized = canvas.toDataURL('image/jpeg', quality);
+      callback(resized);
+    };
+    img.onerror = function() { callback(base64); };
+    img.src = base64;
   }
 };
 
@@ -880,21 +901,25 @@ TLI.Photos = {
     this.pendingTarget = null;
     var reader = new FileReader();
     reader.onload = function(e) {
-      var photoData = e.target.result;
-      if (target && target.type === 'order' && target.id) {
-        if (TLI.Data.addPhotoToOrder(target.id, photoData)) {
-          TLI.UI.renderOrderPhotos(target.id);
-          TLI.UI.showToast("Photo ajoutée à la commande", "success");
-          TLI.Server.push('orders');
+      var rawPhoto = e.target.result;
+      TLI.UI.showToast("Compression photo...", "success");
+      // Redimensionner à 800px max, qualité 0.7
+      TLI.Utils.resizeImage(rawPhoto, 800, 800, 0.7, function(photoData) {
+        if (target && target.type === 'order' && target.id) {
+          if (TLI.Data.addPhotoToOrder(target.id, photoData)) {
+            TLI.UI.renderOrderPhotos(target.id);
+            TLI.UI.showToast("Photo ajoutée à la commande", "success");
+            TLI.Server.uploadPhoto(photoData, 'order', target.id);
+          } else {
+            TLI.UI.showToast("Erreur: commande introuvable", "error");
+          }
         } else {
-          TLI.UI.showToast("Erreur: commande introuvable", "error");
+          TLI.Data.addGeneralPhoto(photoData);
+          TLI.UI.renderPhotos();
+          TLI.UI.showToast("Photo ajoutée à la galerie", "success");
+          TLI.Server.uploadPhoto(photoData, 'gallery');
         }
-      } else {
-        TLI.Data.addGeneralPhoto(photoData);
-        TLI.UI.renderPhotos();
-        TLI.UI.showToast("Photo ajoutée à la galerie", "success");
-        TLI.Server.push('photos');
-      }
+      });
     };
     reader.onerror = function() {
       TLI.UI.showToast("Erreur lecture photo", "error");
@@ -908,13 +933,16 @@ TLI.Photos = {
     if (!file) return;
     var reader = new FileReader();
     reader.onload = function(e) {
-      TLI.Data.tempQualityPhoto = e.target.result;
-      var preview = document.getElementById("qualityPhotoPreview");
-      if (preview) {
-        preview.innerHTML = '<div class="photo-item"><img src="' + TLI.Data.tempQualityPhoto + '" alt="Photo qualite"></div>';
-        preview.style.display = "grid";
-      }
-      TLI.UI.showToast("Photo qualité prise", "success");
+      var rawPhoto = e.target.result;
+      TLI.Utils.resizeImage(rawPhoto, 800, 800, 0.7, function(photoData) {
+        TLI.Data.tempQualityPhoto = photoData;
+        var preview = document.getElementById("qualityPhotoPreview");
+        if (preview) {
+          preview.innerHTML = '<div class="photo-item"><img src="' + TLI.Data.tempQualityPhoto + '" alt="Photo qualite"></div>';
+          preview.style.display = "grid";
+        }
+        TLI.UI.showToast("Photo qualité prise", "success");
+      });
     };
     reader.onerror = function() {
       TLI.UI.showToast("Erreur photo qualité", "error");
@@ -1103,6 +1131,30 @@ TLI.Server = {
         TLI.UI.showToast('Auth : ' + msg, 'error');
       });
 
+      this.socket.on('new-photo', function(payload) {
+        console.log('[TLI.Server] Nouvelle photo reçue');
+        if (payload.targetType === 'gallery') {
+          TLI.Data.generalPhotos.push({
+            id: payload.id || TLI.Utils.generateId(),
+            src: payload.photoData,
+            date: payload.date || new Date().toISOString()
+          });
+          TLI.Data.save();
+          TLI.UI.renderPhotos();
+        } else if (payload.targetType === 'order' && payload.targetId) {
+          var order = TLI.Data.getOrder(payload.targetId);
+          if (order) {
+            if (!order.photos) order.photos = [];
+            order.photos.push(payload.photoData);
+            TLI.Data.save();
+            if (TLI.Data.currentOrderId === payload.targetId) {
+              TLI.UI.renderOrderPhotos(payload.targetId);
+            }
+          }
+        }
+        TLI.UI.showToast('Photo synchronisée', 'success');
+      });
+
       this.socket.on('data-update', function(payload) {
         if (TLI.Data.offlineMode) {
           console.log('[TLI.Server] Ignoré (mode offline) :', payload.type);
@@ -1182,6 +1234,23 @@ TLI.Server = {
     if (type === 'rates') data = TLI.Data.rates;
     if (type === 'timers') data = { active: TLI.Data.activeTimers, finished: TLI.Data.finishedTimers };
     this.socket.emit('update', { type: type, data: data, userId: TLI.Data.currentUserEmail || 'unknown' });
+  },
+
+  uploadPhoto: function(photoData, targetType, targetId) {
+    if (TLI.Data.offlineMode) {
+      TLI.Data.save();
+      return;
+    }
+    if (!this.socket || !this.isConnected) {
+      TLI.Data.save();
+      return;
+    }
+    this.socket.emit('upload-photo', {
+      photoData: photoData,
+      targetType: targetType || 'gallery',
+      targetId: targetId || null,
+      userId: TLI.Data.currentUserEmail || 'unknown'
+    });
   },
 
   pushTimers: function() { this.push('timers'); },
