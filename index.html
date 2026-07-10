@@ -192,9 +192,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 #prospection .checkboxes input{accent-color:var(--primary);width:16px;height:16px}
 #prospection .toggle-sb{display:none;position:absolute;bottom:20px;left:20px;z-index:1000;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,212,255,0.4);align-items:center;justify-content:center}
 @media (max-width:768px){
-  #prospection .sidebar{position:absolute;z-index:900;height:100%;width:90%;max-width:380px}
+  #prospection .sidebar{position:absolute;z-index:900;height:100%;width:90%;max-width:380px;transition:transform .3s ease}
+  #prospection .sidebar.hidden{transform:translateX(-110%)}
   #prospection .toggle-sb{display:flex}
 }
+#prospection .sidebar.hidden{transform:translateX(-100%);width:0;padding:0;overflow:hidden;opacity:0;transition:all .3s ease}
+#prospection .sidebar.hidden + .map-wrap #prospectMap{width:100% !important}
 
 /* ─── PROSPECTION EXTRA ─── */
 #prospection .prospect-toolbar{display:flex;gap:8px;padding:0 14px 10px;border-bottom:1px solid var(--glass-border);flex-wrap:wrap}
@@ -477,6 +480,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <input type="checkbox" id="prospectOnlyNotes" onchange="TLI.Prospection.applyFilters()"> Uniquement avec notes
           </label>
         </div>
+      </div>
+
+      <!-- Point de départ -->
+      <div style="padding:12px 14px;border-bottom:1px solid var(--glass-border);background:var(--darker)">
+        <span class="filter-label" style="margin-bottom:6px">📍 Point de départ</span>
+        <input type="text" class="search-box" id="prospectOrigin" placeholder="Votre adresse..." style="margin-bottom:6px;font-size:.82rem">
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <button class="btn btn-sm btn-secondary" id="btnUseMyPos" style="flex:1;font-size:11px;padding:6px 8px">📡 Ma position</button>
+          <button class="btn btn-sm btn-primary" id="btnSetOrigin" style="flex:1;font-size:11px;padding:6px 8px">✅ Appliquer</button>
+        </div>
+        <div id="originStatus" style="font-size:11px;color:var(--text-muted);min-height:16px"></div>
       </div>
       <div class="sb-stats">
         <div class="sb-stat a"><div class="n" id="prospectStatA">0</div><div class="l">Prioritaires</div></div>
@@ -1090,6 +1104,15 @@ TLI.Photos = {
     };
     reader.readAsDataURL(file);
     input.value = "";
+  },
+
+  deletePhoto: function(index) {
+    if (!confirm('Supprimer cette photo ?')) return;
+    TLI.Data.generalPhotos.splice(index, 1);
+    TLI.Data.save();
+    TLI.UI.renderPhotos();
+    TLI.UI.showToast('Photo supprimée', 'success');
+    TLI.Server.push('photos');
   },
 
   handleQualityFile: function(input) {
@@ -2652,8 +2675,13 @@ TLI.UI = {
       el.innerHTML = '<div class="empty-state"><div class="icon">📷</div><div>Aucune photo</div></div>';
       return;
     }
+    var total = TLI.Data.generalPhotos.length;
     el.innerHTML = TLI.Data.generalPhotos.slice().reverse().map(function(p, idx) {
-      return '<div class="photo-item" onclick="TLI.UI.showGalleryPhoto(' + idx + ')"><img src="' + p.src + '" alt="Photo"></div>';
+      var realIdx = total - 1 - idx;
+      return '<div class="photo-item" style="position:relative" onclick="TLI.UI.showGalleryPhoto(' + idx + ')">' +
+        '<img src="' + p.src + '" alt="Photo">' +
+        '<button class="photo-delete" onclick="event.stopPropagation();TLI.Photos.deletePhoto(' + realIdx + ')" title="Supprimer">×</button>' +
+      '</div>';
     }).join('');
   },
 
@@ -2855,6 +2883,18 @@ TLI.Prospection = {
     document.getElementById('btnDeleteProspect').addEventListener('click', function() { TLI.Prospection.deleteProspect(); });
     document.getElementById('btnSaveNewProspect').addEventListener('click', function() { TLI.Prospection.saveNewProspect(); });
 
+    // Point de départ
+    var btnUsePos = document.getElementById('btnUseMyPos');
+    if (btnUsePos) btnUsePos.addEventListener('click', function() { TLI.Prospection.useMyPosition(); });
+    var btnSetOrigin = document.getElementById('btnSetOrigin');
+    if (btnSetOrigin) btnSetOrigin.addEventListener('click', function() { TLI.Prospection.geocodeOrigin(); });
+    var originInput = document.getElementById('prospectOrigin');
+    if (originInput && this.origin) {
+      originInput.value = this.origin.label || '';
+      var status = document.getElementById('originStatus');
+      if (status) status.textContent = '✅ ' + (this.origin.label || 'Point de départ');
+    }
+
     this.applyFilters();
     this.updateSolCount();
   },
@@ -2958,7 +2998,9 @@ TLI.Prospection = {
       if (q && !p.nom.toLowerCase().includes(q) && !p.secteur.toLowerCase().includes(q) && !p.naf.toLowerCase().includes(q) && !p.ville.toLowerCase().includes(q)) return false;
       if (secteur && p.secteur !== secteur) return false;
       if (notation && p.notation !== notation) return false;
-      if (p.distance > distMax) return false;
+      var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : p.distance;
+      if (dist === null) dist = p.distance || 0;
+      if (dist > distMax) return false;
       if (p.effectif < effMin) return false;
       if (cats.length && !cats.includes(p.categorie)) return false;
       if (onlyNotes && !p.notes) return false;
@@ -2997,6 +3039,9 @@ TLI.Prospection = {
       var badgeClass = self.toSolicit.has(p.id) ? 'sol' : p.notation;
       var badgeText = self.toSolicit.has(p.id) ? '★' : p.notation;
       var statusLabel = self.prospectStatus[p.id] ? '<span style="color:#888;font-size:.7rem">' + self.STATUS_LABELS[self.prospectStatus[p.id]] + '</span>' : '';
+      var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : p.distance;
+      if (dist === null) dist = p.distance || 0;
+      var distLabel = self.origin ? '• ' + dist.toFixed(1) + 'km (dep. origine)' : '• ' + dist.toFixed(0) + 'km';
       return '<div class="res-item" id="prospect-item-' + p.id + '" onclick="TLI.Prospection.flyToProspect(' + p.id + ')">' +
         '<div class="res-check"><input type="checkbox" ' + (self.toSolicit.has(p.id) ? 'checked' : '') + ' onclick="event.stopPropagation();TLI.Prospection.toggleSol(' + p.id + ')"></div>' +
         '<div class="res-body">' +
@@ -3005,7 +3050,7 @@ TLI.Prospection = {
             '<span class="res-badge ' + badgeClass + '">' + badgeText + '</span>' +
             '<span>' + p.secteur + '</span>' +
             '<span>• ' + p.ville + '</span>' +
-            '<span>• ' + p.distance.toFixed(0) + 'km</span>' +
+            '<span>' + distLabel + '</span>' +
             '<span>• ' + p.effectif + 'p</span>' +
             (statusLabel ? '<span>• ' + statusLabel + '</span>' : '') +
           '</div>' +
@@ -3255,7 +3300,77 @@ TLI.Prospection = {
     a.download = 'tli_prospects_' + new Date().toISOString().slice(0, 10) + '.csv';
     a.click();
     TLI.UI.showToast(this.filteredData.length + ' prospects exportés', 'success');
-  }
+
+
+  // ─── POINT DE DÉPART ───
+  origin: JSON.parse(localStorage.getItem('tli_origin') || 'null'),
+
+  setOrigin: function(lat, lng, label) {
+    this.origin = { lat: lat, lng: lng, label: label || 'Point de départ' };
+    localStorage.setItem('tli_origin', JSON.stringify(this.origin));
+    this.applyFilters();
+    var status = document.getElementById('originStatus');
+    if (status) status.textContent = '✅ ' + this.origin.label;
+    TLI.UI.showToast('Point de départ mis à jour', 'success');
+  },
+
+  useMyPosition: function() {
+    var self = this;
+    var status = document.getElementById('originStatus');
+    if (status) status.textContent = '⏳ Localisation...';
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        self.setOrigin(pos.coords.latitude, pos.coords.longitude, 'Ma position');
+        var input = document.getElementById('prospectOrigin');
+        if (input) input.value = 'Ma position (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
+      }, function() {
+        if (status) status.textContent = '❌ Localisation refusée';
+        TLI.UI.showToast('Localisation refusée', 'error');
+      });
+    } else {
+      if (status) status.textContent = '❌ Non supportée';
+      TLI.UI.showToast('Géolocalisation non supportée', 'error');
+    }
+  },
+
+  geocodeOrigin: function() {
+    var input = document.getElementById('prospectOrigin');
+    var status = document.getElementById('originStatus');
+    if (!input || !input.value.trim()) return;
+    if (status) status.textContent = '⏳ Géocodage...';
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(input.value.trim());
+    fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+      if (data && data.length > 0) {
+        var lat = parseFloat(data[0].lat);
+        var lng = parseFloat(data[0].lon);
+        TLI.Prospection.setOrigin(lat, lng, data[0].display_name);
+        if (status) status.textContent = '✅ ' + data[0].display_name.split(',')[0];
+        TLI.UI.showToast('Point de départ mis à jour', 'success');
+      } else {
+        if (status) status.textContent = '❌ Adresse non trouvée';
+        TLI.UI.showToast('Adresse non trouvée', 'error');
+      }
+    }).catch(function() {
+      if (status) status.textContent = '❌ Erreur réseau';
+      TLI.UI.showToast('Erreur de géocodage', 'error');
+    });
+  },
+
+  distanceFromOrigin: function(lat, lng) {
+    if (!this.origin) return null;
+    var R = 6371;
+    var dLat = (lat - this.origin.lat) * Math.PI / 180;
+    var dLng = (lng - this.origin.lng) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.origin.lat * Math.PI/180) * Math.cos(lat * Math.PI/180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  },
+
+  toggleSidebar: function() {
+    var sb = document.getElementById('prospectSidebar');
+    if (sb) sb.classList.toggle('hidden');
+    setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
+  }  }
 };
 
 // ============================================================
