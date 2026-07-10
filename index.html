@@ -487,7 +487,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <div class="dropdown" style="flex:1;position:relative">
               <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
               <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden">
-                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal();TLI.UI.closeDropdowns()">🏢 Nouveau prospect</button>
+                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
               </div>
             </div>
           </div>
@@ -573,12 +573,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           </div>
           <div id="originStatus" style="font-size:11px;color:var(--text-muted);min-height:16px"></div>
         </div>
-      </div>
-      <div class="sb-stats">
-        <div class="sb-stat a"><div class="n" id="prospectStatA">0</div><div class="l">Prioritaires</div></div>
-        <div class="sb-stat b"><div class="n" id="prospectStatB">0</div><div class="l">Secondaires</div></div>
-        <div class="sb-stat c"><div class="n" id="prospectStatC">0</div><div class="l">Faible pot.</div></div>
-        <div class="sb-stat s"><div class="n" id="prospectStatSol">0</div><div class="l">À solliciter</div></div>
       </div>
       <div class="res-count" id="prospectCount">0 résultats</div>
       <div class="sb-results" id="prospectResults"></div>
