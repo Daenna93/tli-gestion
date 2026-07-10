@@ -249,9 +249,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 #prospection .history-list{max-height:120px;overflow-y:auto;margin-top:8px}
 #prospection .history-item{padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px;font-size:.8rem;color:#aaa}
 #prospection .history-item b{color:var(--light)}
+
 /* ─── Bouton ghost ─── */
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--light);transition:all .2s}
-.btn-ghost:hover{background:var(--glass)}</style>
+.btn-ghost:hover{background:var(--glass)}
+
+/* ─── Badge sol (à solliciter) ─── */
+#prospection .res-badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+#prospection .popup-prospect .badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+
+/* ─── Transitions modals ─── */
+.modal-overlay,.quality-overlay,.call-overlay,.photo-overlay{opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease}
+.modal-overlay.active,.quality-overlay.active,.call-overlay.active,.photo-overlay.active{opacity:1;visibility:visible}
+.modal-content,.quality-content,.call-content{transform:scale(.92) translateY(20px);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .35s ease;opacity:0}
+.modal-overlay.active .modal-content,.quality-overlay.active .quality-content,.call-overlay.active .call-content{transform:scale(1) translateY(0);opacity:1}
+</style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -489,8 +501,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
             <div class="dropdown" style="flex:1;position:relative">
               <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
-              <div class="dropdown-menu" style="position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden;display:none">
-                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
+              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid var(--glass-border)" onclick="TLI.Prospection.showAddModal();document.querySelectorAll('.dropdown-menu').forEach(function(m){m.style.display='none';})">🏢 Nouveau prospect</button>
               </div>
             </div>
           </div>
@@ -3038,7 +3050,7 @@ TLI.Prospection = {
       '</div>' +
       '<div style="margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">' +
         '<iframe width="100%" height="150" style="border:0;display:block" ' +
-        'src="https://www.google.com/maps/embed?pb=!4v' + Date.now() + '!6m8!1m7!1sCAoSLEFGMVFpcE8!2m2!1d' + p.lat + '!2d' + p.lng + '!3f0!4f0!5f0.7820865974627469" ' +
+        'src="https://www.google.com/maps?q=' + p.lat + ',' + p.lng + '&hl=fr&z=16&output=embed" ' +
         'allowfullscreen loading="lazy"></iframe>' +
       '</div>' +
       '<button class="btn btn-primary" onclick="TLI.Prospection.toggleSol(' + p.id + '); setTimeout(function(){ var m=TLI.Prospection.allMarkers.find(function(x){return x.id===' + p.id + ';}); if(m) m.marker.setPopupContent(TLI.Prospection.makePopup(m.data)); }, 50);" style="margin-top:10px">' +
@@ -3061,8 +3073,10 @@ TLI.Prospection = {
       if (self.sortBy === 'dist') cmp = a.distance - b.distance;
       else if (self.sortBy === 'eff') cmp = a.effectif - b.effectif;
       else if (self.sortBy === 'note') {
-        var order = { A: 0, B: 1, C: 2 };
-        cmp = (order[a.notation] || 2) - (order[b.notation] || 2);
+        var order = { 'A': 0, 'B': 1, 'C': 2 };
+        var na = String(a.notation || 'C').toUpperCase();
+        var nb = String(b.notation || 'C').toUpperCase();
+        cmp = (order[na] !== undefined ? order[na] : 2) - (order[nb] !== undefined ? order[nb] : 2);
       }
       else if (self.sortBy === 'name') cmp = a.nom.localeCompare(b.nom);
       return cmp;
@@ -3187,7 +3201,7 @@ TLI.Prospection = {
 
   updateSolCount: function() {
     var count = this.filteredData ? this.filteredData.filter(function(p) { return TLI.Prospection.toSolicit.has(p.id); }).length : 0;
-    var el = document.getElementById('statSol');
+    var el = document.getElementById('prospectStatSol');
     if (el) el.textContent = count;
   },
 
@@ -3429,7 +3443,7 @@ TLI.Prospection = {
       TLI.UI.showToast('Géolocalisation non supportée', 'error');
       return;
     }
-    if (window.location.protocol === 'http:') {
+    if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       if (status) status.textContent = '❌ HTTPS requis';
       TLI.UI.showToast('Géolocalisation bloquée en HTTP → utilisez HTTPS', 'error');
       return;
@@ -3486,12 +3500,18 @@ TLI.Prospection = {
 
   distanceFromOrigin: function(lat, lng) {
     if (!this.origin) return null;
+    var oLat = parseFloat(this.origin.lat);
+    var oLng = parseFloat(this.origin.lng);
+    var pLat = parseFloat(lat);
+    var pLng = parseFloat(lng);
+    if (isNaN(oLat) || isNaN(oLng) || isNaN(pLat) || isNaN(pLng)) return null;
     var R = 6371;
-    var dLat = (lat - this.origin.lat) * Math.PI / 180;
-    var dLng = (lng - this.origin.lng) * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.origin.lat * Math.PI/180) * Math.cos(lat * Math.PI/180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+    var dLat = (pLat - oLat) * Math.PI / 180;
+    var dLng = (pLng - oLng) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(oLat * Math.PI/180) * Math.cos(pLat * Math.PI/180) * Math.sin(dLng/2) * Math.sin(dLng/2);
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+    var d = R * c;
+    return isNaN(d) ? null : d;
   },
 
   toggleSidebar: function() {
