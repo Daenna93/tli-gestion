@@ -885,6 +885,7 @@ TLI.Photos = {
         if (TLI.Data.addPhotoToOrder(target.id, photoData)) {
           TLI.UI.renderOrderPhotos(target.id);
           TLI.UI.showToast("Photo ajoutée à la commande", "success");
+          TLI.Server.push('orders');
         } else {
           TLI.UI.showToast("Erreur: commande introuvable", "error");
         }
@@ -892,9 +893,8 @@ TLI.Photos = {
         TLI.Data.addGeneralPhoto(photoData);
         TLI.UI.renderPhotos();
         TLI.UI.showToast("Photo ajoutée à la galerie", "success");
+        TLI.Server.push('photos');
       }
-      TLI.Server.push('orders');
-      TLI.Server.push('photos');
     };
     reader.onerror = function() {
       TLI.UI.showToast("Erreur lecture photo", "error");
@@ -1125,7 +1125,15 @@ TLI.Server = {
         if (payload.type === 'planning') { TLI.Data.planningEvents = payload.data; TLI.UI.renderPlanning(); }
         if (payload.type === 'machines') { TLI.Data.machines = payload.data; TLI.UI.renderMachines(); }
         if (payload.type === 'photos') {
-          TLI.Data.generalPhotos = payload.data;
+          // Fusion : conserver les photos locales absentes du serveur
+          var localPhotoIds = new Set(TLI.Data.generalPhotos.map(function(p) { return p.id; }));
+          var serverPhotos = payload.data || [];
+          serverPhotos.forEach(function(p) {
+            if (!localPhotoIds.has(p.id)) {
+              TLI.Data.generalPhotos.push(p);
+              localPhotoIds.add(p.id);
+            }
+          });
           TLI.UI.renderPhotos();
         }
         if (payload.type === 'quality') { TLI.Data.qualityResults = payload.data; }
@@ -1256,9 +1264,11 @@ TLI.Server = {
   logout: function() {
     if (confirm('Se déconnecter ?')) {
       TLI.Data.currentUserId = null; TLI.Data.currentUserEmail = null;
+      TLI.Data.offlineMode = true;
       if (this.socket) this.socket.disconnect();
       TLI.UI.updateAuthDisplay();
       TLI.UI.showToast('Déconnecté', 'warning');
+      setTimeout(function() { window.location.reload(); }, 1000);
     }
   }
 };
