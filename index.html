@@ -618,6 +618,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
       <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="authPassword" placeholder="••••••••"></div>
       <button class="btn btn-primary" id="btnLogin" onclick="TLI.Server.login()" type="button">Se connecter</button>
       <button class="btn btn-secondary" id="btnRegister" style="margin-top:8px" onclick="TLI.Server.register()" type="button">Créer un compte</button>
+      <button class="btn btn-secondary" id="btnOffline" style="margin-top:8px" onclick="TLI.UI.closeModal('authModal')" type="button">Continuer hors-ligne</button>
       <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:10px;text-align:center;display:none"></div>
     </div>
   </div>
@@ -2467,6 +2468,10 @@ TLI.App = {
     document.getElementById('priceFilament').value = TLI.Data.rates.filamentKg;
     document.getElementById('priceResinKg').value = TLI.Data.rates.resinKg;
 
+    // Ouvrir la modal auth si pas connecté
+    if (!TLI.Data.currentUserEmail) {
+      TLI.UI.openModal('authModal');
+    }
     console.log('[TLI.App] Initialized successfully');
   }
 };
