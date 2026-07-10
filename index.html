@@ -449,12 +449,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <section id="prospection" class="section">
   <div class="prospect-wrap">
     <div class="sidebar" id="prospectSidebar">
+      <!-- Stats rapides -->
+      <div class="stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 14px;border-bottom:1px solid var(--glass-border);background:var(--darker)">
+        <div class="stat-card" style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border)">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--primary)" id="statA">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase">Prioritaires</div>
+        </div>
+        <div class="stat-card" style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border)">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--accent)" id="statB">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase">Secondaires</div>
+        </div>
+        <div class="stat-card" style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border)">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text-muted)" id="statC">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase">Faible pot.</div>
+        </div>
+        <div class="stat-card" style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border)">
+          <div style="font-size:1.1rem;font-weight:700;color:#ef4444" id="statSol">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase">À solliciter</div>
+        </div>
+      </div>
+
+      <div class="res-count" id="prospectCount" style="padding:8px 14px;font-size:.85rem;color:var(--text-muted);border-bottom:1px solid var(--glass-border);background:var(--darker)">Chargement...</div>
+
       <div class="sb-top">
         <input type="text" class="search-box" id="prospectSearch" placeholder="🔍 Rechercher une entreprise, un secteur, un NAF..." oninput="TLI.Prospection.applyFilters()">
       </div>
-
-      <!-- Stats rapides -->
-      <div class="res-count" id="prospectCount" style="padding:10px 14px;font-size:.9rem;font-weight:600;border-bottom:1px solid var(--glass-border);background:var(--darker)">Chargement...</div>
 
       <!-- Accordéon: Actions -->
       <div class="accordion" data-accordion="actions">
@@ -1638,17 +1657,7 @@ TLI.UI = {
     if (acc) acc.classList.toggle('open');
   },
 
-  toggleDropdown: function(btn) {
-    var menu = btn.nextElementSibling;
-    if (!menu) return;
-    var isOpen = menu.style.display === 'block';
-    this.closeDropdowns();
-    menu.style.display = isOpen ? 'none' : 'block';
-  },
 
-  closeDropdowns: function() {
-    document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.style.display = 'none'; });
-  },
 
   showToast: function(msg, type) {
     var t = document.getElementById('toast');
