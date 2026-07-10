@@ -1033,6 +1033,14 @@ TLI.Server = {
         self.isConnected = true;
         self.reconnectAttempts = 0;
         TLI.UI.updateSyncStatus('synced');
+        // Si on était en mode offline, forcer la déconnexion immédiatement
+        if (TLI.Data.offlineMode) {
+          console.log('[TLI.Server] Déconnexion forcée (mode offline)');
+          self.socket.disconnect();
+          self.isConnected = false;
+          TLI.UI.updateSyncStatus('offline');
+          return;
+        }
         // Ne pas spammer le toast si reconnexion rapide
         var now = Date.now();
         if (!self.lastConnectToast || (now - self.lastConnectToast > 10000)) {
@@ -1191,8 +1199,17 @@ TLI.Server = {
 
   sync: function() {
     if (!this.isConnected) {
+      if (!TLI.Data.currentUserEmail) {
+        TLI.UI.showToast('Connexion requise', 'warning');
+        TLI.UI.openModal('authModal');
+        return;
+      }
       TLI.UI.showToast('Hors-ligne', 'warning');
       if (this.socket) this.socket.connect();
+      return;
+    }
+    if (TLI.Data.offlineMode) {
+      TLI.UI.showToast('Mode hors-ligne actif', 'warning');
       return;
     }
     TLI.UI.showToast('Synchronisation...', 'success');
