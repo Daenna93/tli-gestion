@@ -633,7 +633,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 // - TLI.Data      : persistence localStorage + données
 // - TLI.Photos    : gestion photos (galerie, commandes, checklist)
 // - TLI.UI        : rendu interface
-// - TLI.Server  : auth + sync temps réel
+// - TLI.Server    : serveur privé WebSocket
 // - TLI.Notifs    : notifications locales
 // - TLI.Timer     : timers d'impression
 // - TLI.Planning  : calendrier + rappels
@@ -737,6 +737,7 @@ TLI.Data = {
   currentUserId: null,
   currentUserEmail: null,
   isOnline: false,
+  syncInProgress: false,
 
   // Reminders
   checkedReminders: {},
@@ -1059,33 +1060,27 @@ TLI.Notifs = {
 };
 
 // ============================================================
-// MODULE: Server (remplace Firebase - Serveur privé TLI)
+// MODULE: Server (Serveur privé TLI)
 // ============================================================
 TLI.Server = {
   socket: null,
-  serverUrl: 'http://192.168.1.153:3000', // ← MODIFIER AVEC L'IP DE TON DELL
+  serverUrl: 'http://192.168.1.153:3000',
   reconnectAttempts: 0,
   maxReconnectAttempts: 10,
   isConnected: false,
-  cursors: {},
 
   init: function() {
     var self = this;
     console.log('[TLI.Server] Initialisation...');
-
     if (typeof io === 'undefined') {
       console.error('[TLI.Server] Socket.io non chargé');
-      TLI.UI.showToast('Erreur: Socket.io manquant', 'error');
       return;
     }
-
     this.connect();
   },
 
   connect: function() {
     var self = this;
-    console.log('[TLI.Server] Connexion à', this.serverUrl);
-
     this.socket = io(this.serverUrl, {
       transports: ['websocket', 'polling'],
       timeout: 20000,
@@ -1101,7 +1096,6 @@ TLI.Server = {
       self.reconnectAttempts = 0;
       TLI.UI.updateSyncStatus('synced');
       TLI.UI.showToast('Connecté au serveur', 'success');
-
       self.socket.emit('auth', {
         name: TLI.Data.currentUserEmail || 'Utilisateur',
         email: TLI.Data.currentUserEmail || 'inconnu'
@@ -1130,64 +1124,18 @@ TLI.Server = {
     });
 
     this.socket.on('data-update', function(payload) {
-      console.log('[TLI.Server] Mise à jour reçue :', payload.type, 'par', payload.userName);
-
-      if (payload.type === 'orders') {
-        TLI.Data.orders = payload.data;
-        TLI.UI.renderOrders();
-        TLI.UI.renderStats();
-      }
-      if (payload.type === 'clients') {
-        TLI.Data.clients = payload.data;
-        TLI.UI.renderClients();
-      }
-      if (payload.type === 'models') {
-        TLI.Data.models = payload.data;
-        TLI.UI.renderCatalog();
-      }
-      if (payload.type === 'stock') {
-        TLI.Data.stock = payload.data;
-        TLI.UI.renderStock();
-      }
-      if (payload.type === 'planning') {
-        TLI.Data.planningEvents = payload.data;
-        TLI.UI.renderPlanning();
-      }
-      if (payload.type === 'machines') {
-        TLI.Data.machines = payload.data;
-        TLI.UI.renderMachines();
-      }
-      if (payload.type === 'photos') {
-        TLI.Data.generalPhotos = payload.data;
-        TLI.UI.renderPhotos();
-      }
-      if (payload.type === 'quality') {
-        TLI.Data.qualityResults = payload.data;
-      }
-      if (payload.type === 'rates') {
-        TLI.Data.rates = payload.data;
-        TLI.Calc.update();
-      }
-
+      console.log('[TLI.Server] Mise à jour reçue :', payload.type);
+      if (payload.type === 'orders') { TLI.Data.orders = payload.data; TLI.UI.renderOrders(); TLI.UI.renderStats(); }
+      if (payload.type === 'clients') { TLI.Data.clients = payload.data; TLI.UI.renderClients(); }
+      if (payload.type === 'models') { TLI.Data.models = payload.data; TLI.UI.renderCatalog(); }
+      if (payload.type === 'stock') { TLI.Data.stock = payload.data; TLI.UI.renderStock(); }
+      if (payload.type === 'planning') { TLI.Data.planningEvents = payload.data; TLI.UI.renderPlanning(); }
+      if (payload.type === 'machines') { TLI.Data.machines = payload.data; TLI.UI.renderMachines(); }
+      if (payload.type === 'photos') { TLI.Data.generalPhotos = payload.data; TLI.UI.renderPhotos(); }
+      if (payload.type === 'quality') { TLI.Data.qualityResults = payload.data; }
+      if (payload.type === 'rates') { TLI.Data.rates = payload.data; TLI.Calc.update(); }
       TLI.Data.save();
       TLI.UI.showToast('Synchro : ' + payload.userName + ' a modifié ' + payload.type, 'success');
-    });
-
-    this.socket.on('cursor-update', function(data) {
-      self.showCursor(data);
-    });
-
-    this.socket.on('cursor-remove', function(socketId) {
-      self.removeCursor(socketId);
-    });
-
-    this.socket.on('user-joined', function(data) {
-      console.log('[TLI.Server]', data.name, 'est connecté');
-      TLI.UI.showToast(data.name + ' est en ligne', 'success');
-    });
-
-    this.socket.on('user-left', function(socketId) {
-      self.removeCursor(socketId);
     });
 
     this.socket.on('disconnect', function(reason) {
@@ -1201,27 +1149,14 @@ TLI.Server = {
       console.error('[TLI.Server] Erreur connexion :', err.message);
       self.reconnectAttempts++;
       TLI.UI.updateSyncStatus('error');
-      if (self.reconnectAttempts >= self.maxReconnectAttempts) {
-        TLI.UI.showToast('Serveur injoignable', 'error');
-      }
     });
-
-    setInterval(function() {
-      if (self.socket && self.isConnected) {
-        self.socket.emit('ping');
-      }
-    }, 30000);
-
-    this.socket.on('pong', function() {});
   },
 
   push: function(type) {
     if (!this.socket || !this.isConnected) {
-      console.log('[TLI.Server] Hors-ligne, sauvegarde locale');
       TLI.Data.save();
       return;
     }
-
     var data;
     if (type === 'orders') data = TLI.Data.orders;
     if (type === 'clients') data = TLI.Data.clients;
@@ -1233,144 +1168,60 @@ TLI.Server = {
     if (type === 'quality') data = TLI.Data.qualityResults;
     if (type === 'rates') data = TLI.Data.rates;
     if (type === 'timers') data = { active: TLI.Data.activeTimers, finished: TLI.Data.finishedTimers };
-
-    this.socket.emit('update', {
-      type: type,
-      data: data,
-      userId: TLI.Data.currentUserEmail || 'unknown'
-    });
-    console.log('[TLI.Server] Push :', type);
+    this.socket.emit('update', { type: type, data: data, userId: TLI.Data.currentUserEmail || 'unknown' });
   },
+
+  pushTimers: function() { this.push('timers'); },
 
   sync: function() {
     if (!this.isConnected) {
-      TLI.UI.showToast('Hors-ligne, connexion en cours...', 'warning');
+      TLI.UI.showToast('Hors-ligne', 'warning');
       if (this.socket) this.socket.connect();
       return;
     }
     TLI.UI.showToast('Synchronisation...', 'success');
-    this.push('orders');
-    this.push('clients');
-    this.push('stock');
-    this.push('planning');
-    this.push('machines');
-    this.push('photos');
+    this.push('orders'); this.push('clients'); this.push('stock');
+    this.push('planning'); this.push('machines'); this.push('photos');
     TLI.UI.showToast('Synchronisé !', 'success');
-  },
-
-  pushTimers: function() {
-    this.push('timers');
-  },
-
-  showCursor: function(data) {
-    var cursor = document.getElementById('tli-cursor-' + data.socketId);
-    if (!cursor) {
-      cursor = document.createElement('div');
-      cursor.id = 'tli-cursor-' + data.socketId;
-      cursor.style.cssText = 'position:fixed;z-index:9999;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:none;transition:all 0.15s ease;';
-      cursor.style.backgroundColor = data.color || '#ff6b6b';
-      document.body.appendChild(cursor);
-
-      var label = document.createElement('div');
-      label.id = 'tli-cursor-label-' + data.socketId;
-      label.style.cssText = 'position:fixed;z-index:9999;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;color:#fff;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
-      label.style.backgroundColor = data.color || '#ff6b6b';
-      label.textContent = data.name;
-      document.body.appendChild(label);
-    }
-    cursor.style.left = data.x + 'px';
-    cursor.style.top = data.y + 'px';
-    cursor.style.display = 'block';
-
-    var label = document.getElementById('tli-cursor-label-' + data.socketId);
-    if (label) {
-      label.style.left = (data.x + 18) + 'px';
-      label.style.top = (data.y + 18) + 'px';
-      label.style.display = 'block';
-    }
-  },
-
-  removeCursor: function(socketId) {
-    var cursor = document.getElementById('tli-cursor-' + socketId);
-    var label = document.getElementById('tli-cursor-label-' + socketId);
-    if (cursor) cursor.remove();
-    if (label) label.remove();
   },
 
   login: function() {
     var email = document.getElementById('authEmail').value.trim();
     var password = document.getElementById('authPassword').value;
     var errorDiv = document.getElementById('authError');
-
-    if (!email || !password) {
-      errorDiv.textContent = 'Email et mot de passe requis';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    TLI.Data.currentUserId = email;
-    TLI.Data.currentUserEmail = email;
+    if (!email || !password) { errorDiv.textContent = 'Email et mot de passe requis'; errorDiv.style.display = 'block'; return; }
+    TLI.Data.currentUserId = email; TLI.Data.currentUserEmail = email;
     errorDiv.style.display = 'none';
     TLI.UI.closeModal('authModal');
     TLI.UI.showToast('Connecté : ' + email, 'success');
     TLI.UI.updateAuthDisplay();
-
-    if (this.socket) {
-      this.socket.emit('auth', { name: email, email: email });
-    }
+    if (this.socket) this.socket.emit('auth', { name: email, email: email });
   },
 
   register: function() {
     var email = document.getElementById('authEmail').value.trim();
     var password = document.getElementById('authPassword').value;
     var errorDiv = document.getElementById('authError');
-
-    if (!email || !password) {
-      errorDiv.textContent = 'Champs requis';
-      errorDiv.style.display = 'block';
-      return;
-    }
-    if (password.length < 6) {
-      errorDiv.textContent = '6 caractères minimum';
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    TLI.Data.currentUserId = email;
-    TLI.Data.currentUserEmail = email;
+    if (!email || !password) { errorDiv.textContent = 'Champs requis'; errorDiv.style.display = 'block'; return; }
+    if (password.length < 6) { errorDiv.textContent = '6 caractères minimum'; errorDiv.style.display = 'block'; return; }
+    TLI.Data.currentUserId = email; TLI.Data.currentUserEmail = email;
     errorDiv.style.display = 'none';
     TLI.UI.closeModal('authModal');
     TLI.UI.showToast('Compte créé !', 'success');
     TLI.UI.updateAuthDisplay();
-
-    if (this.socket) {
-      this.socket.emit('auth', { name: email, email: email });
-    }
+    if (this.socket) this.socket.emit('auth', { name: email, email: email });
   },
 
   logout: function() {
     if (confirm('Se déconnecter ?')) {
-      TLI.Data.currentUserId = null;
-      TLI.Data.currentUserEmail = null;
-      if (this.socket) {
-        this.socket.disconnect();
-      }
+      TLI.Data.currentUserId = null; TLI.Data.currentUserEmail = null;
+      if (this.socket) this.socket.disconnect();
       TLI.UI.updateAuthDisplay();
       TLI.UI.showToast('Déconnecté', 'warning');
     }
   }
 };
 
-// Track cursor position
-document.addEventListener('mousemove', function(e) {
-  if (TLI.Server && TLI.Server.isConnected) {
-    TLI.Server.sendCursor(e.clientX, e.clientY, TLI.Data.currentSection || 'dashboard');
-  }
-});
-
-// Track active section
-TLI.Data.currentSection = 'dashboard';
-// ============================================================
 // MODULE: App (Orchestration)
 // ============================================================
 TLI.App = {
@@ -1378,9 +1229,9 @@ TLI.App = {
     console.log('[TLI.App] Initializing v15...');
     TLI.Data.load();
     TLI.UI.init();
-
-    TLI.Server.init();    TLI.Photos.init();
+    TLI.Photos.init();
     TLI.Timer.loop();
+    TLI.Server.init();
 
     // Reminder loop
     setInterval(function() { TLI.Notifs.checkReminders(); }, 30000);
