@@ -55,8 +55,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .order-item-title{font-weight:700;font-size:.95rem}
 .order-item-meta{font-size:.8rem;color:#888;display:flex;gap:12px;flex-wrap:wrap}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.active{display:flex}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;padding:16px}
 .modal-content{background:var(--dark);border:1px solid var(--glass-border);border-radius:20px;padding:22px;width:100%;max-height:90vh;overflow-y:auto;max-width:480px}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-title{font-size:1.1rem;font-weight:700}
@@ -96,8 +95,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
 .checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
 .checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
-.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
-.quality-overlay.active{display:flex}
+.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;padding:16px}
 .quality-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 0 30px rgba(0,212,255,0.3)}
 .quality-header{text-align:center;margin-bottom:18px}
 .quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
@@ -106,8 +104,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .order-tabs::-webkit-scrollbar{display:none}
 .order-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .order-tab.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent}
-.photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
-.photo-overlay.active{display:flex}
+.photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;padding:20px}
 .photo-overlay img{max-width:100%;max-height:80vh;border-radius:12px;object-fit:contain}
 .photo-overlay-close{position:absolute;top:20px;right:20px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
 .client-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
@@ -131,8 +128,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .ca-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px;text-align:center}
 .ca-amount{font-size:1.8rem;font-weight:800;color:var(--primary)}
 .ca-label{font-size:.75rem;color:#888;margin-top:4px}
-.call-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}
-.call-overlay.active{display:flex}
+.call-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4000;padding:16px}
 .call-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:350px;text-align:center}
 .call-content h3{color:var(--primary);margin-bottom:8px}
 .call-content p{color:#888;margin-bottom:20px}
@@ -249,6 +245,42 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 #prospection .history-list{max-height:120px;overflow-y:auto;margin-top:8px}
 #prospection .history-item{padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px;font-size:.8rem;color:#aaa}
 #prospection .history-item b{color:var(--light)}
+
+/* ─── Bouton ghost ─── */
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--light);transition:all .2s}
+.btn-ghost:hover{background:var(--glass)}
+
+/* ─── Badge sol (à solliciter) ─── */
+#prospection .res-badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+#prospection .popup-prospect .badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+
+/* ─── Transitions overlays & modals ─── */
+.modal-overlay,.quality-overlay,.call-overlay,.photo-overlay{
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;
+  transition:opacity .4s ease,visibility .4s ease;
+}
+.modal-overlay.active,.quality-overlay.active,.call-overlay.active,.photo-overlay.active{
+  opacity:1;visibility:visible;
+}
+.modal-content,.quality-content,.call-content{
+  transform:scale(0.92) translateY(20px);
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
+  opacity:0;
+}
+.modal-overlay.active .modal-content,
+.quality-overlay.active .quality-content,
+.call-overlay.active .call-content{
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
+/* Photo overlay img transition */
+.photo-overlay img{transition:transform .4s ease;}
+.photo-overlay.active img{transform:scale(1);}
+
+/* ─── Dropdown menu ─── */
+.dropdown-menu{display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden}
+.dropdown-menu.show{display:block}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,8 +500,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase">À solliciter</div>
         </div>
       </div>
-
-      <div class="res-count" id="prospectCount" style="padding:8px 14px;font-size:.85rem;color:var(--text-muted);border-bottom:1px solid var(--glass-border);background:var(--darker)">Chargement...</div>
 
       <div class="sb-top">
         <input type="text" class="search-box" id="prospectSearch" placeholder="🔍 Rechercher une entreprise, un secteur, un NAF..." oninput="TLI.Prospection.applyFilters()">
@@ -3109,10 +3139,10 @@ TLI.Prospection = {
     var b = this.filteredData.filter(function(p) { return p.notation === 'B'; }).length;
     var c = this.filteredData.filter(function(p) { return p.notation === 'C'; }).length;
     var solCount = this.filteredData.filter(function(p) { return self.toSolicit.has(p.id); }).length;
-    document.getElementById('prospectStatA').textContent = a;
-    document.getElementById('prospectStatB').textContent = b;
-    document.getElementById('prospectStatC').textContent = c;
-    document.getElementById('prospectStatSol').textContent = solCount;
+    document.getElementById('statA').textContent = a;
+    document.getElementById('statB').textContent = b;
+    document.getElementById('statC').textContent = c;
+    document.getElementById('statSol').textContent = solCount;
     document.getElementById('prospectCount').textContent = this.filteredData.length + ' résultat' + (this.filteredData.length > 1 ? 's' : '');
 
     this.renderList(this.filteredData);
@@ -3506,10 +3536,12 @@ TLI.App = {
     document.getElementById('priceFilament').value = TLI.Data.rates.filamentKg;
     document.getElementById('priceResinKg').value = TLI.Data.rates.resinKg;
 
-    // Ouvrir la modal auth si pas connecté
-    if (!TLI.Data.currentUserEmail) {
-      TLI.UI.openModal('authModal');
-    }
+    // Transition vers authModal après le splash screen (7000ms + marge)
+    setTimeout(function() {
+      if (!TLI.Data.currentUserEmail) {
+        TLI.UI.openModal('authModal');
+      }
+    }, 7200);
     console.log('[TLI.App] Initialized successfully');
   }
 };
