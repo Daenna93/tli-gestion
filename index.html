@@ -3093,9 +3093,6 @@ TLI.Prospection = {
     if (el) el.textContent = count;
   },
 
-  toggleSidebar: function() {
-    document.getElementById('prospectSidebar').classList.toggle('hidden');
-  },
 
   resetFilters: function() {
     document.getElementById('prospectSearch').value = '';
@@ -3300,7 +3297,7 @@ TLI.Prospection = {
     a.download = 'tli_prospects_' + new Date().toISOString().slice(0, 10) + '.csv';
     a.click();
     TLI.UI.showToast(this.filteredData.length + ' prospects exportés', 'success');
-
+  },
 
   // ─── POINT DE DÉPART ───
   origin: JSON.parse(localStorage.getItem('tli_origin') || 'null'),
@@ -3370,7 +3367,7 @@ TLI.Prospection = {
     var sb = document.getElementById('prospectSidebar');
     if (sb) sb.classList.toggle('hidden');
     setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
-  }  }
+  }
 };
 
 // ============================================================
