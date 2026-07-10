@@ -55,7 +55,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .order-item-title{font-weight:700;font-size:.95rem}
 .order-item-meta{font-size:.8rem;color:#888;display:flex;gap:12px;flex-wrap:wrap}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;padding:16px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
 .modal-content{background:var(--dark);border:1px solid var(--glass-border);border-radius:20px;padding:22px;width:100%;max-height:90vh;overflow-y:auto;max-width:480px}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-title{font-size:1.1rem;font-weight:700}
@@ -95,7 +96,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .checklist-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--glass);border-radius:10px;margin-bottom:8px;cursor:pointer}
 .checklist-item input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer}
 .checklist-item label{flex:1;cursor:pointer;font-size:.9rem}
-.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;padding:16px}
+.quality-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.quality-overlay.active{display:flex}
 .quality-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 0 30px rgba(0,212,255,0.3)}
 .quality-header{text-align:center;margin-bottom:18px}
 .quality-header h3{font-size:1.2rem;font-weight:800;color:var(--primary);text-shadow:0 0 10px rgba(0,212,255,0.3)}
@@ -104,7 +106,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .order-tabs::-webkit-scrollbar{display:none}
 .order-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);color:var(--light);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .order-tab.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent}
-.photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;padding:20px}
+.photo-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
+.photo-overlay.active{display:flex}
 .photo-overlay img{max-width:100%;max-height:80vh;border-radius:12px;object-fit:contain}
 .photo-overlay-close{position:absolute;top:20px;right:20px;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
 .client-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .3s}
@@ -128,7 +131,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .ca-card{background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.1));border:1px solid var(--primary);border-radius:12px;padding:14px;margin-bottom:10px;text-align:center}
 .ca-amount{font-size:1.8rem;font-weight:800;color:var(--primary)}
 .ca-label{font-size:.75rem;color:#888;margin-top:4px}
-.call-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4000;padding:16px}
+.call-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}
+.call-overlay.active{display:flex}
 .call-content{background:var(--dark);border:1px solid var(--primary);border-radius:20px;padding:24px;width:100%;max-width:350px;text-align:center}
 .call-content h3{color:var(--primary);margin-bottom:8px}
 .call-content p{color:#888;margin-bottom:20px}
@@ -245,43 +249,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 #prospection .history-list{max-height:120px;overflow-y:auto;margin-top:8px}
 #prospection .history-item{padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px;font-size:.8rem;color:#aaa}
 #prospection .history-item b{color:var(--light)}
-
 /* ─── Bouton ghost ─── */
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--light);transition:all .2s}
-.btn-ghost:hover{background:var(--glass)}
-
-/* ─── Badge sol (à solliciter) ─── */
-#prospection .res-badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
-#prospection .popup-prospect .badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
-
-/* ─── Transitions overlays & modals ─── */
-.modal-overlay,.quality-overlay,.call-overlay,.photo-overlay{
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;visibility:hidden;
-  transition:opacity .4s ease,visibility .4s ease;
-}
-.modal-overlay.active,.quality-overlay.active,.call-overlay.active,.photo-overlay.active{
-  opacity:1;visibility:visible;
-}
-.modal-content,.quality-content,.call-content{
-  transform:scale(0.92) translateY(20px);
-  transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
-  opacity:0;
-}
-.modal-overlay.active .modal-content,
-.quality-overlay.active .quality-content,
-.call-overlay.active .call-content{
-  transform:scale(1) translateY(0);
-  opacity:1;
-}
-/* Photo overlay img transition */
-.photo-overlay img{transition:transform .4s ease;}
-.photo-overlay.active img{transform:scale(1);}
-
-/* ─── Dropdown menu ─── */
-.dropdown-menu{display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden}
-.dropdown-menu.show{display:block}
-</style>
+.btn-ghost:hover{background:var(--glass)}</style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -292,7 +262,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <body>
 
 <header class="app-header">
-  <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+    <img src="logo-192.png" alt="TLI" style="height:36px;width:36px;border-radius:8px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.3);flex-shrink:0">
+    <h1 style="margin:0"><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+  </div>
   <button class="sync-btn" id="btnSync"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button>
 </header>
 
@@ -516,7 +489,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
             <div class="dropdown" style="flex:1;position:relative">
               <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
-              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden">
+              <div class="dropdown-menu" style="position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden;display:none">
                 <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
               </div>
             </div>
@@ -600,6 +573,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div style="display:flex;gap:6px;margin-bottom:6px">
             <button class="btn btn-sm btn-secondary" id="btnUseMyPos" style="flex:1;font-size:11px;padding:6px 8px">📡 Ma position</button>
             <button class="btn btn-sm btn-primary" id="btnSetOrigin" style="flex:1;font-size:11px;padding:6px 8px">✅ Appliquer</button>
+            <button class="btn btn-sm btn-danger" id="btnResetOrigin" style="flex:1;font-size:11px;padding:6px 8px" onclick="TLI.Prospection.resetOrigin()">🔄 Réinit.</button>
           </div>
           <div id="originStatus" style="font-size:11px;color:var(--text-muted);min-height:16px"></div>
         </div>
@@ -3113,14 +3087,20 @@ TLI.Prospection = {
 
     var self = this;
     this.filteredData = PROSPECTS_DATA.filter(function(p) {
-      if (q && !p.nom.toLowerCase().includes(q) && !p.secteur.toLowerCase().includes(q) && !p.naf.toLowerCase().includes(q) && !p.ville.toLowerCase().includes(q)) return false;
+      if (q) {
+        var nom = (p.nom || '').toLowerCase();
+        var secteurNom = (p.secteur || '').toLowerCase();
+        var naf = (p.naf || '').toLowerCase();
+        var ville = (p.ville || '').toLowerCase();
+        if (!nom.includes(q) && !secteurNom.includes(q) && !naf.includes(q) && !ville.includes(q)) return false;
+      }
       if (secteur && p.secteur !== secteur) return false;
       if (notation && p.notation !== notation) return false;
-      var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : p.distance;
-      if (dist === null) dist = p.distance || 0;
+      var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : (p.distance || 0);
+      if (dist === null || isNaN(dist)) dist = p.distance || 0;
       if (dist > distMax) return false;
-      if (p.effectif < effMin) return false;
-      if (cats.length && !cats.includes(p.categorie)) return false;
+      if ((p.effectif || 0) < effMin) return false;
+      if (cats.length && p.categorie && !cats.includes(p.categorie)) return false;
       if (onlyNotes && !p.notes) return false;
       return true;
     });
@@ -3207,7 +3187,7 @@ TLI.Prospection = {
 
   updateSolCount: function() {
     var count = this.filteredData ? this.filteredData.filter(function(p) { return TLI.Prospection.toSolicit.has(p.id); }).length : 0;
-    var el = document.getElementById('prospectStatSol');
+    var el = document.getElementById('statSol');
     if (el) el.textContent = count;
   },
 
@@ -3429,23 +3409,44 @@ TLI.Prospection = {
     TLI.UI.showToast('Point de départ mis à jour', 'success');
   },
 
+  resetOrigin: function() {
+    this.origin = null;
+    localStorage.removeItem('tli_origin');
+    this.applyFilters();
+    var input = document.getElementById('prospectOrigin');
+    if (input) input.value = '';
+    var status = document.getElementById('originStatus');
+    if (status) status.textContent = '❌ Aucun point de départ';
+    TLI.UI.showToast('Point de départ réinitialisé', 'warning');
+  },
+
   useMyPosition: function() {
     var self = this;
     var status = document.getElementById('originStatus');
     if (status) status.textContent = '⏳ Localisation...';
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(pos) {
-        self.setOrigin(pos.coords.latitude, pos.coords.longitude, 'Ma position');
-        var input = document.getElementById('prospectOrigin');
-        if (input) input.value = 'Ma position (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
-      }, function() {
-        if (status) status.textContent = '❌ Localisation refusée';
-        TLI.UI.showToast('Localisation refusée', 'error');
-      });
-    } else {
+    if (!navigator.geolocation) {
       if (status) status.textContent = '❌ Non supportée';
       TLI.UI.showToast('Géolocalisation non supportée', 'error');
+      return;
     }
+    if (window.location.protocol === 'http:') {
+      if (status) status.textContent = '❌ HTTPS requis';
+      TLI.UI.showToast('Géolocalisation bloquée en HTTP → utilisez HTTPS', 'error');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      self.setOrigin(pos.coords.latitude, pos.coords.longitude, 'Ma position');
+      var input = document.getElementById('prospectOrigin');
+      if (input) input.value = 'Ma position (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
+      if (status) status.textContent = '✅ Ma position';
+    }, function(err) {
+      var msg = 'Localisation refusée';
+      if (err.code === 1) msg = 'Permission refusée par le navigateur';
+      else if (err.code === 2) msg = 'Position indisponible';
+      else if (err.code === 3) msg = 'Délai dépassé';
+      if (status) status.textContent = '❌ ' + msg;
+      TLI.UI.showToast(msg, 'error');
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   },
 
   geocodeOrigin: function() {
@@ -3536,12 +3537,10 @@ TLI.App = {
     document.getElementById('priceFilament').value = TLI.Data.rates.filamentKg;
     document.getElementById('priceResinKg').value = TLI.Data.rates.resinKg;
 
-    // Transition vers authModal après le splash screen (7000ms + marge)
-    setTimeout(function() {
-      if (!TLI.Data.currentUserEmail) {
-        TLI.UI.openModal('authModal');
-      }
-    }, 7200);
+    // Ouvrir la modal auth si pas connecté
+    if (!TLI.Data.currentUserEmail) {
+      TLI.UI.openModal('authModal');
+    }
     console.log('[TLI.App] Initialized successfully');
   }
 };
