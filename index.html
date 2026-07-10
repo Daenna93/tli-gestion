@@ -201,13 +201,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .accordion.open .accordion-body{max-height:800px;padding:8px 14px}
 
 /* ─── Splash Screen ─── */
-#splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#581c87 0%,#ec4899 100%);transition:opacity .8s ease,transform .8s ease}
-#splashScreen.fade-out{opacity:0;transform:scale(1.1);pointer-events:none}
-#splashScreen .splash-logo{width:140px;height:140px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:splashPop 3s ease forwards}
-#splashScreen .splash-title{margin-top:24px;font-size:1.4rem;font-weight:700;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.3);opacity:0;animation:splashFadeIn 1s .5s ease forwards}
-#splashScreen .splash-subtitle{margin-top:6px;font-size:.85rem;color:rgba(255,255,255,.8);opacity:0;animation:splashFadeIn 1s 1s ease forwards}
-@keyframes splashPop{0%{transform:scale(0) rotate(-10deg);opacity:0}40%{transform:scale(1.1) rotate(2deg)}60%{transform:scale(1) rotate(0)}100%{transform:scale(1) rotate(0);opacity:1}}
-@keyframes splashFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#splashScreen{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a1f;transition:opacity .9s ease,transform .9s ease}
+#splashScreen::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 1px,rgba(255,255,255,.03) 1px,rgba(255,255,255,.03) 2px),repeating-linear-gradient(90deg,transparent 0px,transparent 1px,rgba(255,255,255,.02) 1px,rgba(255,255,255,.02) 2px);pointer-events:none}
+#splashScreen.fade-out{opacity:0;transform:scale(1.08);pointer-events:none}
+#splashScreen .splash-logo-wrap{position:relative;animation:splashLogoPop 5s ease forwards}
+#splashScreen .splash-logo{width:160px;height:160px;border-radius:28px;box-shadow:0 0 60px rgba(0,212,255,.25),0 20px 40px rgba(0,0,0,.5);animation:splashLogoGlow 3s ease-in-out infinite alternate}
+#splashScreen .splash-title{margin-top:28px;font-size:1.5rem;font-weight:700;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#splashScreen .splash-title .splash-word{display:inline-block;overflow:hidden;white-space:nowrap}
+#splashScreen .splash-title .splash-word span{display:inline-block;transform:translateY(100%);opacity:0;animation:splashLetterReveal .5s ease forwards}
+#splashScreen .splash-title .splash-blue{color:#00d4ff;text-shadow:0 0 20px rgba(0,212,255,.5)}
+#splashScreen .splash-subtitle{margin-top:10px;font-size:.85rem;color:rgba(255,255,255,.6);opacity:0;animation:splashFadeIn .8s 4.2s ease forwards}
+@keyframes splashLogoPop{0%{transform:scale(0) rotate(-15deg);opacity:0}25%{transform:scale(1.15) rotate(3deg)}40%{transform:scale(1) rotate(0)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes splashLogoGlow{0%{box-shadow:0 0 40px rgba(0,212,255,.2),0 20px 40px rgba(0,0,0,.5)}100%{box-shadow:0 0 70px rgba(0,212,255,.4),0 20px 40px rgba(0,0,0,.5)}}
+@keyframes splashLetterReveal{from{transform:translateY(100%) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes splashFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 @media (max-width:768px){
   #prospection .sidebar{position:absolute;z-index:900;height:100%;width:90%;max-width:380px;transition:transform .3s ease}
@@ -3605,10 +3612,53 @@ if ('serviceWorker' in navigator) {
 
 <!-- Splash Screen -->
 <div id="splashScreen">
-  <img src="logo-192.png" alt="TLI" class="splash-logo">
-  <div class="splash-title">Technical Layer Innovation</div>
+  <div class="splash-logo-wrap">
+    <img src="logo-192.png" alt="TLI" class="splash-logo">
+  </div>
+  <div class="splash-title" id="splashTitle">
+    <span class="splash-word">Technical</span>
+    <span class="splash-word">Layer</span>
+    <span class="splash-word splash-blue">Innovation</span>
+  </div>
   <div class="splash-subtitle">Impression 3D · Prototypage · Innovation</div>
 </div>
+
+<script>
+// Splash screen indépendant - animation lettre par lettre + auto-hide
+(function() {
+  // Animation lettre par lettre
+  var title = document.getElementById('splashTitle');
+  if (title) {
+    var words = title.querySelectorAll('.splash-word');
+    var delay = 1.2; // début après 1.2s (le temps que le logo apparaisse)
+    var letterDelay = 0.06; // 60ms entre chaque lettre
+    words.forEach(function(word) {
+      var text = word.textContent;
+      word.innerHTML = '';
+      for (var i = 0; i < text.length; i++) {
+        var span = document.createElement('span');
+        span.textContent = text[i] === ' ' ? ' ' : text[i];
+        span.style.animationDelay = (delay + i * letterDelay) + 's';
+        word.appendChild(span);
+      }
+    });
+  }
+
+  function hideSplash() {
+    var s = document.getElementById('splashScreen');
+    if (s) {
+      s.classList.add('fade-out');
+      setTimeout(function() { s.style.display = 'none'; }, 900);
+    }
+  }
+  // 5 secondes
+  setTimeout(hideSplash, 5000);
+  // Fallback
+  if (window.performance && performance.timing && (Date.now() - performance.timing.navigationStart > 7000)) {
+    hideSplash();
+  }
+})();
+</script>
 
 </body>
 </html>
