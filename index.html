@@ -3245,8 +3245,7 @@ TLI.Prospection = {
         (p.distance ? p.distance.toFixed(1) : 0),
         '"' + (status ? TLI.Prospection.STATUS_LABELS[status] : '') + '"',
         '"' + last + '"',
-        '"' + (p.notes || '').replace(/"/g, '""').replace(/
-/g, ' ') + '"'
+        '"' + (p.notes || '').replace(/"/g, '""').split('\n').join(' ') + '"'
       ].join(';');
     });
     var csv = '\uFEFF' + headers.join(';') + '\n' + rows.join('\n');
