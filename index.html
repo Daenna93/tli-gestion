@@ -3183,7 +3183,7 @@ TLI.Prospection = {
 
   saveNewProspect: function() {
     var name = document.getElementById('prospectAddName').value.trim();
-    if (!name) { TLI.UI.showToast('Nom de l'entreprise requis', 'error'); return; }
+    if (!name) { TLI.UI.showToast('Nom de l\'entreprise requis', 'error'); return; }
     var lat = parseFloat(document.getElementById('prospectAddLat').value);
     var lng = parseFloat(document.getElementById('prospectAddLng').value);
     if (isNaN(lat) || isNaN(lng)) { TLI.UI.showToast('Coordonnées GPS requises', 'error'); return; }
