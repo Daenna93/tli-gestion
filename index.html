@@ -2944,7 +2944,7 @@ TLI.Prospection = {
       '<p>📍 ' + p.adresse + ', ' + p.cp + ' ' + p.ville + '</p>' +
       '<p>🏭 ' + p.secteur + ' • NAF ' + p.naf + '</p>' +
       '<p>👥 ' + p.effectif + ' salariés • ' + p.categorie + '</p>' +
-      '<p>📏 ' + p.distance.toFixed(1) + ' km de Nantes</p>' +
+      '<p>📏 ' + (self.origin ? self.distanceFromOrigin(p.lat, p.lng).toFixed(1) + ' km (dep. origine)' : p.distance.toFixed(1) + ' km de Nantes') + '</p>' +
       notes + status + last +
       '<div style="margin-top:8px">' +
         '<span class="badge ' + p.notation + '">' + p.notation + '</span>' + sol +
@@ -3334,6 +3334,18 @@ TLI.Prospection = {
     var input = document.getElementById('prospectOrigin');
     var status = document.getElementById('originStatus');
     if (!input || !input.value.trim()) return;
+
+    // Vérifier si le champ contient déjà des coordonnées (format "Ma position (lat, lng)")
+    var coordMatch = input.value.match(/\(?([-+]?\d+\.\d+),\s*([-+]?\d+\.\d+)\)?/);
+    if (coordMatch) {
+      var lat = parseFloat(coordMatch[1]);
+      var lng = parseFloat(coordMatch[2]);
+      this.setOrigin(lat, lng, 'Point personnalisé');
+      if (status) status.textContent = '✅ Coordonnées appliquées';
+      TLI.UI.showToast('Point de départ mis à jour', 'success');
+      return;
+    }
+
     if (status) status.textContent = '⏳ Géocodage...';
     var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(input.value.trim());
     fetch(url).then(function(r) { return r.json(); }).then(function(data) {
