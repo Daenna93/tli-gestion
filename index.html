@@ -486,6 +486,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
         </div>
       </div>
 
+      
+
       <div class="sb-top">
         <input type="text" class="search-box" id="prospectSearch" placeholder="🔍 Rechercher une entreprise, un secteur, un NAF..." oninput="TLI.Prospection.applyFilters()">
       </div>
@@ -501,8 +503,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
             <div class="dropdown" style="flex:1;position:relative">
               <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
-              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
-                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid var(--glass-border)" onclick="TLI.Prospection.showAddModal();document.querySelectorAll('.dropdown-menu').forEach(function(m){m.style.display='none';})">🏢 Nouveau prospect</button>
+              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden">
+                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
               </div>
             </div>
           </div>
@@ -1667,7 +1669,13 @@ TLI.UI = {
     if (acc) acc.classList.toggle('open');
   },
 
-
+  toggleDropdown: function(btn) {
+    var menu = btn.nextElementSibling;
+    if (!menu) return;
+    var isVisible = menu.style.display === 'block';
+    document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.style.display = 'none'; });
+    if (!isVisible) menu.style.display = 'block';
+  },
 
   showToast: function(msg, type) {
     var t = document.getElementById('toast');
@@ -2921,6 +2929,7 @@ TLI.Calc = {
 TLI.Prospection = {
   map: null,
   clusterGroup: null,
+  originMarker: null,
   allMarkers: [],
   filteredData: [],
   toSolicit: null,
@@ -3025,6 +3034,7 @@ TLI.Prospection = {
     });
     this.map.addLayer(this.clusterGroup);
     this.mapInitialized = true;
+    this.updateOriginMarker();
     this.applyFilters();
   },
 
@@ -3417,21 +3427,26 @@ TLI.Prospection = {
   setOrigin: function(lat, lng, label) {
     this.origin = { lat: lat, lng: lng, label: label || 'Point de départ' };
     localStorage.setItem('tli_origin', JSON.stringify(this.origin));
+    this.updateOriginMarker();
     this.applyFilters();
     var status = document.getElementById('originStatus');
     if (status) status.textContent = '✅ ' + this.origin.label;
     TLI.UI.showToast('Point de départ mis à jour', 'success');
   },
 
-  resetOrigin: function() {
-    this.origin = null;
-    localStorage.removeItem('tli_origin');
-    this.applyFilters();
-    var input = document.getElementById('prospectOrigin');
-    if (input) input.value = '';
-    var status = document.getElementById('originStatus');
-    if (status) status.textContent = '❌ Aucun point de départ';
-    TLI.UI.showToast('Point de départ réinitialisé', 'warning');
+  updateOriginMarker: function() {
+    if (!this.map) return;
+    if (this.originMarker) { this.map.removeLayer(this.originMarker); this.originMarker = null; }
+    if (!this.origin) return;
+    var oLat = parseFloat(this.origin.lat), oLng = parseFloat(this.origin.lng);
+    if (isNaN(oLat) || isNaN(oLng)) return;
+    var greenIcon = L.divIcon({
+      className: 'origin-marker',
+      html: '<div style="width:28px;height:28px;background:#00ff88;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:14px;">📍</div><div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #00ff88;margin:-2px auto 0;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));"></div>',
+      iconSize: [28, 40], iconAnchor: [14, 38]
+    });
+    this.originMarker = L.marker([oLat, oLng], { icon: greenIcon, zIndexOffset: 1000 }).addTo(this.map);
+    this.originMarker.bindPopup('<b>📍 Point de départ</b><br>' + (this.origin.label || 'Origine'));
   },
 
   useMyPosition: function() {
@@ -3500,10 +3515,8 @@ TLI.Prospection = {
 
   distanceFromOrigin: function(lat, lng) {
     if (!this.origin) return null;
-    var oLat = parseFloat(this.origin.lat);
-    var oLng = parseFloat(this.origin.lng);
-    var pLat = parseFloat(lat);
-    var pLng = parseFloat(lng);
+    var oLat = parseFloat(this.origin.lat), oLng = parseFloat(this.origin.lng);
+    var pLat = parseFloat(lat), pLng = parseFloat(lng);
     if (isNaN(oLat) || isNaN(oLng) || isNaN(pLat) || isNaN(pLng)) return null;
     var R = 6371;
     var dLat = (pLat - oLat) * Math.PI / 180;
