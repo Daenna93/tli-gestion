@@ -618,7 +618,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
       <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="authPassword" placeholder="••••••••"></div>
       <button class="btn btn-primary" id="btnLogin" onclick="TLI.Server.login()" type="button">Se connecter</button>
       <button class="btn btn-secondary" id="btnRegister" style="margin-top:8px" onclick="TLI.Server.register()" type="button">Créer un compte</button>
-      <button class="btn btn-secondary" id="btnOffline" style="margin-top:8px" onclick="TLI.UI.closeModal('authModal')" type="button">Continuer hors-ligne</button>
+      <button class="btn btn-secondary" id="btnOffline" style="margin-top:8px" onclick="TLI.Server.goOffline()" type="button">Continuer hors-ligne</button>
       <div id="authError" style="color:var(--danger);font-size:.8rem;margin-top:10px;text-align:center;display:none"></div>
     </div>
   </div>
@@ -723,6 +723,8 @@ TLI.Data = {
   qualityOrderId: null,
   tempQualityPhoto: null,
   callNumber: "",
+
+  offlineMode: false,
 
   load: function() {
     try {
@@ -1094,6 +1096,10 @@ TLI.Server = {
       });
 
       this.socket.on('data-update', function(payload) {
+        if (TLI.Data.offlineMode) {
+          console.log('[TLI.Server] Ignoré (mode offline) :', payload.type);
+          return;
+        }
         console.log('[TLI.Server] Mise à jour reçue :', payload.type);
         if (payload.type === 'orders') {
           // Fusion : conserver les photos locales si le serveur n'en a pas
@@ -1140,6 +1146,10 @@ TLI.Server = {
   },
 
   push: function(type) {
+    if (TLI.Data.offlineMode) {
+      TLI.Data.save();
+      return;
+    }
     if (!this.socket || !this.isConnected) {
       TLI.Data.save();
       return;
@@ -1160,6 +1170,25 @@ TLI.Server = {
 
   pushTimers: function() { this.push('timers'); },
 
+  goOffline: function() {
+    TLI.Data.offlineMode = true;
+    if (this.socket) {
+      this.socket.disconnect();
+      this.isConnected = false;
+    }
+    TLI.UI.updateSyncStatus('offline');
+    TLI.UI.closeModal('authModal');
+    TLI.UI.showToast('Mode hors-ligne activé', 'warning');
+    console.log('[TLI.Server] Mode hors-ligne');
+  },
+
+  disconnect: function() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.isConnected = false;
+    }
+  },
+
   sync: function() {
     if (!this.isConnected) {
       TLI.UI.showToast('Hors-ligne', 'warning');
@@ -1179,6 +1208,7 @@ TLI.Server = {
     if (!email || !password) { errorDiv.textContent = 'Email et mot de passe requis'; errorDiv.style.display = 'block'; return; }
     errorDiv.style.display = 'none';
     TLI.Data.currentUserId = email; TLI.Data.currentUserEmail = email;
+    TLI.Data.offlineMode = false;
     if (this.socket && this.socket.connected) {
       this.socket.emit('auth', { name: email, email: email, password: password });
     } else {
@@ -1196,6 +1226,7 @@ TLI.Server = {
     if (password.length < 6) { errorDiv.textContent = '6 caractères minimum'; errorDiv.style.display = 'block'; return; }
     errorDiv.style.display = 'none';
     TLI.Data.currentUserId = email; TLI.Data.currentUserEmail = email;
+    TLI.Data.offlineMode = false;
     if (this.socket && this.socket.connected) {
       this.socket.emit('register', { name: email, email: email, password: password });
     } else {
