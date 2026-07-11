@@ -2952,11 +2952,11 @@ TLI.Prospection = {
 
   init: function() {
     this.toSolicit = new Set(JSON.parse(localStorage.getItem('tli_prospects_sol')||'[]'));
-    this.prospectStatus = JSON.parse(localStorage.getItem('tli_prospect_status')||'{}'));
-    this.prospectHistory = JSON.parse(localStorage.getItem('tli_prospect_history')||'{}'));
-    this.lastContact = JSON.parse(localStorage.getItem('tli_prospect_lastcontact')||'{}'));
-    this.prospectClientLinks = JSON.parse(localStorage.getItem('tli_prospect_clientlinks')||'{}'));
-    this._customProspects = JSON.parse(localStorage.getItem('tli_prospects_custom')||'[]'));
+    this.prospectStatus = JSON.parse(localStorage.getItem('tli_prospect_status')||'{}');
+    this.prospectHistory = JSON.parse(localStorage.getItem('tli_prospect_history')||'{}');
+    this.lastContact = JSON.parse(localStorage.getItem('tli_prospect_lastcontact')||'{}');
+    this.prospectClientLinks = JSON.parse(localStorage.getItem('tli_prospect_clientlinks')||'{}');
+    this._customProspects = JSON.parse(localStorage.getItem('tli_prospects_custom')||'[]');
     if (this._customProspects.length > 0 && typeof PROSPECTS_DATA !== 'undefined') {
       var existingIds = new Set(PROSPECTS_DATA.map(function(p) { return p.id; }));
       this._customProspects.forEach(function(p) {
