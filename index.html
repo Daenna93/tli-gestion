@@ -461,6 +461,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
     <button class="btn btn-secondary" id="btnLogout">🚪 Se déconnecter</button>
   </div>
   <div class="card">
+    <div class="card-title">📱 Installation</div>
+    <button class="btn btn-primary" id="btnInstallPWA" style="display:none">📲 Installer l'application</button>
+    <p style="font-size:.75rem;color:#888;margin-top:8px">Si le bouton n'apparaît pas, utilise le menu Chrome → "Ajouter à l'écran d'accueil"</p>
+  </div>
+  <div class="card">
+    <div class="card-title">📱 Installation</div>
+    <button class="btn btn-primary" id="btnInstallPWA" style="display:none">📲 Installer l'application</button>
+    <p style="font-size:.75rem;color:#888;margin-top:8px">Si le bouton n'apparaît pas, utilise le menu Chrome → "Ajouter à l'écran d'accueil"</p>
+  </div>
+  <div class="card">
     <div class="card-title">⚠️ Danger Zone</div>
     <button class="btn btn-danger" id="btnClearAll">🗑️ Tout effacer</button>
   </div>
@@ -1356,6 +1366,8 @@ TLI.Server = {
           self.lastConnectToast = now;
         }
         // Ne pas auto-auth ici, attendre que l'utilisateur se connecte manuellement
+        // Demander les données prospects au serveur
+        TLI.Server.requestProspects();
       });
 
       this.socket.on('init-data', function(data) {
@@ -1433,6 +1445,11 @@ TLI.Server = {
           }
         }
         TLI.UI.showToast('Photo synchronisée', 'success');
+      });
+
+      this.socket.on('prospects-data', function(data) {
+        console.log('[TLI.Server] Données prospects reçues');
+        TLI.Prospection.setProspectsState(data);
       });
 
       this.socket.on('data-update', function(payload) {
@@ -1619,6 +1636,16 @@ TLI.Server = {
       TLI.UI.showToast('Déconnecté', 'warning');
       setTimeout(function() { window.location.reload(); }, 1000);
     }
+  },
+
+  pushProspects: function() {
+    if (TLI.Data.offlineMode || !this.socket || !this.isConnected) return;
+    this.socket.emit('update-prospects', TLI.Prospection.getProspectsState());
+  },
+
+  requestProspects: function() {
+    if (!this.socket || !this.isConnected) return;
+    this.socket.emit('request-prospects');
   }
 };
 
@@ -2751,6 +2778,22 @@ TLI.UI = {
     document.getElementById('btnLogout').addEventListener('click', function() {
       TLI.Server.logout();
     });
+    document.getElementById('btnInstallPWA').addEventListener('click', function() {
+      if (!TLI.App.deferredPrompt) {
+        TLI.UI.showToast('Installation non disponible. Utilise le menu Chrome.', 'warning');
+        return;
+      }
+      TLI.App.deferredPrompt.prompt();
+      TLI.App.deferredPrompt.userChoice.then(function(choice) {
+        if (choice.outcome === 'accepted') {
+          TLI.UI.showToast('Installation en cours...', 'success');
+        } else {
+          TLI.UI.showToast('Installation annulée', 'warning');
+        }
+        TLI.App.deferredPrompt = null;
+        document.getElementById('btnInstallPWA').style.display = 'none';
+      });
+    });
     document.getElementById('btnClearAll').addEventListener('click', function() {
       if (!confirm('TOUT effacer ? C\'est irréversible !')) return;
       TLI.Data.orders = []; TLI.Data.clients = []; TLI.Data.models = [];
@@ -3014,6 +3057,10 @@ TLI.Prospection = {
 
     this.applyFilters();
     this.updateSolCount();
+    // Charger depuis le serveur si connecté
+    if (TLI.Server.isConnected) {
+      TLI.Server.requestProspects();
+    }
   },
 
   initMap: function() {
@@ -3071,10 +3118,13 @@ TLI.Prospection = {
     var clientsHtml = '';
     if (links.length > 0) {
       clientsHtml = '<div style="margin-top:8px"><b>👤 Clients liés:</b></div>';
-      links.forEach(function(cid) {
+            links.forEach(function(cid) {
         var c = TLI.Data.getClient(cid);
         if (c) {
-          clientsHtml += '<button class="btn btn-sm btn-secondary" style="margin:4px 4px 0 0;width:auto;padding:4px 10px;font-size:.75rem" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector(\'.nav-tab[data-section=clients]\').click();">' + TLI.Utils.escapeHtml(c.name) + '</button>';
+          clientsHtml += '<div style="display:inline-flex;align-items:center;gap:4px;margin:4px 4px 0 0;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:4px 10px;font-size:.75rem">' +
+            '<span style="cursor:pointer" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector('.nav-tab[data-section=clients]').click();">' + TLI.Utils.escapeHtml(c.name) + '</span>' +
+            '<span style="cursor:pointer;color:var(--secondary);font-weight:800;margin-left:4px" onclick="event.stopPropagation();TLI.Prospection.unlinkClientFromPopup(' + p.id + ',' + cid + ');" title="Délier">❌</span>' +
+          '</div>';
         }
       });
     }
@@ -3231,6 +3281,7 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospects_sol', JSON.stringify([...this.toSolicit]));
     this.updateSolCount();
     this.applyFilters();
+    TLI.Server.pushProspects();
     var m = this.allMarkers.find(function(x) { return x.id === id; });
     if (m) m.marker.setPopupContent(this.makePopup(m.data));
   },
@@ -3352,6 +3403,7 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
     localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
     localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    TLI.Server.pushProspects();
 
     TLI.UI.closeModal('prospectDetailModal');
     TLI.UI.showToast('Prospect mis à jour', 'success');
@@ -3368,6 +3420,7 @@ TLI.Prospection = {
     if (this.prospectClientLinks[id].indexOf(cid) === -1) {
       this.prospectClientLinks[id].push(cid);
       localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+      TLI.Server.pushProspects();
       TLI.UI.showToast('Client lié', 'success');
       this.showDetailModal(id);
       this.applyFilters();
@@ -3381,8 +3434,21 @@ TLI.Prospection = {
     if (!this.prospectClientLinks[id]) return;
     this.prospectClientLinks[id] = this.prospectClientLinks[id].filter(function(x) { return x !== cid; });
     localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    TLI.Server.pushProspects();
     TLI.UI.showToast('Client délié', 'warning');
     this.showDetailModal(id);
+    this.applyFilters();
+  },
+
+  unlinkClientFromPopup: function(prospectId, cid) {
+    if (!this.prospectClientLinks[prospectId]) return;
+    this.prospectClientLinks[prospectId] = this.prospectClientLinks[prospectId].filter(function(x) { return x !== cid; });
+    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    TLI.Server.pushProspects();
+    TLI.UI.showToast('Client délié', 'warning');
+    // Rafraîchir le popup
+    var m = this.allMarkers.find(function(x) { return x.id === prospectId; });
+    if (m) { m.marker.setPopupContent(this.makePopup(m.data)); }
     this.applyFilters();
   },
 
@@ -3420,6 +3486,7 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
     TLI.UI.closeModal('prospectDetailModal');
     TLI.UI.showToast('Prospect supprimé', 'warning');
+    TLI.Server.pushProspects();
     this.applyFilters();
   },
 
@@ -3491,6 +3558,7 @@ TLI.Prospection = {
 
     TLI.UI.closeModal('prospectAddModal');
     TLI.UI.showToast('Prospect ajouté et sauvegardé', 'success');
+    TLI.Server.pushProspects();
     this.applyFilters();
   },
 
@@ -3532,6 +3600,7 @@ TLI.Prospection = {
   setOrigin: function(lat, lng, label) {
     this.origin = { lat: lat, lng: lng, label: label || 'Point de départ' };
     localStorage.setItem('tli_origin', JSON.stringify(this.origin));
+    TLI.Server.pushProspects();
     this.updateOriginMarker();
     this.applyFilters();
     var status = document.getElementById('originStatus');
@@ -3633,12 +3702,57 @@ TLI.Prospection = {
       document.getElementById('prospectOnlyNotes').checked = true;
     }
     this.applyFilters();
+    TLI.Server.pushProspects();
   },
 
   toggleSidebar: function() {
     var sb = document.getElementById('prospectSidebar');
     if (sb) sb.classList.toggle('hidden');
     setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
+  },
+
+  getProspectsState: function() {
+    return {
+      prospectStatus: this.prospectStatus,
+      prospectHistory: this.prospectHistory,
+      lastContact: this.lastContact,
+      prospectClientLinks: this.prospectClientLinks,
+      toSolicit: [...this.toSolicit],
+      customProspects: this._customProspects,
+      origin: this.origin
+    };
+  },
+
+  setProspectsState: function(data) {
+    if (!data) return;
+    if (data.prospectStatus) this.prospectStatus = data.prospectStatus;
+    if (data.prospectHistory) this.prospectHistory = data.prospectHistory;
+    if (data.lastContact) this.lastContact = data.lastContact;
+    if (data.prospectClientLinks) this.prospectClientLinks = data.prospectClientLinks;
+    if (data.toSolicit) this.toSolicit = new Set(data.toSolicit);
+    if (data.customProspects) {
+      this._customProspects = data.customProspects;
+      // Fusionner les prospects custom dans PROSPECTS_DATA
+      if (typeof PROSPECTS_DATA !== 'undefined') {
+        var existingIds = new Set(PROSPECTS_DATA.map(function(p) { return p.id; }));
+        data.customProspects.forEach(function(p) {
+          if (!existingIds.has(p.id)) { PROSPECTS_DATA.push(p); existingIds.add(p.id); }
+        });
+      }
+    }
+    if (data.origin) {
+      this.origin = data.origin;
+      localStorage.setItem('tli_origin', JSON.stringify(data.origin));
+    }
+    // Sauvegarder en localStorage comme cache
+    localStorage.setItem('tli_prospect_status', JSON.stringify(this.prospectStatus));
+    localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
+    localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
+    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    localStorage.setItem('tli_prospects_sol', JSON.stringify([...this.toSolicit]));
+    localStorage.setItem('tli_prospects_custom', JSON.stringify(this._customProspects));
+    this.applyFilters();
+    this.updateOriginMarker();
   }
 };
 
@@ -3655,6 +3769,22 @@ TLI.App = {
     TLI.Server.init();
     TLI.Calc.update();
     TLI.Prospection.init();
+
+    // PWA install prompt
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      TLI.App.deferredPrompt = e;
+      console.log('[TLI.App] beforeinstallprompt capturé');
+      var btn = document.getElementById('btnInstallPWA');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+    window.addEventListener('appinstalled', function() {
+      console.log('[TLI.App] PWA installée');
+      TLI.App.deferredPrompt = null;
+      var btn = document.getElementById('btnInstallPWA');
+      if (btn) btn.style.display = 'none';
+      TLI.UI.showToast('Application installée !', 'success');
+    });
 
     // Reminder loop
     setInterval(function() { TLI.Notifs.checkReminders(); }, 30000);
