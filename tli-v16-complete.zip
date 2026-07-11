@@ -1,0 +1,79 @@
+# Plan TLI v16 - Refactoring Complet & Corrections
+
+## Contexte
+PWA TLI (Technical Layer Innovation) - App de gestion d'entreprise impression 3D.
+Fichier monolithique index.html de 4000+ lignes accumulant des bugs depuis 50+ patches.
+
+## Problèmes identifiés
+1. **Popup map → client lié non-bouton** : Les clients liés dans le popup sont des <span>, pas des boutons cliquables
+2. **Synchro serveur cassée** : Les prospects custom ne se synchronisent pas entre PC/téléphone
+3. **Édition prospect incomplète** : Impossible de modifier nom, adresse, secteur, effectif, notation
+4. **Boutons PWA dupliqués** : 2 cartes "Installation" avec même ID, l'installation native ne marche pas
+5. **Import CSV manquant** : Seul l'export existe dans l'onglet prospection
+6. **Erreurs syntaxe** : Guillements cassés dans les onclick inline, structure fragile
+7. **Architecture monolithique** : Un seul fichier de 4000+ lignes, impossible à maintenir
+
+## Stages
+
+### Stage 1 — Analyse & Architecture (Orchestrateur)
+- Charger skill vibecoding-general-swarm
+- Définir la nouvelle architecture modulaire
+- Préparer les sous-tâches
+
+### Stage 2 — Refactoring HTML+CSS (SubAgent)
+- Extraire le HTML structure + CSS dans un index.html propre
+- Corriger les boutons PWA dupliqués
+- Ajouter le modal d'import CSV
+- Corriger les IDs dupliqués
+
+### Stage 3 — Refactoring JS Core (SubAgent)
+- Module Utils + Data (chargement/sauvegarde localStorage)
+- Module Server (WebSocket sync)
+- Module Notifications
+- Module Photos
+- Module Calculator
+- Corriger la synchro serveur pour prospects
+
+### Stage 4 — Refactoring JS UI (SubAgent)
+- Module UI (rendu interface)
+- Module Timer
+- Corriger la navigation client depuis popup map
+
+### Stage 5 — Refactoring Prospection (SubAgent)
+- Module Prospection complet refondu
+- Édition complète de tous les champs prospect
+- Import CSV
+- Synchro prospects serveur fiable
+
+### Stage 6 — Assemblage & Vérification (Orchestrateur)
+- Assembler tous les modules
+- Vérifier syntaxe JS (accolades, parenthèses, crochets)
+- Vérifier cohérence des appels inter-modules
+- Générer les fichiers livrables
+
+## Architecture cible
+```
+tli-gestion/
+├── index.html          (structure HTML + CSS, ~600 lignes)
+├── app.js              (point d'entrée + init, ~50 lignes)
+├── modules/
+│   ├── utils.js        (utilitaires, ~100 lignes)
+│   ├── data.js         (données + localStorage, ~200 lignes)
+│   ├── server.js       (WebSocket sync, ~250 lignes)
+│   ├── ui.js           (rendu interface, ~1200 lignes)
+│   ├── photos.js       (gestion photos, ~150 lignes)
+│   ├── timer.js        (timers + boucle, ~150 lignes)
+│   ├── calc.js         (calculateur devis, ~80 lignes)
+│   ├── notifs.js       (notifications, ~80 lignes)
+│   └── prospection.js  (carte + prospects, ~800 lignes)
+├── data_prospects.js   (données prospects statiques)
+├── sw.js               (service worker)
+└── manifest.json
+```
+
+## Livrables
+- index.html (refondu)
+- app.js (nouveau)
+- modules/*.js (7 modules séparés)
+- sw.js (corrigé)
+- manifest.json (inchangé)
