@@ -1,90 +1,94 @@
-const CACHE_NAME = 'tli-v15-cache-v25';
-const ASSETS = [
-  './',
-  './index.html',
-  './app.js',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+// TLI Service Worker v16 - Force update
+const CACHE_NAME = 'tli-cache-v16';
+const STATIC_ASSETS = [
+  '/tli-gestion/',
+  '/tli-gestion/index.html',
+  '/tli-gestion/logo-192.png',
+  '/tli-gestion/logo-512.png',
+  '/tli-gestion/logo-apple-180.png',
+  '/tli-gestion/manifest.json'
 ];
 
-self.addEventListener('install', (event) => {
-  console.log('[SW v25] Installing...');
+// Installation : met en cache et force l'activation
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-      .catch(() => caches.open(CACHE_NAME).then((c) => c.add('./index.html')))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(STATIC_ASSETS).catch(() => {
+        console.log('[SW] Certains assets non cacheables (normal pour Google Sheets)');
+      });
+    }).then(() => {
+      self.skipWaiting();
+    })
   );
-  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('[SW v25] Activating...');
+// Activation : nettoie les anciens caches et prend le contrôle
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
-    ).then(() => self.clients.claim()).then(() => {
-      return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({ type: 'SW_RELOAD', version: 25 });
-          if (client.navigate) client.navigate(client.url);
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+    }).then(() => {
+      return self.clients.claim();
+    }).then(() => {
+      // Notifier tous les clients qu'une mise à jour est disponible
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'SW_UPDATED', version: CACHE_NAME });
         });
       });
     })
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('firebase') || event.request.url.includes('google')) return;
-  event.respondWith(
-    fetch(event.request).then((res) => {
-      if (res && res.status === 200) {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
-      }
-      return res;
-    }).catch(() =>
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        if (event.request.mode === 'navigate') return caches.match('./index.html');
-        return new Response('Offline', { status: 503 });
-      })
-    )
-  );
-});
+// Fetch : network-first pour le HTML, cache-first pour les assets statiques
+self.addEventListener('fetch', event => {
+  const { request } = event;
+  const url = new URL(request.url);
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
-    self.registration.showNotification(event.data.title, {
-      body: event.data.body,
-      icon: './icon-192.png',
-      badge: './icon-192.png',
-      tag: event.data.tag || 'tli-local'
-    });
+  // Ne pas intercepter les requêtes vers d'autres origines (Google Sheets, API, etc.)
+  if (url.origin !== self.location.origin) {
+    return;
   }
-});
 
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
-  try {
-    const payload = event.data.json();
-    event.waitUntil(
-      self.registration.showNotification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: './icon-192.png',
-        badge: './icon-192.png',
-        tag: payload.notification.tag || 'tli-default'
+  // Pour les assets statiques (images, manifest) → cache first
+  if (request.destination === 'image' || request.url.includes('manifest.json')) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        return cached || fetch(request).then(response => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, response.clone());
+            return response;
+          });
+        });
       })
     );
-  } catch (e) { console.error('[SW v25] Push error:', e); }
-});
+    return;
+  }
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((clients) => {
-      if (clients.length > 0) clients[0].focus();
-      else self.clients.openWindow('./');
+  // Pour le reste → network first avec fallback cache
+  event.respondWith(
+    fetch(request).then(response => {
+      if (response.status === 200) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+      }
+      return response;
+    }).catch(() => {
+      return caches.match(request).then(cached => {
+        if (cached) return cached;
+        return new Response('Hors ligne', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+      });
     })
   );
+});
+
+// Écouter les messages du client (forcer le reload)
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
