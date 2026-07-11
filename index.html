@@ -3113,16 +3113,16 @@ TLI.Prospection = {
     var status = self.prospectStatus[p.id] ? '<p>📌 ' + self.STATUS_LABELS[self.prospectStatus[p.id]] + '</p>' : '';
     var last = self.lastContact[p.id] ? '<p>📅 Dernier contact: ' + TLI.Utils.formatDate(self.lastContact[p.id]) + '</p>' : '';
 
-    // Clients liés
+        // Clients liés
     var links = self.prospectClientLinks[p.id] || [];
     var clientsHtml = '';
     if (links.length > 0) {
       clientsHtml = '<div style="margin-top:8px"><b>👤 Clients liés:</b></div>';
-            links.forEach(function(cid) {
+      links.forEach(function(cid) {
         var c = TLI.Data.getClient(cid);
         if (c) {
           clientsHtml += '<div style="display:inline-flex;align-items:center;gap:4px;margin:4px 4px 0 0;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:4px 10px;font-size:.75rem">' +
-            '<span style="cursor:pointer" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector('.nav-tab[data-section=clients]').click();">' + TLI.Utils.escapeHtml(c.name) + '</span>' +
+            '<span style="cursor:pointer" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector(".nav-tab[data-section=clients]").click();">' + TLI.Utils.escapeHtml(c.name) + '</span>' +
             '<span style="cursor:pointer;color:var(--secondary);font-weight:800;margin-left:4px" onclick="event.stopPropagation();TLI.Prospection.unlinkClientFromPopup(' + p.id + ',' + cid + ');" title="Délier">❌</span>' +
           '</div>';
         }
