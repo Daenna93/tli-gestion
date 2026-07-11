@@ -277,10 +277,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <body>
 
 <header class="app-header">
-  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-    <img src="logo-192.png" alt="TLI" style="height:36px;width:36px;border-radius:8px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.3);flex-shrink:0">
-    <h1 style="margin:0"><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
-  </div>
+  <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
   <button class="sync-btn" id="btnSync"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button>
 </header>
 
@@ -504,12 +501,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div class="prospect-toolbar" style="padding:8px 0">
             <button class="btn btn-primary btn-sm" style="flex:1" onclick="TLI.Prospection.exportCSV()">📤 Export CSV</button>
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
-            <div class="dropdown" style="flex:1;position:relative">
-              <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
-              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden">
-                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
-              </div>
-            </div>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.showAddModal()">➕ Prospect</button>
           </div>
         </div>
       </div>
@@ -523,7 +515,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div class="sort-bar" style="padding:8px 0">
             <button class="sort-btn active" id="sort-dist" onclick="TLI.Prospection.setSort('dist')">📏 Distance</button>
             <button class="sort-btn" id="sort-eff" onclick="TLI.Prospection.setSort('eff')">👥 Effectif</button>
-            <button class="sort-btn" id="sort-annotation" onclick="TLI.Prospection.toggleAnnotationFilter()">📝 Annotation</button>
+            <button class="sort-btn" id="sort-note" onclick="TLI.Prospection.setSort('note')">⭐ Notation</button>
             <button class="sort-btn" id="sort-name" onclick="TLI.Prospection.setSort('name')">🔤 Nom</button>
           </div>
         </div>
@@ -2015,7 +2007,8 @@ TLI.UI = {
       TLI.UI.showToast('Client ajouté !', 'success');
       TLI.Server.push('clients');
       if (TLI.Data._pendingProspectLink) {
-        TLI.Prospection.prospectClientLinks[TLI.Data._pendingProspectLink] = client.id;
+        if (!TLI.Prospection.prospectClientLinks[TLI.Data._pendingProspectLink]) TLI.Prospection.prospectClientLinks[TLI.Data._pendingProspectLink] = [];
+        TLI.Prospection.prospectClientLinks[TLI.Data._pendingProspectLink].push(client.id);
         localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(TLI.Prospection.prospectClientLinks));
         TLI.UI.showToast('Client lié au prospect', 'success');
         TLI.Data._pendingProspectLink = null;
@@ -2978,19 +2971,13 @@ TLI.Prospection = {
       PROSPECTS_DATA.forEach(function(p) {
         var col = self.toSolicit.has(p.id) ? self.colors.sol : (self.colors[p.notation] || self.colors.C);
         var m = L.circleMarker([p.lat, p.lng], {
-          radius: p.notation === 'A' ? 18 : 14,
-          fillColor: col, color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.9
+          radius: p.notation === 'A' ? 8 : 6,
+          fillColor: col, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
         });
         m._notation = p.notation;
         m._id = p.id;
         m.bindPopup(self.makePopup(p));
-        m.bindTooltip(p.nom, { permanent: false, direction: 'top', offset: [0, -10], className: 'permanent-tooltip' });
-        m.on('click', function() {
-          self.highlightItem(p.id);
-          var sb = document.getElementById('prospectSidebar');
-          if (sb && sb.classList.contains('hidden')) sb.classList.remove('hidden');
-          setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
-        });
+        m.on('click', function() { self.highlightItem(p.id); });
         self.allMarkers.push({ id: p.id, marker: m, data: p });
       });
     }
@@ -3059,6 +3046,21 @@ TLI.Prospection = {
     var last = self.lastContact[p.id] ? '<p>📅 Dernier contact: ' + TLI.Utils.formatDate(self.lastContact[p.id]) + '</p>' : '';
     var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : p.distance;
     if (dist === null || isNaN(dist)) dist = p.distance || 0;
+
+    // Clients liés
+    var linkedIds = self.prospectClientLinks[p.id] || [];
+    var linkedClientsHtml = '';
+    if (linkedIds.length > 0) {
+      linkedClientsHtml = '<div style="margin-top:8px">' +
+        '<div style="font-size:.75rem;color:#888;margin-bottom:4px">👤 Clients liés:</div>' +
+        linkedIds.map(function(cid) {
+          var c = TLI.Data.getClient(cid);
+          if (!c) return '';
+          return '<button class="btn btn-sm btn-ghost" style="width:auto;margin:2px 2px 0 0;padding:4px 10px;font-size:11px" onclick="TLI.Prospection.goToClient(' + cid + ')">' + TLI.Utils.escapeHtml(c.name) + '</button>';
+        }).join('') +
+      '</div>';
+    }
+
     return '<div class="popup-prospect">' +
       '<h3>' + p.nom + '</h3>' +
       '<p>📍 ' + p.adresse + ', ' + p.cp + ' ' + p.ville + '</p>' +
@@ -3069,6 +3071,7 @@ TLI.Prospection = {
       '<div style="margin-top:8px">' +
         '<span class="badge ' + p.notation + '">' + p.notation + '</span>' + sol +
       '</div>' +
+      linkedClientsHtml +
       '<div style="margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">' +
         '<iframe width="100%" height="150" style="border:0;display:block" ' +
         'src="https://www.google.com/maps/embed?pb=!4v' + Date.now() + '!6m8!1m7!1sCAoSLEFGMVFpcE8!2m2!1d' + p.lat + '!2d' + p.lng + '!3f0!4f0!5f0.7820865974627469" ' +
@@ -3092,28 +3095,15 @@ TLI.Prospection = {
     this.applyFilters();
   },
 
-  annotationFilter: false,
-
-  toggleAnnotationFilter: function() {
-    this.annotationFilter = !this.annotationFilter;
-    var btn = document.getElementById('sort-annotation');
-    if (btn) {
-      if (this.annotationFilter) { btn.classList.add('active'); btn.textContent = '📝 Annotation (ON)'; }
-      else { btn.classList.remove('active'); btn.textContent = '📝 Annotation'; }
-    }
-    this.applyFilters();
-  },
-
   sortData: function(data) {
     var self = this;
     data.sort(function(a, b) {
       var cmp = 0;
       if (self.sortBy === 'dist') cmp = a.distance - b.distance;
       else if (self.sortBy === 'eff') cmp = a.effectif - b.effectif;
-      else if (self.sortBy === 'annotation') {
-        var hasA = !!(a.notes && a.notes.trim());
-        var hasB = !!(b.notes && b.notes.trim());
-        cmp = (hasA ? 0 : 1) - (hasB ? 0 : 1);
+      else if (self.sortBy === 'note') {
+        var order = { A: 0, B: 1, C: 2 };
+        cmp = (order[a.notation] || 2) - (order[b.notation] || 2);
       }
       else if (self.sortBy === 'name') cmp = a.nom.localeCompare(b.nom);
       return cmp;
@@ -3147,7 +3137,6 @@ TLI.Prospection = {
       if (p.effectif < effMin) return false;
       if (cats.length && !cats.includes(p.categorie)) return false;
       if (onlyNotes && !p.notes) return false;
-      if (self.annotationFilter && !(p.notes && p.notes.trim())) return false;
       return true;
     });
 
@@ -3274,18 +3263,22 @@ TLI.Prospection = {
     document.getElementById('prospectDetailStatus').value = this.prospectStatus[id] || '';
     document.getElementById('prospectDetailLastContact').value = this.lastContact[id] || '';
 
-    // Afficher lien client
-    var clientLink = document.getElementById('prospectDetailClientLink');
-    var linkedClient = this.prospectClientLinks && this.prospectClientLinks[id];
-    if (linkedClient) {
-      var client = TLI.Data.getClient(linkedClient);
-      if (client) {
-        clientLink.innerHTML = '<div style="background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;padding:8px 10px;font-size:.85rem"><b>' + TLI.Utils.escapeHtml(client.name) + '</b>' + (client.company ? ' (' + TLI.Utils.escapeHtml(client.company) + ')' : '') + '<br><span style="color:#888;font-size:.75rem">' + (client.phone || '') + ' ' + (client.email || '') + '</span></div>';
-      } else {
-        clientLink.innerHTML = '<div style="font-size:.8rem;color:#888;margin-bottom:8px">Client lié (ID ' + linkedClient + ') introuvable</div>';
-      }
+    // Afficher clients liés
+    var linksEl = document.getElementById('prospectDetailClientLinks');
+    var linkedIds = this.prospectClientLinks[id] || [];
+    if (linkedIds.length === 0) {
+      linksEl.innerHTML = '<div style="font-size:.8rem;color:#888;margin-bottom:8px">Aucun client lié</div>';
     } else {
-      clientLink.innerHTML = '<div style="font-size:.8rem;color:#888;margin-bottom:8px">Aucun client lié</div>';
+      linksEl.innerHTML = linkedIds.map(function(cid) {
+        var c = TLI.Data.getClient(cid);
+        if (!c) return '';
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+          '<button class="btn btn-sm btn-ghost" style="flex:1;margin-top:0;text-align:left;padding:6px 10px;font-size:12px" onclick="TLI.Prospection.goToClient(' + cid + ')">' +
+            '👤 ' + TLI.Utils.escapeHtml(c.name) + (c.company ? ' (' + TLI.Utils.escapeHtml(c.company) + ')' : '') +
+          '</button>' +
+          '<button class="btn btn-sm btn-danger" style="width:auto;margin-top:0;padding:4px 8px;font-size:11px" onclick="TLI.Prospection.unlinkClient(' + id + ',' + cid + ')">❌</button>' +
+        '</div>';
+      }).join('');
     }
 
     var hist = this.prospectHistory[id] || [];
@@ -3460,16 +3453,35 @@ TLI.Prospection = {
   },
 
   confirmLinkClient: function(prospectId, clientId) {
-    this.prospectClientLinks[prospectId] = clientId;
-    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    if (!this.prospectClientLinks[prospectId]) this.prospectClientLinks[prospectId] = [];
+    if (!this.prospectClientLinks[prospectId].includes(clientId)) {
+      this.prospectClientLinks[prospectId].push(clientId);
+      localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+      TLI.UI.showToast('Client lié au prospect', 'success');
+    } else {
+      TLI.UI.showToast('Client déjà lié', 'warning');
+    }
     this.closeClientPicker();
-    TLI.UI.showToast('Client lié au prospect', 'success');
     this.showDetailModal(prospectId);
+    var m = this.allMarkers.find(function(x) { return x.id === prospectId; });
+    if (m) m.marker.setPopupContent(this.makePopup(m.data));
   },
 
   closeClientPicker: function() {
     var overlay = document.getElementById('clientPickerOverlay');
     if (overlay) overlay.remove();
+  },
+
+  unlinkClient: function(prospectId, clientId) {
+    if (this.prospectClientLinks[prospectId]) {
+      this.prospectClientLinks[prospectId] = this.prospectClientLinks[prospectId].filter(function(id) { return id !== clientId; });
+      if (this.prospectClientLinks[prospectId].length === 0) delete this.prospectClientLinks[prospectId];
+      localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+      TLI.UI.showToast('Client délié', 'warning');
+      this.showDetailModal(prospectId);
+      var m = this.allMarkers.find(function(x) { return x.id === prospectId; });
+      if (m) m.marker.setPopupContent(this.makePopup(m.data));
+    }
   },
 
   createClientFromProspect: function() {
@@ -3497,6 +3509,13 @@ TLI.Prospection = {
   linkClientFromPopup: function(prospectId) {
     this.currentDetailId = prospectId;
     this.linkExistingClient();
+  },
+
+  goToClient: function(clientId) {
+    var client = TLI.Data.getClient(clientId);
+    if (!client) { TLI.UI.showToast('Client introuvable', 'error'); return; }
+    document.querySelector('.nav-tab[data-section="clients"]').click();
+    TLI.UI.showClientDetail(clientId);
   },
 
   // ─── AJOUT ───
@@ -3546,21 +3565,14 @@ TLI.Prospection = {
     PROSPECTS_DATA.push(p);
     var col = this.colors[p.notation] || this.colors.C;
     var m = L.circleMarker([p.lat, p.lng], {
-      radius: p.notation === 'A' ? 18 : 14,
-      fillColor: col, color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.9
+      radius: p.notation === 'A' ? 8 : 6,
+      fillColor: col, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
     });
     m._notation = p.notation;
     m._id = p.id;
     m.bindPopup(this.makePopup(p));
-    m.bindTooltip(p.nom, { permanent: false, direction: 'top', offset: [0, -10], className: 'permanent-tooltip' });
-    m.on('click', function() {
-      TLI.Prospection.highlightItem(p.id);
-      var sb = document.getElementById('prospectSidebar');
-      if (sb && sb.classList.contains('hidden')) sb.classList.remove('hidden');
-      setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
-    });
+    m.on('click', function() { TLI.Prospection.highlightItem(p.id); });
     this.allMarkers.push({ id: p.id, marker: m, data: p });
-    if (this.clusterGroup) this.clusterGroup.addLayer(m);
 
     TLI.UI.closeModal('prospectAddModal');
     TLI.UI.showToast('Prospect ajouté', 'success');
@@ -3830,14 +3842,12 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
 
-    <!-- Lien client -->
+    <!-- Section Clients liés -->
     <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px">
-      <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:10px">👤 Lier à un client</div>
-      <div id="prospectDetailClientLink" style="margin-bottom:10px">
-        <div style="font-size:.8rem;color:#888;margin-bottom:8px">Aucun client lié</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-sm btn-secondary" style="flex:1;margin-top:0" onclick="TLI.Prospection.linkExistingClient()">👥 Client existant</button>
+      <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:10px">👤 Clients liés</div>
+      <div id="prospectDetailClientLinks"></div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="btn btn-sm btn-secondary" style="flex:1;margin-top:0" onclick="TLI.Prospection.linkExistingClient()">👥 Lier existant</button>
         <button class="btn btn-sm btn-primary" style="flex:1;margin-top:0" onclick="TLI.Prospection.createClientFromProspect()">➕ Nouveau client</button>
       </div>
     </div>
