@@ -473,7 +473,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
         </div>
       </div>
 
-      <div class="res-count" id="prospectCount" style="padding:8px 14px;font-size:.85rem;color:var(--text-muted);border-bottom:1px solid var(--glass-border);background:var(--darker)">Chargement...</div>
+      
 
       <div class="sb-top">
         <input type="text" class="search-box" id="prospectSearch" placeholder="🔍 Rechercher une entreprise, un secteur, un NAF..." oninput="TLI.Prospection.applyFilters()">
@@ -3138,10 +3138,10 @@ TLI.Prospection = {
     var b = this.filteredData.filter(function(p) { return p.notation === 'B'; }).length;
     var c = this.filteredData.filter(function(p) { return p.notation === 'C'; }).length;
     var solCount = this.filteredData.filter(function(p) { return self.toSolicit.has(p.id); }).length;
-    document.getElementById('prospectStatA').textContent = a;
-    document.getElementById('prospectStatB').textContent = b;
-    document.getElementById('prospectStatC').textContent = c;
-    document.getElementById('prospectStatSol').textContent = solCount;
+    document.getElementById('statA').textContent = a;
+    document.getElementById('statB').textContent = b;
+    document.getElementById('statC').textContent = c;
+    document.getElementById('statSol').textContent = solCount;
     document.getElementById('prospectCount').textContent = this.filteredData.length + ' résultat' + (this.filteredData.length > 1 ? 's' : '');
 
     this.renderList(this.filteredData);
