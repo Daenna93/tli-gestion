@@ -249,6 +249,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 #prospection .history-list{max-height:120px;overflow-y:auto;margin-top:8px}
 #prospection .history-item{padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px;font-size:.8rem;color:#aaa}
 #prospection .history-item b{color:var(--light)}
+
+/* ─── Bouton ghost ─── */
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--light);transition:all .2s}
+.btn-ghost:hover{background:var(--glass)}
+/* ─── Badge sol ─── */
+#prospection .res-badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+#prospection .popup-prospect .badge.sol{background:rgba(255,107,107,0.15);color:var(--secondary)}
+/* ─── Transitions modals ─── */
+.modal-overlay,.quality-overlay,.call-overlay,.photo-overlay{opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease}
+.modal-overlay.active,.quality-overlay.active,.call-overlay.active,.photo-overlay.active{opacity:1;visibility:visible}
+.modal-content,.quality-content,.call-content{transform:scale(.92) translateY(20px);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .35s ease;opacity:0}
+.modal-overlay.active .modal-content,.quality-overlay.active .quality-content,.call-overlay.active .call-content{transform:scale(1) translateY(0);opacity:1}
+/* ─── Dropdown z-index fix ─── */
+.dropdown-menu{z-index:1000!important}
+/* ─── Tooltip hover ─── */
+.leaflet-tooltip.permanent-tooltip{background:var(--dark);border:1px solid var(--glass-border);color:var(--light);font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.5);white-space:nowrap}
+.leaflet-tooltip-left.permanent-tooltip:before,.leaflet-tooltip-right.permanent-tooltip:before{border-left-color:var(--dark)}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -260,7 +277,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 <body>
 
 <header class="app-header">
-  <h1><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+  <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+    <img src="logo-192.png" alt="TLI" style="height:36px;width:36px;border-radius:8px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.3);flex-shrink:0">
+    <h1 style="margin:0"><span class="white">Technical Layer</span> <span class="blue">Innovation</span></h1>
+  </div>
   <button class="sync-btn" id="btnSync"><span id="syncIcon">🔄</span><span id="syncText">Sync</span></button>
 </header>
 
@@ -469,7 +489,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
         </div>
       </div>
 
-      <div class="res-count" id="prospectCount" style="padding:8px 14px;font-size:.85rem;color:var(--text-muted);border-bottom:1px solid var(--glass-border);background:var(--darker)">Chargement...</div>
+      
 
       <div class="sb-top">
         <input type="text" class="search-box" id="prospectSearch" placeholder="🔍 Rechercher une entreprise, un secteur, un NAF..." oninput="TLI.Prospection.applyFilters()">
@@ -484,12 +504,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div class="prospect-toolbar" style="padding:8px 0">
             <button class="btn btn-primary btn-sm" style="flex:1" onclick="TLI.Prospection.exportCSV()">📤 Export CSV</button>
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
-            <div class="dropdown" style="flex:1;position:relative">
-              <button class="btn btn-ghost btn-sm" style="width:100%" onclick="TLI.UI.toggleDropdown(this)">➕ Ajouter ▾</button>
-              <div class="dropdown-menu" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--darker);border:1px solid var(--glass-border);border-radius:8px;margin-top:4px;overflow:hidden">
-                <button class="btn btn-ghost btn-sm" style="width:100%;border-radius:0;text-align:left;padding:10px 12px" onclick="TLI.Prospection.showAddModal()">🏢 Nouveau prospect</button>
-              </div>
-            </div>
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.showAddModal()">➕ Prospect</button>
           </div>
         </div>
       </div>
@@ -570,6 +585,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
           <div style="display:flex;gap:6px;margin-bottom:6px">
             <button class="btn btn-sm btn-secondary" id="btnUseMyPos" style="flex:1;font-size:11px;padding:6px 8px">📡 Ma position</button>
             <button class="btn btn-sm btn-primary" id="btnSetOrigin" style="flex:1;font-size:11px;padding:6px 8px">✅ Appliquer</button>
+            <button class="btn btn-sm btn-danger" id="btnResetOrigin" style="flex:1;font-size:11px;padding:6px 8px" onclick="TLI.Prospection.resetOrigin()">🔄 Réinit.</button>
           </div>
           <div id="originStatus" style="font-size:11px;color:var(--text-muted);min-height:16px"></div>
         </div>
@@ -1651,9 +1667,15 @@ TLI.UI = {
     if (acc) acc.classList.toggle('open');
   },
 
+  toggleDropdown: function(btn) {
+    var menu = btn.nextElementSibling;
+    if (!menu) return;
+    var isVisible = menu.style.display === 'block';
+    document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.style.display = 'none'; });
+    if (!isVisible) menu.style.display = 'block';
+  },
 
-
-  showToast: function(msg, type) {
+  showToast: functionshowToast: function(msg, type) {
     var t = document.getElementById('toast');
     if (!t) return;
     t.textContent = msg;
@@ -2905,6 +2927,7 @@ TLI.Calc = {
 TLI.Prospection = {
   map: null,
   clusterGroup: null,
+  originMarker: null,
   allMarkers: [],
   filteredData: [],
   toSolicit: null,
@@ -2928,20 +2951,15 @@ TLI.Prospection = {
 
   init: function() {
     this.toSolicit = new Set(JSON.parse(localStorage.getItem('tli_prospects_sol')||'[]'));
-    this.prospectStatus = JSON.parse(localStorage.getItem('tli_prospect_status')||'{}');
-    this.prospectHistory = JSON.parse(localStorage.getItem('tli_prospect_history')||'{}');
-    this.lastContact = JSON.parse(localStorage.getItem('tli_prospect_lastcontact')||'{}');
-    this.prospectClientLinks = JSON.parse(localStorage.getItem('tli_prospect_clientlinks')||'{}');
-    this._customProspects = JSON.parse(localStorage.getItem('tli_prospects_custom')||'[]');
-
-    // Fusionner les prospects persistant dans PROSPECTS_DATA
+    this.prospectStatus = JSON.parse(localStorage.getItem('tli_prospect_status')||'{}'));
+    this.prospectHistory = JSON.parse(localStorage.getItem('tli_prospect_history')||'{}'));
+    this.lastContact = JSON.parse(localStorage.getItem('tli_prospect_lastcontact')||'{}'));
+    this.prospectClientLinks = JSON.parse(localStorage.getItem('tli_prospect_clientlinks')||'{}'));
+    this._customProspects = JSON.parse(localStorage.getItem('tli_prospects_custom')||'[]'));
     if (this._customProspects.length > 0 && typeof PROSPECTS_DATA !== 'undefined') {
       var existingIds = new Set(PROSPECTS_DATA.map(function(p) { return p.id; }));
       this._customProspects.forEach(function(p) {
-        if (!existingIds.has(p.id)) {
-          PROSPECTS_DATA.push(p);
-          existingIds.add(p.id);
-        }
+        if (!existingIds.has(p.id)) { PROSPECTS_DATA.push(p); existingIds.add(p.id); }
       });
     }
 
@@ -3022,6 +3040,7 @@ TLI.Prospection = {
     });
     this.map.addLayer(this.clusterGroup);
     this.mapInitialized = true;
+    this.updateOriginMarker();
     this.applyFilters();
   },
 
@@ -3122,10 +3141,10 @@ TLI.Prospection = {
     var b = this.filteredData.filter(function(p) { return p.notation === 'B'; }).length;
     var c = this.filteredData.filter(function(p) { return p.notation === 'C'; }).length;
     var solCount = this.filteredData.filter(function(p) { return self.toSolicit.has(p.id); }).length;
-    document.getElementById('prospectStatA').textContent = a;
-    document.getElementById('prospectStatB').textContent = b;
-    document.getElementById('prospectStatC').textContent = c;
-    document.getElementById('prospectStatSol').textContent = solCount;
+    document.getElementById('statA').textContent = a;
+    document.getElementById('statB').textContent = b;
+    document.getElementById('statC').textContent = c;
+    document.getElementById('statSol').textContent = solCount;
     document.getElementById('prospectCount').textContent = this.filteredData.length + ' résultat' + (this.filteredData.length > 1 ? 's' : '');
 
     this.renderList(this.filteredData);
@@ -3279,8 +3298,6 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospect_status', JSON.stringify(this.prospectStatus));
     localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
     localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
-    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
-    localStorage.setItem('tli_prospects_custom', JSON.stringify(this._customProspects));
 
     TLI.UI.closeModal('prospectDetailModal');
     TLI.UI.showToast('Prospect mis à jour', 'success');
@@ -3306,8 +3323,6 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospect_status', JSON.stringify(this.prospectStatus));
     localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
     localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
-    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
-    localStorage.setItem('tli_prospects_custom', JSON.stringify(this._customProspects));
     TLI.UI.closeModal('prospectDetailModal');
     TLI.UI.showToast('Prospect supprimé', 'warning');
     this.applyFilters();
@@ -3355,7 +3370,7 @@ TLI.Prospection = {
       secteur: document.getElementById('prospectAddSecteur').value.trim() || 'Autre',
       notation: document.getElementById('prospectAddNotation').value,
       notes: document.getElementById('prospectAddNotes').value.trim()
-    };
+    },
 
     PROSPECTS_DATA.push(p);
     this._customProspects.push(p);
@@ -3414,10 +3429,26 @@ TLI.Prospection = {
   setOrigin: function(lat, lng, label) {
     this.origin = { lat: lat, lng: lng, label: label || 'Point de départ' };
     localStorage.setItem('tli_origin', JSON.stringify(this.origin));
+    this.updateOriginMarker();
     this.applyFilters();
     var status = document.getElementById('originStatus');
     if (status) status.textContent = '✅ ' + this.origin.label;
     TLI.UI.showToast('Point de départ mis à jour', 'success');
+  },
+
+  updateOriginMarker: function() {
+    if (!this.map) return;
+    if (this.originMarker) { this.map.removeLayer(this.originMarker); this.originMarker = null; }
+    if (!this.origin) return;
+    var oLat = parseFloat(this.origin.lat), oLng = parseFloat(this.origin.lng);
+    if (isNaN(oLat) || isNaN(oLng)) return;
+    var greenIcon = L.divIcon({
+      className: 'origin-marker',
+      html: '<div style="width:28px;height:28px;background:#00ff88;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:14px;">📍</div><div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #00ff88;margin:-2px auto 0;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));"></div>',
+      iconSize: [28, 40], iconAnchor: [14, 38]
+    });
+    this.originMarker = L.marker([oLat, oLng], { icon: greenIcon, zIndexOffset: 1000 }).addTo(this.map);
+    this.originMarker.bindPopup('<b>📍 Point de départ</b><br>' + (this.origin.label || 'Origine'));
   },
 
   useMyPosition: function() {
