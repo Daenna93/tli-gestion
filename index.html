@@ -3074,7 +3074,7 @@ TLI.Prospection = {
       links.forEach(function(cid) {
         var c = TLI.Data.getClient(cid);
         if (c) {
-          clientsHtml += '<button class="btn btn-sm btn-secondary" style="margin:4px 4px 0 0;width:auto;padding:4px 10px;font-size:.75rem" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector('.nav-tab[data-section=\'clients\']').click();">' + TLI.Utils.escapeHtml(c.name) + '</button>';
+          clientsHtml += '<button class="btn btn-sm btn-secondary" style="margin:4px 4px 0 0;width:auto;padding:4px 10px;font-size:.75rem" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector(\'.nav-tab[data-section=clients]\').click();">' + TLI.Utils.escapeHtml(c.name) + '</button>';
         }
       });
     }
