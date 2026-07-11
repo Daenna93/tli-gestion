@@ -2939,6 +2939,7 @@ TLI.Prospection = {
   prospectStatus: {},
   prospectHistory: {},
   lastContact: {},
+  prospectClientLinks: {},
 
   STATUS_LABELS: {
     '': '—',
@@ -3209,7 +3210,7 @@ TLI.Prospection = {
 
   updateSolCount: function() {
     var count = this.filteredData ? this.filteredData.filter(function(p) { return TLI.Prospection.toSolicit.has(p.id); }).length : 0;
-    var el = document.getElementById('prospectStatSol');
+    var el = document.getElementById('statSol');
     if (el) el.textContent = count;
   },
 
