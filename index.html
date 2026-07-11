@@ -263,6 +263,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
 .modal-overlay.active,.quality-overlay.active,.call-overlay.active,.photo-overlay.active{opacity:1;visibility:visible}
 .modal-content,.quality-content,.call-content{transform:scale(.92) translateY(20px);transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .35s ease;opacity:0}
 .modal-overlay.active .modal-content,.quality-overlay.active .quality-content,.call-overlay.active .call-content{transform:scale(1) translateY(0);opacity:1}
+
+/* ─── Dropdown z-index fix ─── */
+.dropdown-menu{z-index:1000!important}
+
+/* ─── Tooltip permanent sur pins ─── */
+.leaflet-tooltip.permanent-tooltip{background:var(--dark);border:1px solid var(--glass-border);color:var(--light);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.4);white-space:nowrap}
+.leaflet-tooltip-left.permanent-tooltip:before,.leaflet-tooltip-right.permanent-tooltip:before{border-left-color:var(--dark)}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2981,8 +2988,14 @@ TLI.Prospection = {
         m._notation = p.notation;
         m._id = p.id;
         m.bindPopup(self.makePopup(p));
-        m.on('click', function() { self.highlightItem(p.id); });
-        self.allMarkers.push({ id: p.id, marker: m, data: p });
+        m.on('click', function() {
+        self.highlightItem(p.id);
+        var sb = document.getElementById('prospectSidebar');
+        if (sb && sb.classList.contains('hidden')) sb.classList.remove('hidden');
+        setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
+      });
+        m.bindTooltip(p.nom, { permanent: true, direction: 'top', offset: [0, -10], className: 'permanent-tooltip' });
+      self.allMarkers.push({ id: p.id, marker: m, data: p });
       });
     }
 
@@ -3048,26 +3061,31 @@ TLI.Prospection = {
     var notes = p.notes ? '<p>📝 ' + p.notes + '</p>' : '';
     var status = self.prospectStatus[p.id] ? '<p>📌 ' + self.STATUS_LABELS[self.prospectStatus[p.id]] + '</p>' : '';
     var last = self.lastContact[p.id] ? '<p>📅 Dernier contact: ' + TLI.Utils.formatDate(self.lastContact[p.id]) + '</p>' : '';
+    var dist = self.origin ? self.distanceFromOrigin(p.lat, p.lng) : p.distance;
+    if (dist === null || isNaN(dist)) dist = p.distance || 0;
     return '<div class="popup-prospect">' +
       '<h3>' + p.nom + '</h3>' +
       '<p>📍 ' + p.adresse + ', ' + p.cp + ' ' + p.ville + '</p>' +
       '<p>🏭 ' + p.secteur + ' • NAF ' + p.naf + '</p>' +
       '<p>👥 ' + p.effectif + ' salariés • ' + p.categorie + '</p>' +
-      '<p>📏 ' + (self.origin ? self.distanceFromOrigin(p.lat, p.lng).toFixed(1) + ' km (dep. origine)' : p.distance.toFixed(1) + ' km de Nantes') + '</p>' +
+      '<p>📏 ' + dist.toFixed(1) + ' km</p>' +
       notes + status + last +
       '<div style="margin-top:8px">' +
         '<span class="badge ' + p.notation + '">' + p.notation + '</span>' + sol +
       '</div>' +
       '<div style="margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">' +
         '<iframe width="100%" height="150" style="border:0;display:block" ' +
-        'src="https://www.google.com/maps?q=' + p.lat + ',' + p.lng + '&hl=fr&z=16&output=embed" ' +
+        'src="https://www.google.com/maps/embed?pb=!4v' + Date.now() + '!6m8!1m7!1sCAoSLEFGMVFpcE8!2m2!1d' + p.lat + '!2d' + p.lng + '!3f0!4f0!5f0.7820865974627469" ' +
         'allowfullscreen loading="lazy"></iframe>' +
       '</div>' +
-      '<button class="btn btn-primary" onclick="TLI.Prospection.toggleSol(' + p.id + '); setTimeout(function(){ var m=TLI.Prospection.allMarkers.find(function(x){return x.id===' + p.id + ';}); if(m) m.marker.setPopupContent(TLI.Prospection.makePopup(m.data)); }, 50);" style="margin-top:10px">' +
-        (self.toSolicit.has(p.id) ? 'Retirer des favoris' : '⭐ À solliciter') +
-      '</button>' +
+      '<div style="display:flex;gap:6px;margin-top:10px">' +
+        '<button class="btn btn-primary" style="flex:1;margin-top:0" onclick="TLI.Prospection.toggleSol(' + p.id + '); setTimeout(function(){ var m=TLI.Prospection.allMarkers.find(function(x){return x.id===' + p.id + ';}); if(m) m.marker.setPopupContent(TLI.Prospection.makePopup(m.data)); }, 50);">' +
+          (self.toSolicit.has(p.id) ? 'Retirer des favoris' : '⭐ À solliciter') +
+        '</button>' +
+        '<button class="btn btn-secondary" style="flex:1;margin-top:0" onclick="TLI.Prospection.showDetailModal(' + p.id + ')">✏️ Modifier</button>' +
+      '</div>' +
     '</div>';
-  },
+  },  },
 
   setSort: function(by) {
     this.sortBy = by;
@@ -3236,19 +3254,19 @@ TLI.Prospection = {
     this.currentDetailId = id;
     document.getElementById('prospectDetailTitle').textContent = p.nom;
 
-    var html = '<div class="detail-grid">' +
-      '<div class="detail-field"><label>SIRET</label><span>' + (p.siret || '—') + '</span></div>' +
-      '<div class="detail-field"><label>NAF</label><span>' + (p.naf || '—') + '</span></div>' +
-      '<div class="detail-field"><label>Secteur</label><span>' + (p.secteur || '—') + '</span></div>' +
-      '<div class="detail-field"><label>Catégorie</label><span>' + (p.categorie || '—') + '</span></div>' +
-      '<div class="detail-field"><label>Effectif</label><span>' + (p.effectif || 0) + ' salariés</span></div>' +
-      '<div class="detail-field"><label>Distance</label><span>' + (p.distance ? p.distance.toFixed(1) : 0) + ' km</span></div>' +
-      '<div class="detail-field"><label>Notation</label><span style="color:' + (this.colors[p.notation] || this.colors.C) + '">' + (p.notation || '—') + '</span></div>' +
-      '<div class="detail-field"><label>Ville</label><span>' + (p.ville || '—') + '</span></div>' +
-    '</div>' +
-    '<div class="detail-field" style="margin-top:8px"><label>Adresse complète</label><span>' + (p.adresse || '') + ', ' + (p.cp || '') + ' ' + (p.ville || '') + '</span></div>';
-    document.getElementById('prospectDetailContent').innerHTML = html;
-
+    // Remplir tous les champs
+    document.getElementById('prospectDetailNom').value = p.nom || '';
+    document.getElementById('prospectDetailSiret').value = p.siret || '';
+    document.getElementById('prospectDetailNaf').value = p.naf || '';
+    document.getElementById('prospectDetailSecteur').value = p.secteur || '';
+    document.getElementById('prospectDetailEffectif').value = p.effectif || 0;
+    document.getElementById('prospectDetailCategorie').value = p.categorie || 'PME';
+    document.getElementById('prospectDetailNotation').value = p.notation || 'B';
+    document.getElementById('prospectDetailVille').value = p.ville || '';
+    document.getElementById('prospectDetailAdresse').value = p.adresse || '';
+    document.getElementById('prospectDetailCp').value = p.cp || '';
+    document.getElementById('prospectDetailLat').value = p.lat || '';
+    document.getElementById('prospectDetailLng').value = p.lng || '';
     document.getElementById('prospectDetailNotes').value = p.notes || '';
     document.getElementById('prospectDetailStatus').value = this.prospectStatus[id] || '';
     document.getElementById('prospectDetailLastContact').value = this.lastContact[id] || '';
@@ -3257,18 +3275,98 @@ TLI.Prospection = {
     var hist = this.prospectHistory[id] || [];
     var histEl = document.getElementById('prospectDetailHistory');
     if (hist.length === 0) {
-      histEl.innerHTML = '<div style="color:#666;font-size:.8rem">Aucun historique</div>';
+      histEl.innerHTML = '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;color:#888;font-size:.8rem;text-align:center">Aucun historique</div>';
     } else {
-      histEl.innerHTML = '<div class="card-title" style="font-size:.85rem;margin-bottom:6px">📋 Historique</div>' +
+      histEl.innerHTML = '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px">' +
+        '<div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:8px">📋 Historique</div>' +
         hist.slice(-10).reverse().map(function(h) {
-          return '<div class="history-item"><b>' + TLI.Utils.formatDateTime(h.date) + '</b> — ' + h.action + '</div>';
-        }).join('');
+          return '<div style="padding:6px 0;border-bottom:1px solid var(--glass-border);font-size:.8rem;color:#aaa"><b style="color:var(--light)">' + TLI.Utils.formatDateTime(h.date) + '</b> — ' + h.action + '</div>';
+        }).join('') +
+      '</div>';
     }
 
     TLI.UI.openModal('prospectDetailModal');
   },
 
   saveDetail: function() {
+    var id = this.currentDetailId;
+    if (!id) return;
+    var p = PROSPECTS_DATA.find(function(x) { return x.id === id; });
+    if (!p) return;
+
+    var oldNom = p.nom || '';
+    var oldSiret = p.siret || '';
+    var oldNaf = p.naf || '';
+    var oldSecteur = p.secteur || '';
+    var oldEffectif = p.effectif || 0;
+    var oldCategorie = p.categorie || '';
+    var oldNotation = p.notation || '';
+    var oldVille = p.ville || '';
+    var oldAdresse = p.adresse || '';
+    var oldCp = p.cp || '';
+    var oldLat = p.lat || 0;
+    var oldLng = p.lng || 0;
+    var oldNotes = p.notes || '';
+    var oldStatus = this.prospectStatus[id] || '';
+    var oldLast = this.lastContact[id] || '';
+
+    // Mettre à jour tous les champs
+    p.nom = document.getElementById('prospectDetailNom').value.trim();
+    p.siret = document.getElementById('prospectDetailSiret').value.trim();
+    p.naf = document.getElementById('prospectDetailNaf').value.trim();
+    p.secteur = document.getElementById('prospectDetailSecteur').value.trim();
+    p.effectif = parseInt(document.getElementById('prospectDetailEffectif').value) || 0;
+    p.categorie = document.getElementById('prospectDetailCategorie').value;
+    p.notation = document.getElementById('prospectDetailNotation').value;
+    p.ville = document.getElementById('prospectDetailVille').value.trim();
+    p.adresse = document.getElementById('prospectDetailAdresse').value.trim();
+    p.cp = document.getElementById('prospectDetailCp').value.trim();
+    p.lat = parseFloat(document.getElementById('prospectDetailLat').value) || 0;
+    p.lng = parseFloat(document.getElementById('prospectDetailLng').value) || 0;
+    p.notes = document.getElementById('prospectDetailNotes').value.trim();
+    this.prospectStatus[id] = document.getElementById('prospectDetailStatus').value;
+    this.lastContact[id] = document.getElementById('prospectDetailLastContact').value;
+
+    // Historique
+    if (!this.prospectHistory[id]) this.prospectHistory[id] = [];
+    if (oldNom !== p.nom) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Nom modifié: ' + oldNom + ' → ' + p.nom });
+    if (oldSiret !== p.siret) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'SIRET modifié' });
+    if (oldNaf !== p.naf) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'NAF modifié' });
+    if (oldSecteur !== p.secteur) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Secteur modifié: ' + oldSecteur + ' → ' + p.secteur });
+    if (oldEffectif !== p.effectif) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Effectif modifié: ' + oldEffectif + ' → ' + p.effectif });
+    if (oldCategorie !== p.categorie) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Catégorie modifiée: ' + oldCategorie + ' → ' + p.categorie });
+    if (oldNotation !== p.notation) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Notation modifiée: ' + oldNotation + ' → ' + p.notation });
+    if (oldVille !== p.ville) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Ville modifiée: ' + oldVille + ' → ' + p.ville });
+    if (oldAdresse !== p.adresse) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Adresse modifiée' });
+    if (oldCp !== p.cp) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'CP modifié' });
+    if (oldLat !== p.lat || oldLng !== p.lng) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Coordonnées GPS modifiées' });
+    if (oldNotes !== p.notes) this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Notes modifiées' });
+    if (oldStatus !== this.prospectStatus[id] && this.prospectStatus[id]) {
+      this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Statut changé: ' + this.STATUS_LABELS[this.prospectStatus[id]] });
+    }
+    if (oldLast !== this.lastContact[id] && this.lastContact[id]) {
+      this.prospectHistory[id].push({ date: new Date().toISOString(), action: 'Contact: ' + TLI.Utils.formatDate(this.lastContact[id]) });
+    }
+
+    localStorage.setItem('tli_prospect_status', JSON.stringify(this.prospectStatus));
+    localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
+    localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
+
+    // Mettre à jour le marker sur la carte
+    var markerObj = this.allMarkers.find(function(x) { return x.id === id; });
+    if (markerObj) {
+      markerObj.data = p;
+      markerObj.marker.setLatLng([p.lat, p.lng]);
+      markerObj.marker.setStyle({ fillColor: this.colors[p.notation] || this.colors.C });
+      markerObj.marker._notation = p.notation;
+      markerObj.marker.setPopupContent(this.makePopup(p));
+      markerObj.marker.setTooltipContent(p.nom);
+    }
+
+    TLI.UI.closeModal('prospectDetailModal');
+    TLI.UI.showToast('Prospect mis à jour', 'success');
+    this.applyFilters();
+  },saveDetail: function() {
     var id = this.currentDetailId;
     if (!id) return;
     var p = PROSPECTS_DATA.find(function(x) { return x.id === id; });
@@ -3381,8 +3479,15 @@ TLI.Prospection = {
     m._notation = p.notation;
     m._id = p.id;
     m.bindPopup(this.makePopup(p));
-    m.on('click', function() { TLI.Prospection.highlightItem(p.id); });
+    m.bindTooltip(p.nom, { permanent: true, direction: 'top', offset: [0, -10], className: 'permanent-tooltip' });
+    m.on('click', function() {
+      TLI.Prospection.highlightItem(p.id);
+      var sb = document.getElementById('prospectSidebar');
+      if (sb && sb.classList.contains('hidden')) sb.classList.remove('hidden');
+      setTimeout(function() { if(TLI.Prospection.map) TLI.Prospection.map.invalidateSize(); }, 310);
+    });
     this.allMarkers.push({ id: p.id, marker: m, data: p });
+    if (this.clusterGroup) this.clusterGroup.addLayer(m);
 
     TLI.UI.closeModal('prospectAddModal');
     TLI.UI.showToast('Prospect ajouté', 'success');
@@ -3605,14 +3710,77 @@ if ('serviceWorker' in navigator) {
       <div class="modal-title" id="prospectDetailTitle">Détail prospect</div>
       <button class="modal-close" data-close="prospectDetailModal">×</button>
     </div>
-    <div id="prospectDetailContent"></div>
-    <div class="form-group" style="margin-top:12px">
-      <label class="form-label">📝 Notes</label>
-      <textarea class="detail-notes" id="prospectDetailNotes" placeholder="Notes personnelles..."></textarea>
+
+    <!-- Grille d'infos modifiables -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🏢 Nom entreprise</label>
+        <input type="text" class="form-input" id="prospectDetailNom" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🔢 SIRET</label>
+        <input type="text" class="form-input" id="prospectDetailSiret" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🏭 Secteur</label>
+        <input type="text" class="form-input" id="prospectDetailSecteur" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">📊 NAF</label>
+        <input type="text" class="form-input" id="prospectDetailNaf" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">👥 Effectif</label>
+        <input type="number" class="form-input" id="prospectDetailEffectif" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🏷️ Catégorie</label>
+        <select class="form-select" id="prospectDetailCategorie" style="background:var(--darker)">
+          <option value="PME">PME</option>
+          <option value="ETI">ETI</option>
+          <option value="GE">GE</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">⭐ Notation</label>
+        <select class="form-select" id="prospectDetailNotation" style="background:var(--darker)">
+          <option value="A">A — Prioritaire</option>
+          <option value="B">B — Secondaire</option>
+          <option value="C">C — Faible potentiel</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">📍 Ville</label>
+        <input type="text" class="form-input" id="prospectDetailVille" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="grid-column:1/3;margin-bottom:0">
+        <label class="form-label">🗺️ Adresse complète</label>
+        <input type="text" class="form-input" id="prospectDetailAdresse" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">📮 Code postal</label>
+        <input type="text" class="form-input" id="prospectDetailCp" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🌐 Latitude</label>
+        <input type="number" class="form-input" id="prospectDetailLat" step="any" style="background:var(--darker)">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">🌐 Longitude</label>
+        <input type="number" class="form-input" id="prospectDetailLng" step="any" style="background:var(--darker)">
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">📌 Statut</label>
-      <select class="status-select" id="prospectDetailStatus">
+
+    <!-- Section Notes -->
+    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:8px">📝 Notes</div>
+      <textarea class="detail-notes" id="prospectDetailNotes" placeholder="Notes personnelles..." style="width:100%;min-height:70px;background:var(--darker);border:1px solid var(--glass-border);border-radius:10px;padding:10px;color:var(--light);font-family:inherit;font-size:.85rem;resize:vertical;outline:none"></textarea>
+    </div>
+
+    <!-- Section Statut -->
+    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:8px">📌 Statut</div>
+      <select class="status-select" id="prospectDetailStatus" style="width:100%;background:var(--darker);border:1px solid var(--glass-border);color:var(--light);padding:8px 10px;border-radius:10px;font-size:.85rem;outline:none;font-family:inherit">
         <option value="">— Non défini</option>
         <option value="a_contacter">📞 À contacter</option>
         <option value="relance">🔄 En relance</option>
@@ -3621,11 +3789,16 @@ if ('serviceWorker' in navigator) {
         <option value="perdu">❌ Perdu</option>
       </select>
     </div>
-    <div class="form-group last-contact">
-      <label class="form-label">📅 Dernier contact</label>
-      <input type="date" id="prospectDetailLastContact">
+
+    <!-- Section Dernier contact -->
+    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:8px">📅 Dernier contact</div>
+      <input type="date" id="prospectDetailLastContact" style="width:100%;background:var(--darker);border:1px solid var(--glass-border);color:var(--light);padding:8px 10px;border-radius:10px;font-size:.85rem;outline:none;font-family:inherit">
     </div>
-    <div id="prospectDetailHistory" style="margin-top:12px"></div>
+
+    <!-- Historique -->
+    <div id="prospectDetailHistory" style="margin-bottom:12px"></div>
+
     <div class="btn-row" style="margin-top:14px">
       <button class="btn btn-primary" id="btnSaveProspectDetail" style="flex:1">💾 Enregistrer</button>
       <button class="btn btn-danger" id="btnDeleteProspect" style="flex:1">🗑️ Supprimer</button>
