@@ -505,6 +505,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--darker);color:
             <button class="btn btn-primary btn-sm" style="flex:1" onclick="TLI.Prospection.exportCSV()">📤 Export CSV</button>
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.resetFilters()">🔄 Réinit.</button>
             <button class="btn btn-ghost btn-sm" style="flex:1" onclick="TLI.Prospection.showAddModal()">➕ Prospect</button>
+            <button class="btn btn-ghost btn-sm" id="btnAnnotation" style="flex:1" onclick="TLI.Prospection.toggleAnnotation()">📝 Annotation</button>
           </div>
         </div>
       </div>
@@ -2988,6 +2989,7 @@ TLI.Prospection = {
         m._notation = p.notation;
         m._id = p.id;
         m.bindPopup(self.makePopup(p));
+        m.bindTooltip(p.nom, { permanent: false, direction: 'top', className: 'permanent-tooltip', offset: [0, -10] });
         m.on('click', function() { self.highlightItem(p.id); });
         self.allMarkers.push({ id: p.id, marker: m, data: p });
       });
@@ -3041,6 +3043,14 @@ TLI.Prospection = {
     });
     this.map.addLayer(this.clusterGroup);
     this.mapInitialized = true;
+
+    // Recréer tous les markers avec tooltip et bonne taille
+    this.allMarkers.forEach(function(am) {
+      am.marker.setRadius(am.data.notation === 'A' ? 18 : 14);
+      am.marker.setStyle({ weight: 3 });
+      am.marker.bindTooltip(am.data.nom, { permanent: false, direction: 'top', className: 'permanent-tooltip', offset: [0, -10] });
+    });
+
     this.updateOriginMarker();
     this.applyFilters();
   },
@@ -3055,13 +3065,27 @@ TLI.Prospection = {
     var notes = p.notes ? '<p>📝 ' + p.notes + '</p>' : '';
     var status = self.prospectStatus[p.id] ? '<p>📌 ' + self.STATUS_LABELS[self.prospectStatus[p.id]] + '</p>' : '';
     var last = self.lastContact[p.id] ? '<p>📅 Dernier contact: ' + TLI.Utils.formatDate(self.lastContact[p.id]) + '</p>' : '';
+
+    // Clients liés
+    var links = self.prospectClientLinks[p.id] || [];
+    var clientsHtml = '';
+    if (links.length > 0) {
+      clientsHtml = '<div style="margin-top:8px"><b>👤 Clients liés:</b></div>';
+      links.forEach(function(cid) {
+        var c = TLI.Data.getClient(cid);
+        if (c) {
+          clientsHtml += '<button class="btn btn-sm btn-secondary" style="margin:4px 4px 0 0;width:auto;padding:4px 10px;font-size:.75rem" onclick="TLI.UI.showClientDetail(' + cid + '); document.querySelector('.nav-tab[data-section=\'clients\']').click();">' + TLI.Utils.escapeHtml(c.name) + '</button>';
+        }
+      });
+    }
+
     return '<div class="popup-prospect">' +
       '<h3>' + p.nom + '</h3>' +
       '<p>📍 ' + p.adresse + ', ' + p.cp + ' ' + p.ville + '</p>' +
       '<p>🏭 ' + p.secteur + ' • NAF ' + p.naf + '</p>' +
       '<p>👥 ' + p.effectif + ' salariés • ' + p.categorie + '</p>' +
       '<p>📏 ' + (self.origin ? self.distanceFromOrigin(p.lat, p.lng).toFixed(1) + ' km (dep. origine)' : p.distance.toFixed(1) + ' km de Nantes') + '</p>' +
-      notes + status + last +
+      notes + status + last + clientsHtml +
       '<div style="margin-top:8px">' +
         '<span class="badge ' + p.notation + '">' + p.notation + '</span>' + sol +
       '</div>' +
@@ -3070,9 +3094,12 @@ TLI.Prospection = {
         'src="https://www.google.com/maps/embed?pb=!4v' + Date.now() + '!6m8!1m7!1sCAoSLEFGMVFpcE8!2m2!1d' + p.lat + '!2d' + p.lng + '!3f0!4f0!5f0.7820865974627469" ' +
         'allowfullscreen loading="lazy"></iframe>' +
       '</div>' +
-      '<button class="btn btn-primary" onclick="TLI.Prospection.toggleSol(' + p.id + '); setTimeout(function(){ var m=TLI.Prospection.allMarkers.find(function(x){return x.id===' + p.id + ';}); if(m) m.marker.setPopupContent(TLI.Prospection.makePopup(m.data)); }, 50);" style="margin-top:10px">' +
-        (self.toSolicit.has(p.id) ? 'Retirer des favoris' : '⭐ À solliciter') +
-      '</button>' +
+      '<div style="display:flex;gap:6px;margin-top:10px">' +
+        '<button class="btn btn-primary" style="flex:1;margin-top:0;padding:6px 10px;font-size:.75rem" onclick="TLI.Prospection.toggleSol(' + p.id + '); setTimeout(function(){ var m=TLI.Prospection.allMarkers.find(function(x){return x.id===' + p.id + ';}); if(m) m.marker.setPopupContent(TLI.Prospection.makePopup(m.data)); }, 50);">' +
+          (self.toSolicit.has(p.id) ? 'Retirer ★' : '⭐ À solliciter') +
+        '</button>' +
+        '<button class="btn btn-secondary" style="flex:1;margin-top:0;padding:6px 10px;font-size:.75rem" onclick="TLI.Prospection.showDetailModal(' + p.id + ')">✏️ Modifier</button>' +
+      '</div>' +
     '</div>';
   },
 
@@ -3264,6 +3291,31 @@ TLI.Prospection = {
         }).join('');
     }
 
+    // Clients liés
+    var links = this.prospectClientLinks[id] || [];
+    var clientsDiv = document.getElementById('prospectDetailClients');
+    var clientSelect = document.getElementById('prospectDetailClientSelect');
+
+    // Remplir le select
+    clientSelect.innerHTML = '<option value="">-- Choisir un client existant --</option>' +
+      TLI.Data.clients.map(function(c) {
+        return '<option value="' + c.id + '">' + TLI.Utils.escapeHtml(c.name) + (c.company ? ' (' + c.company + ')' : '') + '</option>';
+      }).join('');
+
+    // Afficher les clients liés
+    if (links.length === 0) {
+      clientsDiv.innerHTML = '<div style="color:#666;font-size:.8rem">Aucun client lié</div>';
+    } else {
+      clientsDiv.innerHTML = links.map(function(cid) {
+        var c = TLI.Data.getClient(cid);
+        if (!c) return '';
+        return '<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px">' +
+          '<span style="flex:1;font-size:.85rem">' + TLI.Utils.escapeHtml(c.name) + '</span>' +
+          '<button class="btn btn-sm btn-danger" style="width:auto;padding:4px 8px;font-size:.7rem;margin-top:0" onclick="TLI.Prospection.unlinkClient(' + cid + ')">❌</button>' +
+          '</div>';
+      }).join('');
+    }
+
     TLI.UI.openModal('prospectDetailModal');
   },
 
@@ -3299,12 +3351,54 @@ TLI.Prospection = {
     localStorage.setItem('tli_prospect_status', JSON.stringify(this.prospectStatus));
     localStorage.setItem('tli_prospect_history', JSON.stringify(this.prospectHistory));
     localStorage.setItem('tli_prospect_lastcontact', JSON.stringify(this.lastContact));
+    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
 
     TLI.UI.closeModal('prospectDetailModal');
     TLI.UI.showToast('Prospect mis à jour', 'success');
     this.applyFilters();
     var m = this.allMarkers.find(function(x) { return x.id === id; });
     if (m) m.marker.setPopupContent(this.makePopup(m.data));
+  },
+
+  linkClient: function() {
+    var cid = parseInt(document.getElementById('prospectDetailClientSelect').value);
+    if (!cid) { TLI.UI.showToast('Sélectionnez un client', 'warning'); return; }
+    var id = this.currentDetailId;
+    if (!this.prospectClientLinks[id]) this.prospectClientLinks[id] = [];
+    if (this.prospectClientLinks[id].indexOf(cid) === -1) {
+      this.prospectClientLinks[id].push(cid);
+      localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+      TLI.UI.showToast('Client lié', 'success');
+      this.showDetailModal(id);
+      this.applyFilters();
+    } else {
+      TLI.UI.showToast('Client déjà lié', 'warning');
+    }
+  },
+
+  unlinkClient: function(cid) {
+    var id = this.currentDetailId;
+    if (!this.prospectClientLinks[id]) return;
+    this.prospectClientLinks[id] = this.prospectClientLinks[id].filter(function(x) { return x !== cid; });
+    localStorage.setItem('tli_prospect_clientlinks', JSON.stringify(this.prospectClientLinks));
+    TLI.UI.showToast('Client délié', 'warning');
+    this.showDetailModal(id);
+    this.applyFilters();
+  },
+
+  createClientFromProspect: function() {
+    var id = this.currentDetailId;
+    var p = PROSPECTS_DATA.find(function(x) { return x.id === id; });
+    if (!p) return;
+    // Préremplir le modal client
+    document.getElementById('clientName').value = p.nom || '';
+    document.getElementById('clientCompany').value = p.nom || '';
+    document.getElementById('clientAddress').value = (p.adresse || '') + ', ' + (p.cp || '') + ' ' + (p.ville || '');
+    document.getElementById('clientNotes').value = p.notes || '';
+    TLI.UI.closeModal('prospectDetailModal');
+    TLI.UI.openModal('newClientModal');
+    // Stocker l'ID prospect pour lier après création
+    TLI.Prospection._pendingProspectLink = id;
   },
 
   deleteProspect: function() {
@@ -3376,19 +3470,27 @@ TLI.Prospection = {
     PROSPECTS_DATA.push(p);
     this._customProspects.push(p);
     localStorage.setItem('tli_prospects_custom', JSON.stringify(this._customProspects));
+
+    // Créer le marker avec tooltip
     var col = this.colors[p.notation] || this.colors.C;
     var m = L.circleMarker([p.lat, p.lng], {
-      radius: p.notation === 'A' ? 8 : 6,
-      fillColor: col, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
+      radius: p.notation === 'A' ? 18 : 14,
+      fillColor: col, color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.9
     });
     m._notation = p.notation;
     m._id = p.id;
     m.bindPopup(this.makePopup(p));
+    m.bindTooltip(p.nom, { permanent: false, direction: 'top', className: 'permanent-tooltip', offset: [0, -10] });
     m.on('click', function() { TLI.Prospection.highlightItem(p.id); });
     this.allMarkers.push({ id: p.id, marker: m, data: p });
 
+    // Ajouter au cluster si visible
+    if (this.clusterGroup) {
+      this.clusterGroup.addLayer(m);
+    }
+
     TLI.UI.closeModal('prospectAddModal');
-    TLI.UI.showToast('Prospect ajouté', 'success');
+    TLI.UI.showToast('Prospect ajouté et sauvegardé', 'success');
     this.applyFilters();
   },
 
@@ -3516,6 +3618,23 @@ TLI.Prospection = {
     return R * c;
   },
 
+  toggleAnnotation: function() {
+    var btn = document.getElementById('btnAnnotation');
+    var isActive = btn.classList.contains('active');
+    if (isActive) {
+      btn.classList.remove('active');
+      btn.style.background = '';
+      btn.style.color = '';
+      document.getElementById('prospectOnlyNotes').checked = false;
+    } else {
+      btn.classList.add('active');
+      btn.style.background = 'var(--primary)';
+      btn.style.color = '#000';
+      document.getElementById('prospectOnlyNotes').checked = true;
+    }
+    this.applyFilters();
+  },
+
   toggleSidebar: function() {
     var sb = document.getElementById('prospectSidebar');
     if (sb) sb.classList.toggle('hidden');
@@ -3615,6 +3734,17 @@ if ('serviceWorker' in navigator) {
       <input type="date" id="prospectDetailLastContact">
     </div>
     <div id="prospectDetailHistory" style="margin-top:12px"></div>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">👤 Lier un client</label>
+      <div id="prospectDetailClients" style="margin-bottom:8px"></div>
+      <select class="form-select" id="prospectDetailClientSelect" style="margin-bottom:6px">
+        <option value="">-- Choisir un client existant --</option>
+      </select>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-secondary" style="flex:1;margin-top:0" onclick="TLI.Prospection.linkClient()">🔗 Lier</button>
+        <button class="btn btn-sm btn-primary" style="flex:1;margin-top:0" onclick="TLI.Prospection.createClientFromProspect()">➕ Nouveau client</button>
+      </div>
+    </div>
     <div class="btn-row" style="margin-top:14px">
       <button class="btn btn-primary" id="btnSaveProspectDetail" style="flex:1">💾 Enregistrer</button>
       <button class="btn btn-danger" id="btnDeleteProspect" style="flex:1">🗑️ Supprimer</button>
